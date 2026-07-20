@@ -1,0 +1,3353 @@
+# 23 个设计模式精讲 —— VBScript 版
+
+> 本文对比**传统 VBScript** 与 **AxonASP** 两种运行时在实现 23 个 GoF 设计模式时的差异。传统 VBScript 不支持继承、接口、多态、重载，需用组合、方法名约定、条件分支等变通手段。AxonASP 引入了 `Implements` 接口多态、`Static` 静态变量、`Event`/`RaiseEvent`/`WithEvents` 事件机制等现代化扩展，使得大部分模式能以更地道的方式呈现。
+
+---
+
+## 第1章 单例模式（Singleton）
+
+**核心思想**：全局只存在一个实例。
+
+**示例说明**：用脚本级变量保存唯一实例，通过 `GetInstance` 函数控制创建。两次获取返回同一个对象，修改一个另一个也变。
+
+### 传统 VBScript 版
+
+```vbscript
+' 脚本级变量：全局唯一的实例引用
+Dim gInstance
+Set gInstance = Nothing
+
+Class Singleton
+    Private m_Data
+
+    ' 构造函数：初始化默认数据
+    Private Sub Class_Initialize
+        m_Data = "我是唯一实例"
+    End Sub
+
+    ' 读取内部数据
+    Public Property Get Data
+        Data = m_Data
+    End Property
+
+    ' 写入内部数据
+    Public Property Let Data(value)
+        m_Data = value
+    End Property
+End Class
+
+' 全局访问点：若实例不存在则创建，已存在则直接返回
+' 返回值：Singleton 类的唯一实例
+Function GetInstance()
+    If gInstance Is Nothing Then
+        Set gInstance = New Singleton
+    End If
+    Set GetInstance = gInstance
+End Function
+
+' 演示：两次获取的是同一个对象
+Set s1 = GetInstance()
+Set s2 = GetInstance()
+s1.Data = "已修改"
+Response.Write s2.Data   ' 已修改（同一个对象）
+```
+
+**传统 VBScript 版妥协说明**：
+- **无静态变量**：VBScript 的 Class 内部不支持 `Static` 变量，只能用脚本级（模块级）全局变量 `gInstance` 来保存唯一实例，破坏了类的封装性。
+- **无法禁止外部 New**：VBScript 没有 `Private` 构造或 `Friend` 访问控制，外部代码随时可以 `New Singleton` 绕过 `GetInstance`，无法真正强制单例。
+
+### Axon VBScript 版（支持 Static）
+
+```vbscript
+Class Singleton
+    Private m_Data
+
+    Private Sub Class_Initialize
+        m_Data = "我是唯一实例"
+    End Sub
+
+    Public Property Get Data
+        Data = m_Data
+    End Property
+
+    Public Property Let Data(value)
+        m_Data = value
+    End Property
+End Class
+
+' 全局访问点：模块级变量在函数调用间保持值
+Dim g_Instance
+Set g_Instance = Nothing
+
+Function GetInstance()
+    If g_Instance Is Nothing Then
+        Set g_Instance = New Singleton
+    End If
+    Set GetInstance = g_Instance
+End Function
+
+' 演示：保证同一实例
+Dim s1, s2
+Set s1 = GetInstance()
+Set s2 = GetInstance()
+s1.Data = "已修改"
+Response.Write s2.Data   ' 已修改
+```
+
+**Axon VBScript 版妥协说明**：
+- `Static` 变量在 AxonASP 中与接口多态存在类型兼容性问题，因此改回使用模块级全局变量 `g_Instance` 来保存唯一实例，封装性与传统版本一致。无 Private 构造函数，外部仍可 `New Singleton` 绕过单例控制。
+---
+
+## 第2章 工厂方法模式（Factory Method）
+
+**核心思想**：把"创建哪种对象"的决定封装到工厂中。
+
+**示例说明**：定义 Dog、Cat 两个产品类，AnimalFactory 根据传入的类型字符串决定创建哪种动物。调用方不需要知道具体类名。
+
+### 传统 VBScript 版
+
+```vbscript
+' 产品类：狗
+Class Dog
+    ' 让狗叫一声
+    Public Function Speak
+        Response.Write "汪汪"
+    End Function
+End Class
+
+' 产品类：猫
+Class Cat
+    ' 让猫叫一声
+    Public Function Speak
+        Response.Write "喵喵"
+    End Function
+End Class
+
+' 工厂类：根据类型字符串创建对应的动物对象
+' animalType: "dog" 或 "cat"
+' 返回值: Dog 或 Cat 实例
+Class AnimalFactory
+    Public Function CreateAnimal(animalType)
+        Select Case LCase(animalType)
+            Case "dog"
+                Set CreateAnimal = New Dog
+            Case "cat"
+                Set CreateAnimal = New Cat
+            Case Else
+                Set CreateAnimal = Nothing
+        End Select
+    End Function
+End Class
+
+' 演示：通过工厂创建对象，不直接 New
+Dim factory
+Set factory = New AnimalFactory
+Set myPet = factory.CreateAnimal("dog")
+myPet.Speak   ' 汪汪
+```
+
+**传统 VBScript 版妥协说明**：
+- **无继承、无抽象方法**：经典工厂方法依赖"抽象 Creator + 子类重写 FactoryMethod"。VBScript 无继承，只能把 `Select Case` 写在工厂类内部，每加一种产品就要改工厂代码——违背了开闭原则。
+- **无接口约束**：Dog 和 Cat 没有 `IAnimal` 接口保证它们都有 `Speak` 方法，完全靠开发者自觉。传错类型运行时才报错。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 产品接口
+Class IAnimal
+    Public Sub Speak
+    End Sub
+End Class
+
+' 工厂接口
+Class IFactory
+    Public Function CreateAnimal
+    End Function
+End Class
+
+' 具体产品：狗
+Class Dog
+    Implements IAnimal
+    Public Sub IAnimal_Speak
+        Response.Write "汪汪"
+    End Sub
+End Class
+
+' 具体产品：猫
+Class Cat
+    Implements IAnimal
+    Public Sub IAnimal_Speak
+        Response.Write "喵喵"
+    End Sub
+End Class
+
+' 具体工厂：创建狗
+Class DogFactory
+    Implements IFactory
+    Public Function IFactory_CreateAnimal
+        Set IFactory_CreateAnimal = New Dog
+    End Function
+End Class
+
+' 具体工厂：创建猫
+Class CatFactory
+    Implements IFactory
+    Public Function IFactory_CreateAnimal
+        Set IFactory_CreateAnimal = New Cat
+    End Function
+End Class
+
+' 演示：通过工厂接口创建动物，调用方不依赖具体类
+Dim factory As IFactory
+Dim pet As IAnimal
+Set factory = New DogFactory
+Set pet = factory.CreateAnimal
+pet.Speak   ' 汪汪
+```
+
+**Axon VBScript 版妥协说明**：
+- 此模式在 AxonASP 中实现较为自然，接口机制解决了核心多态问题，无显著妥协。
+---
+
+## 第3章 抽象工厂模式（Abstract Factory）
+
+**核心思想**：创建一系列相关对象（产品族），换一套工厂就换整套风格。
+
+**示例说明**：WinFactory 创建 Windows 风格的按钮+复选框，MacFactory 创建 Mac 风格的按钮+复选框。切换工厂即可切换整套 UI 风格，无需逐个替换。
+
+### 传统 VBScript 版
+
+```vbscript
+' ===== Windows 风格产品 =====
+Class WinButton
+    ' 绘制 Windows 风格按钮
+    Public Function Paint
+        Response.Write "绘制 Windows 风格按钮"
+    End Function
+End Class
+
+Class WinCheckbox
+    ' 绘制 Windows 风格复选框
+    Public Function Paint
+        Response.Write "绘制 Windows 风格复选框"
+    End Function
+End Class
+
+' ===== Mac 风格产品 =====
+Class MacButton
+    ' 绘制 Mac 风格按钮
+    Public Function Paint
+        Response.Write "绘制 Mac 风格按钮"
+    End Function
+End Class
+
+Class MacCheckbox
+    ' 绘制 Mac 风格复选框
+    Public Function Paint
+        Response.Write "绘制 Mac 风格复选框"
+    End Function
+End Class
+
+' ===== Windows 工厂：创建一整套 Windows 风格控件 =====
+Class WinFactory
+    ' 创建 Windows 按钮
+    Public Function CreateButton
+        Set CreateButton = New WinButton
+    End Function
+    ' 创建 Windows 复选框
+    Public Function CreateCheckbox
+        Set CreateCheckbox = New WinCheckbox
+    End Function
+End Class
+
+' ===== Mac 工厂：创建一整套 Mac 风格控件 =====
+Class MacFactory
+    ' 创建 Mac 按钮
+    Public Function CreateButton
+        Set CreateButton = New MacButton
+    End Function
+    ' 创建 Mac 复选框
+    Public Function CreateCheckbox
+        Set CreateCheckbox = New MacCheckbox
+    End Function
+End Class
+
+' 演示：换一个工厂，整套 UI 风格全换
+Dim uiFactory
+Set uiFactory = New MacFactory   ' 改成 WinFactory 就是 Windows 风格
+Dim btn, chk
+Set btn = uiFactory.CreateButton
+Set chk = uiFactory.CreateCheckbox
+btn.Paint
+chk.Paint
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口**：`WinFactory` 和 `MacFactory` 没有共同接口 `IGUIFactory`，编译器无法保证两者都有 `CreateButton`/`CreateCheckbox`。如果某个工厂漏写了方法，运行时调用才报错。
+- **产品类无约束**：所有 Button 和 Checkbox 类仅靠方法名约定，没有 `IButton`/`ICheckbox` 接口保证一致性。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 产品接口
+Class IButton
+    Public Sub Paint
+    End Sub
+End Class
+
+Class ICheckbox
+    Public Sub Paint
+    End Sub
+End Class
+
+' 工厂接口
+Class IGUIFactory
+    Public Function CreateButton
+    End Function
+    Public Function CreateCheckbox
+    End Function
+End Class
+
+' Windows 产品
+Class WinButton
+    Implements IButton
+    Public Sub IButton_Paint
+        Response.Write "绘制 Windows 风格按钮"
+    End Sub
+End Class
+
+Class WinCheckbox
+    Implements ICheckbox
+    Public Sub ICheckbox_Paint
+        Response.Write "绘制 Windows 风格复选框"
+    End Sub
+End Class
+
+' Mac 产品
+Class MacButton
+    Implements IButton
+    Public Sub IButton_Paint
+        Response.Write "绘制 Mac 风格按钮"
+    End Sub
+End Class
+
+Class MacCheckbox
+    Implements ICheckbox
+    Public Sub ICheckbox_Paint
+        Response.Write "绘制 Mac 风格复选框"
+    End Sub
+End Class
+
+' Windows 工厂
+Class WinFactory
+    Implements IGUIFactory
+    Public Function IGUIFactory_CreateButton
+        Set IGUIFactory_CreateButton = New WinButton
+    End Function
+    Public Function IGUIFactory_CreateCheckbox
+        Set IGUIFactory_CreateCheckbox = New WinCheckbox
+    End Function
+End Class
+
+' Mac 工厂
+Class MacFactory
+    Implements IGUIFactory
+    Public Function IGUIFactory_CreateButton
+        Set IGUIFactory_CreateButton = New MacButton
+    End Function
+    Public Function IGUIFactory_CreateCheckbox
+        Set IGUIFactory_CreateCheckbox = New MacCheckbox
+    End Function
+End Class
+
+' 演示：通过接口引用切换整套风格
+Dim uiFactory As IGUIFactory
+Dim btn As IButton
+Dim chk As ICheckbox
+Set uiFactory = New MacFactory
+Set btn = uiFactory.CreateButton
+Set chk = uiFactory.CreateCheckbox
+btn.Paint
+chk.Paint
+```
+
+**Axon VBScript 版妥协说明**：
+- 此模式在 AxonASP 中实现较为自然，接口机制解决了核心多态问题，无显著妥协。
+---
+
+## 第4章 建造者模式（Builder）
+
+**核心思想**：分步骤构建复杂对象，同样的构建过程可以创建不同配置。
+
+**示例说明**：Director 指挥 Builder 分步组装 Computer（CPU→RAM→Disk）。同一个 Builder 可以被指挥出游戏 PC 或办公 PC 两种配置。
+
+### 传统 VBScript 版
+
+```vbscript
+' 产品类：电脑
+Class Computer
+    Public CPU, RAM, Disk
+    ' 打印当前配置
+    Public Function ShowConfig
+        Response.Write "配置：" & CPU & " / " & RAM & " / " & Disk
+    End Function
+End Class
+
+' 建造者：逐步组装 Computer 的各个部件
+Class ComputerBuilder
+    Private m_Computer
+
+    ' 构造函数：创建空白产品实例
+    Private Sub Class_Initialize
+        Set m_Computer = New Computer
+    End Sub
+
+    ' 安装 CPU
+    Public Function BuildCPU(v)
+        m_Computer.CPU = v
+    End Function
+    ' 安装内存
+    Public Function BuildRAM(v)
+        m_Computer.RAM = v
+    End Function
+    ' 安装硬盘
+    Public Function BuildDisk(v)
+        m_Computer.Disk = v
+    End Function
+    ' 返回组装完成的产品
+    Public Function GetResult
+        Set GetResult = m_Computer
+    End Function
+End Class
+
+' 指挥者：按固定步骤调用 Builder，封装不同配置方案
+Class Director
+    ' 方案一：组装游戏 PC
+    Public Function ConstructGamingPC(builder)
+        builder.BuildCPU "i9"
+        builder.BuildRAM "32GB"
+        builder.BuildDisk "2TB SSD"
+    End Function
+    ' 方案二：组装办公 PC
+    Public Function ConstructOfficePC(builder)
+        builder.BuildCPU "i5"
+        builder.BuildRAM "16GB"
+        builder.BuildDisk "512GB SSD"
+    End Function
+End Class
+
+' 演示：Director 指挥 Builder 组装
+Dim myBuilder, director, pc
+Set myBuilder = New ComputerBuilder
+Set director = New Director
+director.ConstructGamingPC myBuilder
+Set pc = myBuilder.GetResult
+pc.ShowConfig
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口**：Director 接收的 `builder` 参数没有 `IBuilder` 接口约束。如果传入的对象没有 `BuildCPU` 等方法，运行时才报错。
+- **无链式调用**：VBScript 虽然用 Function 可以返回 `Me`，但语法上无法实现 `builder.BuildCPU("i9").BuildRAM("32GB")` 这样的链式调用（`Set FunctionName = Me` 写法可行但调用方仍需逐行接收返回值），只能逐行调用。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 产品
+Class Computer
+    Public CPU, RAM, Disk
+    Public Function ShowConfig
+        Response.Write "配置：" & CPU & " / " & RAM & " / " & Disk
+    End Function
+End Class
+
+' 建造者接口
+Class IBuilder
+    Public Sub BuildCPU(v)
+    End Sub
+    Public Sub BuildRAM(v)
+    End Sub
+    Public Sub BuildDisk(v)
+    End Sub
+    Public Function GetResult
+    End Function
+End Class
+
+' 具体建造者
+Class ComputerBuilder
+    Implements IBuilder
+    Private m_Computer
+
+    Private Sub Class_Initialize
+        Set m_Computer = New Computer
+    End Sub
+
+    Public Sub IBuilder_BuildCPU(v)
+        m_Computer.CPU = v
+    End Sub
+    Public Sub IBuilder_BuildRAM(v)
+        m_Computer.RAM = v
+    End Sub
+    Public Sub IBuilder_BuildDisk(v)
+        m_Computer.Disk = v
+    End Sub
+    Public Function IBuilder_GetResult
+        Set IBuilder_GetResult = m_Computer
+    End Function
+End Class
+
+' 指挥者
+Class Director
+    Public Sub ConstructGamingPC(builder As IBuilder)
+        builder.BuildCPU "i9"
+        builder.BuildRAM "32GB"
+        builder.BuildDisk "2TB SSD"
+    End Sub
+    Public Sub ConstructOfficePC(builder As IBuilder)
+        builder.BuildCPU "i5"
+        builder.BuildRAM "16GB"
+        builder.BuildDisk "512GB SSD"
+    End Sub
+End Class
+
+' 演示
+Dim builder As IBuilder
+Dim director, pc
+Set builder = New ComputerBuilder
+Set director = New Director
+director.ConstructGamingPC builder
+Set pc = builder.GetResult
+pc.ShowConfig
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口机制约束了建造者的方法契约，Director 可通过 `IBuilder` 类型安全地接收建造者。但仍无链式调用语法，无法 `builder.BuildCPU("i9").BuildRAM("32GB")`。
+---
+
+## 第5章 原型模式（Prototype）
+
+**核心思想**：通过复制现有对象来创建新对象。
+
+**示例说明**：创建一份简历模板，通过 Clone 方法复制出多份。修改副本的技能数组不影响原件，证明是深拷贝。
+
+### 传统 VBScript 版
+
+```vbscript
+' 简历类：包含姓名、年龄、技能数组
+Class MyResume
+    Public Name, Age, Skills
+
+    ' 深拷贝克隆：创建新 MyResume 并逐字段复制
+    ' 数组单独逐元素拷贝，确保修改副本不影响原件
+    ' 返回值：新的 MyResume 实例
+    Public Function Clone
+        Dim copy
+        Set copy = New MyResume
+        copy.Name = Me.Name
+        copy.Age = Me.Age
+        Dim ub, i
+        ub = UBound(Me.Skills)
+        ReDim copy.Skills(ub)
+        For i = 0 To ub
+            copy.Skills(i) = Me.Skills(i)
+        Next
+        Set Clone = copy
+    End Function
+End Class
+
+' 演示：克隆后修改副本，原件不受影响
+Dim r1, r2
+Set r1 = New MyResume
+r1.Name = "张三"
+r1.Age = 25
+r1.Skills = Array("VBScript", "HTML")
+
+Set r2 = r1.Clone
+r2.Name = "李四"
+r2.Skills(0) = "JavaScript"
+
+Response.Write r1.Name & " " & r1.Skills(0)   ' 张三 VBScript
+Response.Write r2.Name & " " & r2.Skills(0)   ' 李四 JavaScript
+```
+
+**传统 VBScript 版妥协说明**：
+- **无内置 Clone**：VBScript 没有 `Clone()` 方法或序列化机制，必须手动逐字段拷贝。字段越多，Clone 方法越冗长，且新增字段容易忘记在 Clone 中添加。
+- **无 ICloneable 接口**：无法约定所有类都必须实现 Clone，靠开发者自觉。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 克隆接口
+Class ICloneable
+    Public Function Clone
+    End Function
+End Class
+
+' 简历类：实现 ICloneable 接口
+Class MyResume
+    Implements ICloneable
+    Public Name, Age, Skills
+
+    ' 深拷贝克隆：逐字段复制
+    Public Function ICloneable_Clone
+        Dim copy
+        Set copy = New MyResume
+        copy.Name = Me.Name
+        copy.Age = Me.Age
+        copy.Skills = Me.Skills
+        Set ICloneable_Clone = copy
+    End Function
+End Class
+
+' 演示：通过接口引用调用 Clone
+Dim r1, r2 As ICloneable
+Set r1 = New MyResume
+r1.Name = "张三"
+r1.Age = 30
+r1.Skills = Array("VBScript", "HTML")
+Set r2 = r1.ICloneable_Clone()
+
+' 调用方接受 ICloneable，不关心具体类型
+Function DuplicateObject(obj As ICloneable)
+    Set DuplicateObject = obj.Clone
+End Function
+```
+
+**Axon VBScript 版妥协说明**：
+- `ICloneable` 接口保证了所有原型类都有 `Clone` 方法。但仍需手动逐字段拷贝——接口解决的是契约问题，不是语法糖问题。
+- 在接口多态上下文中调用 `Clone` 时，需使用完整限定名 `ICloneable_Clone()`，无法直接通过接口引用调用（因 AxonASP 限制：接口方法在内部无法调用其他接口方法）。
+---
+
+## 第6章 代理模式（Proxy）
+
+**核心思想**：为真实对象提供替身，控制访问或延迟加载。
+
+**示例说明**：ProxyImage 在创建时不加载大图，只有真正调用 Display 时才创建 RealImage 并加载。第二次 Display 直接复用已加载的真实对象。
+
+### 传统 VBScript 版
+
+```vbscript
+' 真实对象：加载并显示大图
+Class RealImage
+    Private m_Filename
+
+    ' 初始化：模拟加载大文件的耗时操作
+    Public Function Init(filename)
+        m_Filename = filename
+        Response.Write "【加载大图】" & filename
+    End Function
+
+    ' 显示图片
+    Public Function Display
+        Response.Write "显示图片：" & m_Filename
+    End Function
+End Class
+
+' 代理对象：延迟加载，控制对 RealImage 的访问
+Class ProxyImage
+    Private m_Filename
+    Private m_RealImage   ' 被代理的真实对象，初始为 Nothing
+
+    ' 初始化：只记录文件名，不加载
+    Public Function Init(filename)
+        m_Filename = filename
+    End Function
+
+    ' 显示图片：首次调用时创建真实对象，后续直接复用
+    Public Function Display
+        If m_RealImage Is Nothing Then
+            Set m_RealImage = New RealImage
+            m_RealImage.Init m_Filename
+        End If
+        m_RealImage.Display
+    End Function
+End Class
+
+' 演示：代理创建时不加载，调用 Display 才加载
+Dim img
+Set img = New ProxyImage
+img.Init "photo.jpg"
+Response.Write "代理已创建，真实大图尚未加载"
+img.Display   ' 此时才触发真实加载
+img.Display   ' 第二次不再加载
+```
+
+**传统 VBScript 版妥协说明**：
+- **无共享接口**：ProxyImage 和 RealImage 没有 `IImage` 接口，外部代码无法透明替换。经典代理模式要求代理和真实对象实现同一接口，VBScript 做不到强制保证。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 图像接口
+Class IImage
+    Public Sub Init(filename)
+    End Sub
+    Public Sub Display
+    End Sub
+End Class
+
+' 真实对象
+Class RealImage
+    Implements IImage
+    Private m_Filename
+
+    Public Sub IImage_Init(filename)
+        m_Filename = filename
+        Response.Write "【加载大图】" & filename
+    End Sub
+    Public Sub IImage_Display
+        Response.Write "显示图片：" & m_Filename
+    End Sub
+End Class
+
+' 代理对象：用缓存避免在接口方法内调用其他接口方法
+Class ProxyImage
+    Implements IImage
+    Private m_Filename
+    Private m_CachedOutput
+    Private m_Initialized
+
+    Public Sub IImage_Init(filename)
+        m_Filename = filename
+    End Sub
+
+    Public Sub IImage_Display
+        If Not m_Initialized Then
+            m_CachedOutput = g_LoadAndDisplay(m_Filename)
+            m_Initialized = True
+        End If
+        Response.Write m_CachedOutput
+    End Sub
+End Class
+
+' 全局辅助函数：在非接口上下文中调用接口方法
+Function g_LoadAndDisplay(filename)
+    Dim img As IImage
+    Set img = New RealImage
+    img.Init filename
+    g_LoadAndDisplay = "显示图片：" & filename
+End Function
+
+' 演示：通过接口透明使用代理或真实对象
+Dim img As IImage
+Set img = New ProxyImage
+img.Init "photo.jpg"
+Response.Write "代理已创建，真实大图尚未加载"
+img.Display
+img.Display
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口机制使代理与真实对象实现同一接口，但 AxonASP 存在限制：**接口方法内部不能调用其他接口方法**。因此 `ProxyImage` 的 `Display` 方法中无法直接调用 `RealImage` 的 `Init` 接口方法。通过引入全局辅助函数 `g_LoadAndDisplay` 在非接口上下文中完成调用，绕过此限制。
+---
+## 第7章 外观模式（Facade）
+
+**核心思想**：为复杂子系统提供一个简单的统一入口。
+
+**示例说明**：开机过程涉及 CPU 冻结→硬盘读取→内存加载→CPU 跳转→CPU 执行，ComputerFacade 把这些步骤封装成一个 Start 方法，外部只需调用一次。
+
+### 传统 VBScript 版
+
+```vbscript
+' 子系统：CPU
+Class CPU
+    ' 冻结当前状态
+    Public Function Freeze
+        Response.Write "CPU 冻结"
+    End Function
+    ' 跳转到指定地址
+    Public Function Jump(pos)
+        Response.Write "CPU 跳转到 " & pos
+    End Function
+    ' 开始执行
+    Public Function Execute
+        Response.Write "CPU 执行"
+    End Function
+End Class
+
+' 子系统：内存
+Class Memory
+    ' 将数据加载到指定地址
+    Public Function Load(pos, data)
+        Response.Write "内存加载 " & data & " 到 " & pos
+    End Function
+End Class
+
+' 子系统：硬盘
+Class HardDrive
+    ' 从指定扇区读取数据
+    ' 返回值：模拟的数据块字符串
+    Public Function Read(lba)
+        Read = "数据块(" & lba & ")"
+    End Function
+End Class
+
+' 外观类：封装子系统的复杂调用，对外只暴露 Start
+Class ComputerFacade
+    Private m_CPU, m_Mem, m_HD
+
+    ' 构造函数：初始化所有子系统
+    Private Sub Class_Initialize
+        Set m_CPU = New CPU
+        Set m_Mem = New Memory
+        Set m_HD = New HardDrive
+    End Sub
+
+    ' 一键开机：内部按顺序调用各子系统
+    Public Function Start
+        m_CPU.Freeze
+        Dim bootData
+        bootData = m_HD.Read(0)
+        m_Mem.Load 0, bootData
+        m_CPU.Jump 0
+        m_CPU.Execute
+    End Function
+End Class
+
+' 演示：外部只需调用 Start，无需了解内部细节
+Dim pc
+Set pc = New ComputerFacade
+pc.Start   ' 对外只暴露一个 Start
+```
+
+**传统 VBScript 版妥协说明**：
+此模式在 VBScript 中实现较为自然，外观类只是组合调用子系统，不依赖继承或接口，无显著妥协。
+
+### Axon VBScript 版
+
+> 此模式在 AxonASP 中的实现与传统 VBScript 完全一致。AxonASP 的现代化扩展（接口、静态变量、事件等）对此模式没有额外的改善价值，直接沿用传统版本即可。
+---
+
+## 第8章 适配器模式（Adapter）
+
+**核心思想**：把不兼容的接口转成目标接口。
+
+**示例说明**：OldPrinter 只有 OldPrint 方法（接收字符串），新系统期望用 Print 方法（接收 Document 对象）。PrinterAdapter 在中间做转换，把 doc.Content 取出来传给 OldPrint。
+
+### 传统 VBScript 版
+
+```vbscript
+' 旧类：只有 OldPrint 方法，接收字符串
+Class OldPrinter
+    ' 旧接口：直接打印字符串
+    Public Function OldPrint(s)
+        Response.Write "【旧打印机】" & s
+    End Function
+End Class
+
+' 适配器：把旧接口转换成新接口
+Class PrinterAdapter
+    Private m_OldPrinter
+
+    ' 注入被适配的旧对象
+    Public Function Init(oldPrinter)
+        Set m_OldPrinter = oldPrinter
+    End Function
+
+    ' 新接口：接收 Document 对象，提取 Content 后转调旧接口
+    Public Function Print(doc)
+        m_OldPrinter.OldPrint doc.Content
+    End Function
+End Class
+
+' 新系统的数据载体
+Class Document
+    Public Content
+End Class
+
+' 演示：用新接口 Print 调用旧打印机
+Dim doc
+Set doc = New Document
+doc.Content = "Hello World"
+
+Dim adapter
+Set adapter = New PrinterAdapter
+adapter.Init New OldPrinter
+adapter.Print doc   ' 用新接口调用旧打印机
+```
+
+**传统 VBScript 版妥协说明**：
+- **无目标接口**：`PrinterAdapter` 没有 `IPrinter` 接口可实现，"新接口"只是约定 `Print` 方法名。如果有多个适配器，无法保证接口一致。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 目标接口
+Class IPrinter
+    Public Sub Print(doc)
+    End Sub
+End Class
+
+' 旧类
+Class OldPrinter
+    Public Sub OldPrint(s)
+        Response.Write "【旧打印机】" & s
+    End Sub
+End Class
+
+' 新系统的数据载体
+Class Document
+    Public Content
+End Class
+
+' 适配器：实现目标接口，内部组合旧对象
+Class PrinterAdapter
+    Implements IPrinter
+    Private m_OldPrinter
+
+    Public Sub Init(oldPrinter)
+        Set m_OldPrinter = oldPrinter
+    End Sub
+
+    Public Sub IPrinter_Print(doc)
+        m_OldPrinter.OldPrint doc.Content
+    End Sub
+End Class
+
+' 演示：通过接口使用适配器
+Dim doc
+Set doc = New Document
+doc.Content = "Hello World"
+
+Dim printer
+Set printer = New PrinterAdapter
+printer.Init New OldPrinter
+
+Dim ip As IPrinter
+Set ip = printer
+ip.Print doc
+```
+
+**Axon VBScript 版妥协说明**：
+- 此模式在 AxonASP 中实现较为自然，接口机制解决了核心多态问题，无显著妥协。
+---
+
+## 第9章 桥接模式（Bridge）
+
+**核心思想**：把抽象和实现分离，使它们可以独立变化。
+
+**示例说明**：Circle（抽象层）持有 Renderer（实现层）的引用。同一个 Circle 搭配 VectorRenderer 或 RasterRenderer，可以产出不同渲染效果。形状和渲染引擎可以各自独立扩展。
+
+### 传统 VBScript 版
+
+```vbscript
+' ===== 实现层：渲染引擎（可独立扩展） =====
+
+' 矢量渲染引擎
+Class VectorRenderer
+    ' 用矢量方式绘制圆
+    Public Function RenderCircle(radius)
+        Response.Write "矢量引擎绘制半径" & radius & "的圆"
+    End Function
+End Class
+
+' 光栅渲染引擎
+Class RasterRenderer
+    ' 用光栅方式绘制圆
+    Public Function RenderCircle(radius)
+        Response.Write "光栅引擎绘制半径" & radius & "的圆"
+    End Function
+End Class
+
+' ===== 抽象层：形状（持有实现层引用） =====
+
+Class Circle
+    Private m_Radius
+    Private m_Renderer   ' 桥接的渲染引擎
+
+    ' 初始化：传入半径和渲染引擎
+    Public Function Init(radius, renderer)
+        m_Radius = radius
+        Set m_Renderer = renderer
+    End Function
+
+    ' 绘制：委托给所持引擎
+    Public Function Draw
+        m_Renderer.RenderCircle m_Radius
+    End Function
+End Class
+
+' 演示：同一个形状，搭配不同引擎
+Dim c1, c2
+Set c1 = New Circle
+c1.Init 5, New VectorRenderer
+c1.Draw   ' 矢量引擎...
+
+Set c2 = New Circle
+c2.Init 5, New RasterRenderer
+c2.Draw   ' 光栅引擎...
+```
+
+**传统 VBScript 版妥协说明**：
+- **无抽象类**：经典桥接模式要求 Abstraction（形状）是抽象类，子类（圆、方形）继承并扩展。VBScript 无继承，Circle 只是一个普通类，无法形成 Shape 抽象层级。
+- **无接口约束**：Renderer 没有 `IRenderer` 接口保证 `RenderCircle` 存在。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 实现层接口
+Class IRenderer
+    Public Sub RenderCircle(radius)
+    End Sub
+End Class
+
+' 抽象层接口
+Class IShape
+    Public Sub Draw
+    End Sub
+End Class
+
+' 矢量渲染
+Class VectorRenderer
+    Implements IRenderer
+    Public Sub IRenderer_RenderCircle(radius)
+        Response.Write "矢量引擎绘制半径" & radius & "的圆"
+    End Sub
+End Class
+
+' 光栅渲染
+Class RasterRenderer
+    Implements IRenderer
+    Public Sub IRenderer_RenderCircle(radius)
+        Response.Write "光栅引擎绘制半径" & radius & "的圆"
+    End Sub
+End Class
+
+' 具体形状：通过组合持有实现层
+Class Circle
+    Implements IShape
+    Private m_Radius
+    Private m_Renderer
+
+    Public Sub Init(radius, renderer)
+        m_Radius = radius
+        Set m_Renderer = renderer
+    End Sub
+
+    Public Sub IShape_Draw
+        Call m_Renderer.IRenderer_RenderCircle(m_Radius)
+    End Sub
+End Class
+
+' 演示：同形状搭配不同引擎
+Dim c1, c2
+Set c1 = New Circle
+c1.Init 5, New VectorRenderer
+c1.IShape_Draw
+
+Set c2 = New Circle
+c2.Init 5, New RasterRenderer
+c2.IShape_Draw
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口机制解决了抽象与实现的分离问题。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`Circle.IShape_Draw` 中需使用完整限定名 `m_Renderer.IRenderer_RenderCircle` 调用渲染器方法，而非更简洁的 `m_Renderer.RenderCircle`。
+---
+## 第10章 组合模式（Composite）
+
+**核心思想**：统一处理单个对象和对象组合（树形结构）。
+
+**示例说明**：Leaf 是叶子节点（员工），Composite 是组合节点（部门），两者都有相同的 Operation 方法。Composite 内部递归调用所有子节点的 Operation，实现"不管叶子还是分支，用同一方法遍历"。
+
+### 传统 VBScript 版
+
+```vbscript
+' 叶子节点：树形结构的最末端
+Class Leaf
+    Public Name
+    ' 显示自身信息，indent 控制缩进层级
+    Public Function Operation(indent)
+        Response.Write indent & "叶子：" & Name
+    End Function
+End Class
+
+' 组合节点：可包含子节点（Leaf 或 Composite）
+Class Composite
+    Public Name
+    Private m_Children()   ' 子节点数组
+    Private m_Count        ' 当前子节点数
+
+    ' 构造函数：初始化数组
+    Private Sub Class_Initialize
+        m_Count = 0
+        ReDim m_Children(10)
+    End Sub
+
+    ' 添加子节点（容量不足时自动扩容）
+    Public Function Add(child)
+        If m_Count > UBound(m_Children) Then
+            ReDim Preserve m_Children(m_Count * 2)
+        End If
+        Set m_Children(m_Count) = child
+        m_Count = m_Count + 1
+    End Function
+
+    ' 显示自身信息，并递归调用所有子节点的 Operation
+    Public Function Operation(indent)
+        Response.Write indent & "组合：" & Name
+        Dim i
+        For i = 0 To m_Count - 1
+            m_Children(i).Operation indent & "  "
+        Next
+    End Function
+End Class
+
+' 演示：构建 总部→分公司→员工 的树形结构
+Dim root, branch1, leaf1, leaf2, leaf3
+Set root = New Composite
+root.Name = "总部"
+
+Set branch1 = New Composite
+branch1.Name = "分公司"
+
+Set leaf1 = New Leaf
+leaf1.Name = "员工A"
+Set leaf2 = New Leaf
+leaf2.Name = "员工B"
+Set leaf3 = New Leaf
+leaf3.Name = "员工C"
+
+branch1.Add leaf1
+branch1.Add leaf2
+root.Add branch1
+root.Add leaf3
+
+root.Operation ""   ' 统一遍历整棵树
+```
+
+**传统 VBScript 版妥协说明**：
+- **无共同基类**：经典组合模式要求 Leaf 和 Composite 继承同一个 `Component` 基类。VBScript 无继承，两者是完全独立的类，仅靠 `Operation` 方法名约定实现"鸭子类型"。编译器无法保证类型安全。
+- **无类型安全**：`Add` 方法接收 `child` 参数无类型约束，理论上可以传入任何对象，运行时调用 `Operation` 才报错。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 组件接口
+Class IComponent
+    Public Sub Operation(indent)
+    End Sub
+    Public Sub Add(child)
+    End Sub
+End Class
+
+' 叶子节点
+Class Leaf
+    Implements IComponent
+    Private m_Name
+
+    Public Property Get Name
+        Name = m_Name
+    End Property
+    Public Property Let Name(v)
+        m_Name = v
+    End Property
+
+    Public Sub IComponent_Operation(indent)
+        Response.Write indent & "叶子：" & m_Name
+    End Sub
+    Public Sub IComponent_Add(child)
+        ' 叶子无子节点，空实现
+    End Sub
+End Class
+
+' 组合辅助类：不实现接口，负责遍历子节点
+Class CompositeHelper
+    Private m_Children()
+    Private m_Count
+
+    Public Sub Init()
+        m_Count = 0
+        ReDim m_Children(10)
+    End Sub
+
+    Public Sub AddChild(child)
+        If m_Count > UBound(m_Children) Then
+            ReDim Preserve m_Children(m_Count * 2)
+        End If
+        Set m_Children(m_Count) = child
+        m_Count = m_Count + 1
+    End Sub
+
+    Public Sub OperateChildren(indent)
+        Dim i, childIndent, child As IComponent
+        For i = 0 To m_Count - 1
+            Set child = m_Children(i)
+            childIndent = indent & "  "
+            child.Operation childIndent
+        Next
+    End Sub
+End Class
+
+' 组合节点
+Class Composite
+    Implements IComponent
+    Private m_Name
+    Private m_Helper
+
+    Public Property Get Name
+        Name = m_Name
+    End Property
+    Public Property Let Name(v)
+        m_Name = v
+    End Property
+
+    Private Sub Class_Initialize
+        Set m_Helper = New CompositeHelper
+        m_Helper.Init
+    End Sub
+
+    Public Sub IComponent_Add(child)
+        m_Helper.AddChild child
+    End Sub
+
+    Public Sub IComponent_Operation(indent)
+        Response.Write indent & "组合：" & m_Name
+        m_Helper.OperateChildren indent
+    End Sub
+End Class
+
+' 演示：统一接口遍历树
+Dim rootObj, branch1Obj, leaf1Obj, leaf2Obj, leaf3Obj
+Set rootObj = New Composite
+rootObj.Name = "总部"
+Set branch1Obj = New Composite
+branch1Obj.Name = "分公司"
+Set leaf1Obj = New Leaf: leaf1Obj.Name = "员工A"
+Set leaf2Obj = New Leaf: leaf2Obj.Name = "员工B"
+Set leaf3Obj = New Leaf: leaf3Obj.Name = "员工C"
+
+Dim root As IComponent, branch1 As IComponent
+Dim leaf1 As IComponent, leaf2 As IComponent, leaf3 As IComponent
+Set root = rootObj
+Set branch1 = branch1Obj
+Set leaf1 = leaf1Obj
+Set leaf2 = leaf2Obj
+Set leaf3 = leaf3Obj
+
+root.Add leaf1
+root.Add leaf2
+root.Add branch1
+root.Add leaf3
+
+root.Operation ""
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口机制统一了叶子和组合节点的契约。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`Composite` 的 `Operation` 方法中无法直接调用子节点的 `Operation` 接口方法。通过引入辅助类 `CompositeHelper`（不实现接口），在其 `OperateChildren` 方法中以非接口上下文遍历并调用子节点，绕过此限制。
+---
+## 第11章 装饰器模式（Decorator）
+
+**核心思想**：动态地给对象添加新功能，不用修改原类。
+
+**示例说明**：SimpleCoffee 是基础对象，MilkDecorator 和 SugarDecorator 各持有一个 coffee 引用。将 base 传入 milk，再将 milk 传入 sugar，最终 sugar.Cost = base.Cost + 2 + 1，层层叠加。
+
+### 传统 VBScript 版
+
+```vbscript
+' 基础组件：普通咖啡
+Class SimpleCoffee
+    ' 返回价格
+    Public Function Cost
+        Cost = 10
+    End Function
+    ' 返回描述
+    Public Function Description
+        Description = "普通咖啡"
+    End Function
+End Class
+
+' 装饰器：牛奶（包裹一个 coffee 对象，在其基础上加价）
+Class MilkDecorator
+    Private m_Coffee   ' 被包裹的内部对象
+
+    ' 注入被装饰的对象
+    Public Function Init(coffee)
+        Set m_Coffee = coffee
+    End Function
+    ' 价格 = 内部对象价格 + 牛奶加价
+    Public Function Cost
+        Cost = m_Coffee.Cost + 2
+    End Function
+    ' 描述 = 内部对象描述 + 牛奶
+    Public Function Description
+        Description = m_Coffee.Description & " + 牛奶"
+    End Function
+End Class
+
+' 装饰器：糖（结构同 MilkDecorator）
+Class SugarDecorator
+    Private m_Coffee
+
+    ' 注入被装饰的对象
+    Public Function Init(coffee)
+        Set m_Coffee = coffee
+    End Function
+    ' 价格 = 内部对象价格 + 糖加价
+    Public Function Cost
+        Cost = m_Coffee.Cost + 1
+    End Function
+    ' 描述 = 内部对象描述 + 糖
+    Public Function Description
+        Description = m_Coffee.Description & " + 糖"
+    End Function
+End Class
+
+' 演示：层层包裹，动态叠加功能
+Dim base, milk, sugar
+Set base = New SimpleCoffee
+Response.Write base.Description & " = " & base.Cost & "元"
+
+Set milk = New MilkDecorator
+milk.Init base              ' milk 包裹 base
+
+Set sugar = New SugarDecorator
+sugar.Init milk             ' sugar 包裹 milk
+Response.Write sugar.Description & " = " & sugar.Cost & "元"
+```
+
+**传统 VBScript 版妥协说明**：
+- **无法继承基类**：经典装饰器要求 Decorator 继承 Component 并持有 Component 引用，实现"类型兼容"。VBScript 无继承，`MilkDecorator` 和 `SimpleCoffee` 是完全不同的类，无法互相替换，调用方必须知道当前持有的是装饰器还是原对象。
+- **无透明性**：理想状态下装饰器对调用方透明，但 VBScript 中 `Set milk = New MilkDecorator` 与 `Set coffee = New SimpleCoffee` 类型不同，无法声明统一变量类型。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 咖啡接口
+Class ICoffee
+    Public Function Cost
+    End Function
+    Public Function Description
+    End Function
+End Class
+
+' 基础咖啡
+Class SimpleCoffee
+    Implements ICoffee
+    Public Function ICoffee_Cost
+        ICoffee_Cost = 10
+    End Function
+    Public Function ICoffee_Description
+        ICoffee_Description = "普通咖啡"
+    End Function
+End Class
+
+' 牛奶装饰器
+Class MilkDecorator
+    Implements ICoffee
+    Private m_BaseCost
+    Private m_BaseDesc
+
+    Public Sub Init(baseCost, baseDesc)
+        m_BaseCost = baseCost
+        m_BaseDesc = baseDesc
+    End Sub
+
+    Public Function ICoffee_Cost
+        ICoffee_Cost = m_BaseCost + 2
+    End Function
+    Public Function ICoffee_Description
+        ICoffee_Description = m_BaseDesc & " + 牛奶"
+    End Function
+End Class
+
+' 糖装饰器
+Class SugarDecorator
+    Implements ICoffee
+    Private m_BaseCost
+    Private m_BaseDesc
+
+    Public Sub Init(baseCost, baseDesc)
+        m_BaseCost = baseCost
+        m_BaseDesc = baseDesc
+    End Sub
+
+    Public Function ICoffee_Cost
+        ICoffee_Cost = m_BaseCost + 1
+    End Function
+    Public Function ICoffee_Description
+        ICoffee_Description = m_BaseDesc & " + 糖"
+    End Function
+End Class
+
+' 演示：接口引用实现透明嵌套
+Dim coffee As ICoffee
+Set coffee = New SimpleCoffee
+Response.Write coffee.Description & " = " & coffee.Cost & "元"
+
+Dim milk As ICoffee
+Dim milkObj
+Set milkObj = New MilkDecorator
+milkObj.Init coffee.Cost(), coffee.Description()
+Set milk = milkObj
+
+Dim sugarObj
+Set sugarObj = New SugarDecorator
+sugarObj.Init milk.Cost(), milk.Description()
+
+Dim sugar As ICoffee
+Set sugar = sugarObj
+Response.Write sugar.Description & " = " & sugar.Cost & "元"
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口机制使装饰器与组件实现同一接口 `ICoffee`。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），装饰器的 `Cost`/`Description` 方法中无法直接调用被包裹对象的接口方法。通过 `Init` 方法在非接口上下文中预取 `Cost` 和 `Description` 值并缓存为普通变量，后续接口方法直接读取缓存值，绕过此限制。此方案牺牲了装饰器的"惰性求值"特性。
+---
+## 第12章 享元模式（Flyweight）
+
+**核心思想**：共享细粒度对象，减少内存占用。
+
+**示例说明**：森林中有大量树，但树的"型"（名称+颜色）只有少数几种。TreeFactory 用 Dictionary 缓存 TreeType，相同配置只创建一次，多个 Tree 实例共享同一个 TreeType。
+
+### 传统 VBScript 版
+
+```vbscript
+' 享元对象：树的固有属性（名称、颜色），可被多棵树共享
+Class TreeType
+    Public Name, Color
+
+    ' 在指定坐标绘制树
+    Public Function Draw(x, y)
+        Response.Write "在 (" & x & "," & y & ") 绘制 " & Color & Name
+    End Function
+End Class
+
+' 享元工厂：缓存并复用 TreeType 对象
+Class TreeFactory
+    Private m_Types   ' Dictionary：key→TreeType
+
+    ' 构造函数：创建字典
+    Private Sub Class_Initialize
+        Set m_Types = CreateObject("Scripting.Dictionary")
+    End Sub
+
+    ' 获取或创建 TreeType：相同参数返回同一个对象
+    ' name: 树名, color: 颜色
+    ' 返回值：共享的 TreeType 实例
+    Public Function GetTreeType(name, color)
+        Dim key
+        key = name & "|" & color
+        If Not m_Types.Exists(key) Then
+            Dim t
+            Set t = New TreeType
+            t.Name = name
+            t.Color = color
+            Set m_Types(key) = t
+        End If
+        Set GetTreeType = m_Types(key)
+    End Function
+End Class
+
+' 演示：3 棵树共享同一个 TreeType 对象
+Dim factory, oakType, i
+Set factory = New TreeFactory
+Set oakType = factory.GetTreeType("橡树", "绿色")
+
+For i = 0 To 2
+    oakType.Draw i, i * 2
+Next
+Response.Write "3 棵树，实际只有 1 个 TreeType 对象"
+```
+
+**传统 VBScript 版妥协说明**：
+此模式在 VBScript 中实现较为自然。`Scripting.Dictionary` 恰好提供了享元工厂所需的"按 key 缓存对象"能力，与模式需求契合。唯一限制是 Dictionary 存取对象必须显式使用 `Set`，语法上稍显繁琐。
+
+### Axon VBScript 版
+
+> 此模式在 AxonASP 中的实现与传统 VBScript 完全一致。`Scripting.Dictionary` 做享元对象缓存已是最优解，AxonASP 的现代化扩展对此模式没有额外的改善价值，直接沿用传统版本即可。
+
+---
+
+## 第13章 策略模式（Strategy）
+
+**核心思想**：把算法封装成可替换的策略对象。
+
+**示例说明**：Sorter 持有 SortStrategy 引用。BubbleSort 和 QuickSort 都实现了 Sort 方法。创建 Sorter 时注入不同策略，Sort 方法就会执行不同算法。
+
+### 传统 VBScript 版
+
+```vbscript
+' 具体策略：冒泡排序
+Class BubbleSort
+    ' 返回排序后数组的副本（原数组不被修改）
+    Public Function Sort(arr)
+        Dim a, i, j, tmp
+        a = arr   ' 复制一份，不修改原数组
+        For i = 0 To UBound(a)
+            For j = 0 To UBound(a) - 1 - i
+                If a(j) > a(j + 1) Then
+                    tmp = a(j)
+                    a(j) = a(j + 1)
+                    a(j + 1) = tmp
+                End If
+            Next
+        Next
+        Sort = a
+    End Function
+End Class
+
+' 具体策略：快速排序（简化版）
+Class QuickSort
+    ' 返回排序后数组的副本
+    Public Function Sort(arr)
+        Sort = QuickSortHelper(arr, 0, UBound(arr))
+    End Function
+
+    ' 快速排序递归实现
+    Private Function QuickSortHelper(a, lo, hi)
+        Dim i, j, pivot, tmp
+        If lo < hi Then
+            pivot = a(hi)
+            i = lo
+            For j = lo To hi - 1
+                If a(j) <= pivot Then
+                    tmp = a(i)
+                    a(i) = a(j)
+                    a(j) = tmp
+                    i = i + 1
+                End If
+            Next
+            tmp = a(i)
+            a(i) = a(hi)
+            a(hi) = tmp
+            a = QuickSortHelper(a, lo, i - 1)
+            a = QuickSortHelper(a, i + 1, hi)
+        End If
+        QuickSortHelper = a
+    End Function
+End Class
+
+' 上下文：持有策略引用，调用方可随时切换策略
+Class Sorter
+    Private m_Strategy   ' 当前使用的排序策略
+
+    ' 注入策略对象
+    Public Function SetStrategy(strategy)
+        Set m_Strategy = strategy
+    End Function
+
+    ' 用当前策略对数组排序
+    Public Function Sort(arr)
+        Sort = m_Strategy.Sort(arr)
+    End Function
+End Class
+
+' 演示：同一 Sorter，换策略就换算法
+Dim mySorter, data
+Set mySorter = New Sorter
+data = Array(5, 2, 8, 1, 9)
+
+mySorter.SetStrategy New BubbleSort
+Response.Write Join(mySorter.Sort(data), ",")
+
+mySorter.SetStrategy New QuickSort
+Response.Write Join(mySorter.Sort(data), ",")
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口约束**：BubbleSort 和 QuickSort 靠 `Sort` 方法名约定，没有 `ISortStrategy` 接口保证签名一致。如果某个策略类漏写 Sort 方法，运行时调用才报错。
+- **算法与上下文紧耦合**：Sorter 接收 `strategy` 参数无类型约束，传错对象时只能在运行时暴露问题。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 策略接口
+Class ISortStrategy
+    Public Function Sort(arr)
+    End Function
+End Class
+
+' 冒泡排序
+Class BubbleSort
+    Implements ISortStrategy
+    Public Function ISortStrategy_Sort(arr)
+        Dim a, i, j, tmp
+        a = arr
+        For i = 0 To UBound(a)
+            For j = 0 To UBound(a) - 1 - i
+                If a(j) > a(j + 1) Then
+                    tmp = a(j)
+                    a(j) = a(j + 1)
+                    a(j + 1) = tmp
+                End If
+            Next
+        Next
+        ISortStrategy_Sort = a
+    End Function
+End Class
+
+' 快速排序
+Class QuickSort
+    Implements ISortStrategy
+    Public Function ISortStrategy_Sort(arr)
+        ISortStrategy_Sort = QuickSortHelper(arr, 0, UBound(arr))
+    End Function
+    Private Function QuickSortHelper(a, lo, hi)
+        Dim i, j, pivot, tmp
+        If lo < hi Then
+            pivot = a(hi)
+            i = lo
+            For j = lo To hi - 1
+                If a(j) <= pivot Then
+                    tmp = a(i)
+                    a(i) = a(j)
+                    a(j) = tmp
+                    i = i + 1
+                End If
+            Next
+            tmp = a(i)
+            a(i) = a(hi)
+            a(hi) = tmp
+            a = QuickSortHelper(a, lo, i - 1)
+            a = QuickSortHelper(a, i + 1, hi)
+        End If
+        QuickSortHelper = a
+    End Function
+End Class
+
+' 上下文
+Class Sorter
+    Private m_Strategy
+
+    Public Sub SetStrategy(strategy)
+        Set m_Strategy = strategy
+    End Sub
+    Public Function Sort(arr)
+        Sort = m_Strategy.ISortStrategy_Sort(arr)
+    End Function
+End Class
+
+' 演示
+Dim sorter, data
+Set sorter = New Sorter
+data = Array(5, 2, 8, 1, 9)
+
+sorter.SetStrategy New BubbleSort
+Response.Write Join(sorter.Sort(data), ",")
+
+sorter.SetStrategy New QuickSort
+Response.Write Join(sorter.Sort(data), ",")
+```
+
+**Axon VBScript 版妥协说明**：
+- `ISortStrategy` 接口保证了所有策略类都有 `Sort` 方法，调用方可以通过接口类型安全地切换策略。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`Sorter.Sort` 中需使用完整限定名 `m_Strategy.ISortStrategy_Sort` 调用策略方法，而非简洁的 `m_Strategy.Sort`。
+---
+## 第14章 观察者模式（Observer）
+
+**核心思想**：对象状态变化时通知所有关注它的观察者。
+
+**示例说明**：NewsAgency（被观察者）维护一个观察者列表。注册多个 Newspaper 后，一旦有新闻发布，所有报纸自动收到通知。
+
+### 传统 VBScript 版
+
+```vbscript
+' 观察者：报纸
+Class Newspaper
+    Public Name
+
+    ' 收到新闻时的响应
+    Public Function Update(news)
+        Response.Write Name & " 收到新闻：" & news
+    End Function
+End Class
+
+' 被观察者：新闻社
+Class NewsAgency
+    Private m_Observers()   ' 观察者数组
+    Private m_Count         ' 当前观察者数量
+
+    ' 构造函数：初始化数组
+    Private Sub Class_Initialize
+        m_Count = 0
+        ReDim m_Observers(10)
+    End Sub
+
+    ' 注册观察者（容量不足时自动扩容）
+    Public Function Subscribe(observer)
+        If m_Count > UBound(m_Observers) Then
+            ReDim Preserve m_Observers(m_Count * 2)
+        End If
+        Set m_Observers(m_Count) = observer
+        m_Count = m_Count + 1
+    End Function
+
+    ' 通知所有观察者
+    Public Function Notify(news)
+        Dim i
+        For i = 0 To m_Count - 1
+            m_Observers(i).Update news
+        Next
+    End Function
+
+    ' 发布新闻：先更新自身状态，再通知所有观察者
+    Public Function Publish(news)
+        Notify news
+    End Function
+End Class
+
+' 演示：多个观察者同时收到通知
+Dim agency, paper1, paper2
+Set agency = New NewsAgency
+Set paper1 = New Newspaper
+paper1.Name = "晨报"
+Set paper2 = New Newspaper
+paper2.Name = "晚报"
+
+agency.Subscribe paper1
+agency.Subscribe paper2
+agency.Publish "重大新闻！"
+```
+
+**传统 VBScript 版妥协说明**：
+- **无事件/委托**：VBScript 没有内置事件机制，Subject 必须手动维护观察者数组（Dim + ReDim + 遍历），代码比 .NET 的 event += 笨重得多。
+- **无接口约束**：Newspaper 没有 `IObserver` 接口强制实现 `Update`，如果某个类方法名不一致，运行时调用才报错。
+
+### Axon VBScript 版（支持 Event）
+
+```vbscript
+' 被观察者：声明事件
+Class NewsAgency
+    Event OnNews(news)
+
+    ' 发布新闻：触发事件，所有订阅者自动收到通知
+    Public Sub Publish(news)
+        RaiseEvent OnNews(news)
+    End Sub
+End Class
+
+' 具体观察者
+Class Newspaper
+    Public Name
+
+    ' 收到新闻时的响应
+    Public Sub ReceiveNews(news)
+        Response.Write Name & " 收到新闻：" & news
+    End Sub
+End Class
+
+' 用 WithEvents 声明事件接收变量
+Dim WithEvents agency
+
+' 事件处理程序：命名规则为 变量名_事件名
+Sub agency_OnNews(news)
+    ' 通过全局引用分发到具体观察者
+    paper1.ReceiveNews news
+    paper2.ReceiveNews news
+End Sub
+
+Dim paper1, paper2
+Set paper1 = New Newspaper
+paper1.Name = "晨报"
+Set paper2 = New Newspaper
+paper2.Name = "晚报"
+
+Set agency = New NewsAgency
+agency.Publish "重大新闻！"
+```
+
+**Axon VBScript 版妥协说明**：
+- 此模式在 AxonASP 中实现较为自然，`Event`/`RaiseEvent`/`WithEvents` 提供了内置的观察者机制，无需手动维护数组。但 `WithEvents` 变量不能是过程内局部变量，必须为类成员或全局变量。
+---
+
+## 第15章 模板方法模式（Template Method）
+
+**核心思想**：定义算法骨架，把可变步骤留给子类实现。
+
+**示例说明**：DataMiner 定义了 MineData 的固定流程（加载→解析→分析→发送报告）。PDFMiner 和 CSVMiner 只需各自实现 Parse 方法，其他步骤复用父类逻辑。
+
+### 传统 VBScript 版
+
+```vbscript
+' 数据挖掘器：定义算法骨架
+Class DataMiner
+    ' 模板方法：固定流程，不可覆盖
+    Public Function MineData(filePath)
+        Load filePath
+        Parse
+        Analyze
+        SendReport
+    End Function
+
+    ' 公共步骤：加载文件
+    Private Function Load(filePath)
+        Response.Write "加载文件：" & filePath
+    End Function
+
+    ' 可变步骤：解析文件（子类必须覆盖）
+    Public Function Parse
+        Response.Write "【默认解析】"
+    End Function
+
+    ' 公共步骤：分析数据
+    Private Function Analyze
+        Response.Write "分析数据"
+    End Function
+
+    ' 公共步骤：发送报告
+    Private Function SendReport
+        Response.Write "发送报告"
+    End Function
+End Class
+
+' 具体子类：PDF 格式解析
+Class PDFMiner
+    ' 覆盖父类的 Parse 方法
+    Public Function Parse
+        Response.Write "【解析 PDF】"
+    End Function
+End Class
+
+' 具体子类：CSV 格式解析
+Class CSVMinder
+    ' 覆盖父类的 Parse 方法
+    Public Function Parse
+        Response.Write "【解析 CSV】"
+    End Function
+End Class
+
+' 演示：两个子类复用相同流程，只需实现 Parse
+Dim pdf, csv
+Set pdf = New PDFMiner
+pdf.MineData "data.pdf"
+
+Set csv = New CSVMinder
+csv.MineData "data.csv"
+```
+
+**传统 VBScript 版妥协说明**：
+- **无继承、无 abstract**：VBScript 没有继承，"子类覆盖 Parse"只能靠同名方法覆盖（实际是两个独立类）。`DataMiner` 的 `MineData` 里调用 `Parse` 时，如果子类没写 Parse，就调用了父类的默认空实现——这不符合模板方法"必须实现"的语义。
+- **无强制覆盖**：VBScript 无法标记某个方法为"必须覆盖"，开发者可能忘记在子类中实现 Parse。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 提取器接口（可变步骤）
+Class IExtractor
+    Public Function Extract(data)
+    End Function
+End Class
+
+' 模板矿工接口（骨架）
+Class ITemplateMiner
+    Public Sub SetExtractor(extractor)
+    End Sub
+    Public Sub MineData(filePath)
+    End Sub
+End Class
+
+' 具体提取器：PDF
+Class PDFExtractor
+    Implements IExtractor
+    Public Function IExtractor_Extract(data)
+        Response.Write "【解析 PDF】"
+    End Function
+End Class
+
+' 具体提取器：CSV
+Class CSVExtractor
+    Implements IExtractor
+    Public Function IExtractor_Extract(data)
+        Response.Write "【解析 CSV】"
+    End Function
+End Class
+
+' 模板矿工：持有提取器引用，执行固定流程
+Class DataMiner
+    Implements ITemplateMiner
+    Private m_Extractor As IExtractor
+
+    Public Sub ITemplateMiner_SetExtractor(extractor)
+        Set m_Extractor = extractor
+    End Sub
+
+    ' 辅助方法
+    Private Sub DoMineData(filePath)
+        Response.Write "加载文件：" & filePath
+        m_Extractor.Extract filePath
+        Response.Write "分析数据"
+        Response.Write "发送报告"
+    End Sub
+
+    Public Sub ITemplateMiner_MineData(filePath)
+        DoMineData(filePath)
+    End Sub
+End Class
+
+' 演示
+Dim miner As ITemplateMiner
+Set miner = New DataMiner
+Dim pdfExtractor As IExtractor
+Set pdfExtractor = New PDFExtractor
+miner.SetExtractor pdfExtractor
+miner.MineData "data.pdf"
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口 + 组合实现了流程骨架与可变步骤的分离。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`ITemplateMiner_MineData` 中无法直接调用 `m_Extractor.Extract` 接口方法。通过引入私有辅助方法 `DoMineData`，在其中以非接口上下文调用提取器的 `Extract` 方法，绕过此限制。此外 `ITemplateMiner` 接口增加了 `SetExtractor` 方法用于注入提取器。
+---
+## 第16章 迭代器模式（Iterator）
+
+**核心思想**：提供一种顺序访问聚合对象元素的方法，而不暴露其内部结构。
+
+**示例说明**：MyCollection 维护一个内部数组。MyIterator 持有当前索引，通过 HasNext 和 NextItem 方法顺序遍历集合元素，调用方无需知道内部是数组还是链表。
+
+### 传统 VBScript 版
+
+```vbscript
+' 集合类：内部用数组存储数据
+Class MyCollection
+    Private m_Items()   ' 内部数组
+    Private m_Count     ' 当前元素数量
+
+    ' 构造函数：初始化数组
+    Private Sub Class_Initialize
+        m_Count = 0
+        ReDim m_Items(10)
+    End Sub
+
+    ' 添加元素（容量不足时自动扩容）
+    Public Function Add(item)
+        If m_Count > UBound(m_Items) Then
+            ReDim Preserve m_Items(m_Count * 2)
+        End If
+        m_Items(m_Count) = item
+        m_Count = m_Count + 1
+    End Function
+
+    ' 返回元素总数
+    Public Function Count
+        Count = m_Count
+    End Function
+
+    ' 返回指定索引的元素
+    Public Function Item(index)
+        Item = m_Items(index)
+    End Function
+
+    ' 创建迭代器
+    Public Function CreateIterator
+        Set CreateIterator = New MyIterator
+        CreateIterator.Init Me
+    End Function
+End Class
+
+' 迭代器：封装遍历逻辑
+Class MyIterator
+    Private m_Collection   ' 被遍历的集合
+    Private m_Index        ' 当前索引
+
+    ' 初始化：传入集合并重置索引
+    Public Function Init(collection)
+        Set m_Collection = collection
+        m_Index = 0
+    End Function
+
+    ' 检查是否还有下一个元素
+    Public Function HasNext
+        HasNext = (m_Index < m_Collection.Count)
+    End Function
+
+    ' 返回当前元素并将索引后移
+    Public Function NextItem
+        NextItem = m_Collection.Item(m_Index)
+        m_Index = m_Index + 1
+    End Function
+End Class
+
+' 演示：用迭代器遍历集合，不暴露内部数组
+Dim coll, iter
+Set coll = New MyCollection
+coll.Add "苹果"
+coll.Add "香蕉"
+coll.Add "橙子"
+
+Set iter = coll.CreateIterator
+Do While iter.HasNext
+    Response.Write iter.NextItem
+Loop
+```
+
+**传统 VBScript 版妥协说明**：
+- **无统一接口**：MyCollection 和 MyIterator 没有 `ICollection`/`IIterator` 接口。如果多个集合类实现不一致（比如有的叫 `NextItem`，有的叫 `Next`），调用方无法统一遍历。
+- **无 IEnumerable 标准接口**：VBScript 的 `For Each` 只支持数组和 Dictionary，不支持自定义集合。自定义迭代器只能靠 `Do While iter.HasNext` 手动循环。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 迭代器接口
+Class IIterator
+    Public Function HasNext
+    End Function
+    Public Function NextItem
+    End Function
+End Class
+
+' 集合接口
+Class ICollection
+    Public Sub Add(item)
+    End Sub
+    Public Function Count
+    End Function
+    Public Function Item(index)
+    End Function
+    Public Function CreateIterator
+    End Function
+End Class
+
+' 具体集合
+Class MyCollection
+    Implements ICollection
+    Private m_Items()
+    Private m_Count
+
+    Private Sub Class_Initialize
+        m_Count = 0
+        ReDim m_Items(10)
+    End Sub
+
+    Public Sub ICollection_Add(item)
+        If m_Count > UBound(m_Items) Then
+            ReDim Preserve m_Items(m_Count * 2)
+        End If
+        m_Items(m_Count) = item
+        m_Count = m_Count + 1
+    End Sub
+
+    Public Function ICollection_Count
+        ICollection_Count = m_Count
+    End Function
+
+    Public Function ICollection_Item(index)
+        ICollection_Item = m_Items(index)
+    End Function
+
+    Public Function ICollection_CreateIterator
+        Dim iter
+        Set iter = New MyIterator
+        iter.Prepare m_Count, m_Items
+        Set ICollection_CreateIterator = iter
+    End Function
+End Class
+
+' 具体迭代器：在 Init 中预取数据，避免接口方法内调用其他接口方法
+Class MyIterator
+    Implements IIterator
+    Private m_Items()
+    Private m_Count
+    Private m_Index
+
+    Public Sub Prepare(count, items)
+        m_Count = count
+        m_Items = items
+        m_Index = 0
+    End Sub
+
+    Public Function IIterator_HasNext
+        IIterator_HasNext = (m_Index < m_Count)
+    End Function
+
+    Public Function IIterator_NextItem
+        IIterator_NextItem = m_Items(m_Index)
+        m_Index = m_Index + 1
+    End Function
+End Class
+
+' 演示
+Dim coll As ICollection
+Set coll = New MyCollection
+coll.Add "苹果"
+coll.Add "香蕉"
+coll.Add "橙子"
+
+Dim iter As IIterator
+Set iter = coll.CreateIterator
+Do While iter.HasNext
+    Response.Write iter.NextItem
+Loop
+```
+
+**Axon VBScript 版妥协说明**：
+- 接口机制（`IIterator`/`ICollection`）解决了多态与契约问题。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），迭代器在创建时无法直接通过集合接口获取数据。通过 `Prepare` 方法在非接口上下文中预取数据到迭代器内部数组，后续 `HasNext`/`NextItem` 直接操作本地数组，绕过此限制。仍无 `IEnumerable` 接口，`For Each` 不支持自定义集合。
+---
+## 第17章 责任链模式（Chain of Responsibility）
+
+**核心思想**：把请求沿链传递，直到某个对象处理它。
+
+**示例说明**：Logger 形成 DEBUG→INFO→ERROR 的链条。调用 Log 时，若当前级别匹配则处理并继续传递，否则直接传递。最终 ERROR 级别会被三个 Logger 都输出。
+
+### 传统 VBScript 版
+
+```vbscript
+' 日志处理器：形成责任链
+Class Logger
+    Public Name
+    Public Level        ' 当前处理器能处理的最低级别（DEBUG/INFO/ERROR）
+    Private m_Next      ' 链上的下一个处理器
+
+    ' 设置下一个处理器
+    Public Function SetNext(nextHandler)
+        Set m_Next = nextHandler
+    End Function
+
+    ' 处理日志请求：若级别匹配则输出，然后传递给下一个
+    Public Function Log(msg, level)
+        If ShouldHandle(level) Then
+            Response.Write "【" & Name & "】" & msg
+        End If
+        If Not m_Next Is Nothing Then
+            m_Next.Log msg, level
+        End If
+    End Function
+
+    ' 判断当前级别是否应该处理
+    Private Function ShouldHandle(level)
+        Dim levels(2)
+        levels(0) = "DEBUG"
+        levels(1) = "INFO"
+        levels(2) = "ERROR"
+
+        Dim currentIdx, msgIdx, i
+        currentIdx = -1
+        msgIdx = -1
+        For i = 0 To 2
+            If levels(i) = Level Then currentIdx = i
+            If levels(i) = level Then msgIdx = i
+        Next
+        ShouldHandle = (msgIdx >= currentIdx)
+    End Function
+End Class
+
+' 演示：构建 DEBUG→INFO→ERROR 的责任链
+Dim debugLog, infoLog, errorLog
+Set debugLog = New Logger
+debugLog.Name = "控制台"
+debugLog.Level = "DEBUG"
+
+Set infoLog = New Logger
+infoLog.Name = "文件"
+infoLog.Level = "INFO"
+
+Set errorLog = New Logger
+errorLog.Name = "邮件"
+errorLog.Level = "ERROR"
+
+debugLog.SetNext infoLog
+infoLog.SetNext errorLog
+
+debugLog.Log "系统启动", "INFO"     ' 文件和邮件都输出
+debugLog.Log "严重错误", "ERROR"    ' 三个都输出
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口约束**：Logger 靠 `SetNext` 和 `Log` 方法名约定形成链条，没有 `IHandler` 接口强制要求这两个方法。如果某个类漏写 `SetNext`，链条就断了，运行时才发现。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 处理器接口
+Class IHandler
+    Public Sub SetNext(handler)
+    End Sub
+    Public Sub Handle(msg, level)
+    End Sub
+End Class
+
+' 辅助类：不实现接口，负责转发到下一处理器
+Class ChainHelper
+    Private m_Next As IHandler
+    Private m_NextSet
+
+    Public Sub SetNext(handler As IHandler)
+        Set m_Next = handler
+        m_NextSet = True
+    End Sub
+
+    Public Sub Forward(msg, level)
+        If m_NextSet Then
+            m_Next.Handle msg, level
+        End If
+    End Sub
+End Class
+
+' 具体处理器
+Class Logger
+    Implements IHandler
+    Private m_Name
+    Private m_Level
+    Private m_ChainHelper
+
+    Public Property Get Name
+        Name = m_Name
+    End Property
+    Public Property Let Name(v)
+        m_Name = v
+    End Property
+
+    Public Property Get Level
+        Level = m_Level
+    End Property
+    Public Property Let Level(v)
+        m_Level = v
+    End Property
+
+    Private Sub Class_Initialize
+        Set m_ChainHelper = New ChainHelper
+    End Sub
+
+    Public Sub IHandler_SetNext(handler)
+        m_ChainHelper.SetNext handler
+    End Sub
+
+    Public Sub IHandler_Handle(msg, level)
+        If ShouldHandle(level) Then
+            Response.Write "【" & m_Name & "】" & msg
+        End If
+        m_ChainHelper.Forward msg, level
+    End Sub
+
+    Private Function ShouldHandle(level)
+        Dim levels(2)
+        levels(0) = "DEBUG"
+        levels(1) = "INFO"
+        levels(2) = "ERROR"
+        Dim currentIdx, msgIdx, i
+        currentIdx = -1
+        msgIdx = -1
+        For i = 0 To 2
+            If levels(i) = m_Level Then currentIdx = i
+            If levels(i) = level Then msgIdx = i
+        Next
+        ShouldHandle = (msgIdx >= currentIdx)
+    End Function
+End Class
+
+' 演示
+Dim debugLog As IHandler, infoLog As IHandler, errorLog As IHandler
+Dim dbgObj, infoObj, errObj
+Set dbgObj = New Logger
+dbgObj.Name = "控制台"
+dbgObj.Level = "DEBUG"
+Set debugLog = dbgObj
+
+Set infoObj = New Logger
+infoObj.Name = "文件"
+infoObj.Level = "INFO"
+Set infoLog = infoObj
+
+Set errObj = New Logger
+errObj.Name = "邮件"
+errObj.Level = "ERROR"
+Set errorLog = errObj
+
+debugLog.SetNext infoLog
+infoLog.SetNext errorLog
+
+debugLog.Handle "系统启动", "INFO"
+debugLog.Handle "严重错误", "ERROR"
+```
+
+
+**Axon VBScript 版妥协说明**：
+- `IHandler` 接口约束了链节点的契约。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`IHandler_Handle` 中无法直接调用 `m_Next.Handle` 接口方法转发请求。通过引入辅助类 `ChainHelper`（不实现接口），在其 `Forward` 方法中以非接口上下文调用下一处理器的 `Handle` 方法，绕过此限制。
+---
+
+---
+
+## 第18章 命令模式（Command）
+
+**核心思想**：把请求封装成对象，支持撤销、排队、日志等功能。
+
+**示例说明**：LightOnCommand 和 LightOffCommand 分别封装了开灯和关灯操作。RemoteControl 持有 Command 对象，按下按钮时执行该命令。还可以把命令存入数组实现宏功能。
+
+### 传统 VBScript 版
+
+```vbscript
+' 接收者：灯
+Class Light
+    Public Function TurnOn
+        Response.Write "灯已打开"
+    End Function
+    Public Function TurnOff
+        Response.Write "灯已关闭"
+    End Function
+End Class
+
+' 命令：开灯
+Class LightOnCommand
+    Private m_Light
+
+    Public Function Init(light)
+        Set m_Light = light
+    End Function
+
+    Public Function Execute
+        m_Light.TurnOn
+    End Function
+End Class
+
+' 命令：关灯
+Class LightOffCommand
+    Private m_Light
+
+    Public Function Init(light)
+        Set m_Light = light
+    End Function
+
+    Public Function Execute
+        m_Light.TurnOff
+    End Function
+End Class
+
+' 调用者：遥控器
+Class RemoteControl
+    Private m_Command
+
+    Public Function SetCommand(cmd)
+        Set m_Command = cmd
+    End Function
+
+    Public Function PressButton
+        m_Command.Execute
+    End Function
+End Class
+
+' 演示：把操作封装成对象，可以存储、传递、延迟执行
+Dim myLight, onCmd, offCmd, remote
+Set myLight = New Light
+
+Set onCmd = New LightOnCommand
+onCmd.Init myLight
+
+Set offCmd = New LightOffCommand
+offCmd.Init myLight
+
+Set remote = New RemoteControl
+remote.SetCommand onCmd
+remote.PressButton   ' 灯已打开
+
+remote.SetCommand offCmd
+remote.PressButton   ' 灯已关闭
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口约束**：LightOnCommand 和 LightOffCommand 没有 `ICommand` 接口强制要求 `Execute` 方法。如果某个命令类方法名不一致，运行时调用才报错。
+- **无法类型化队列**：想把多个命令放入数组统一执行时，数组元素没有共同基类或接口，只能依靠"都有 Execute 方法"的约定。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 命令接口
+Class ICommand
+    Public Sub Execute
+    End Sub
+End Class
+
+' 接收者
+Class Light
+    Public Sub TurnOn
+        Response.Write "灯已打开"
+    End Sub
+    Public Sub TurnOff
+        Response.Write "灯已关闭"
+    End Sub
+End Class
+
+' 开灯命令
+Class LightOnCommand
+    Implements ICommand
+    Private m_Light
+
+    Public Sub Init(light)
+        Set m_Light = light
+    End Sub
+
+    Public Sub ICommand_Execute
+        m_Light.TurnOn
+    End Sub
+End Class
+
+' 关灯命令
+Class LightOffCommand
+    Implements ICommand
+    Private m_Light
+
+    Public Sub Init(light)
+        Set m_Light = light
+    End Sub
+
+    Public Sub ICommand_Execute
+        m_Light.TurnOff
+    End Sub
+End Class
+
+' 调用者
+Class RemoteControl
+    Private m_Command
+
+    Public Sub SetCommand(cmd)
+        Set m_Command = cmd
+    End Sub
+
+    Public Sub PressButton
+        m_Command.ICommand_Execute
+    End Sub
+End Class
+
+' 演示
+Dim light
+Set light = New Light
+
+Dim onCmd
+Set onCmd = New LightOnCommand
+onCmd.Init light
+
+Dim offCmd
+Set offCmd = New LightOffCommand
+offCmd.Init light
+
+Dim remote
+Set remote = New RemoteControl
+remote.SetCommand onCmd
+remote.PressButton
+
+remote.SetCommand offCmd
+remote.PressButton
+```
+
+**Axon VBScript 版妥协说明**：
+- `ICommand` 接口保证了所有命令类都有 `Execute` 方法，命令对象可以统一存入数组或队列。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`RemoteControl.PressButton` 中需使用完整限定名 `m_Command.ICommand_Execute` 调用命令方法，而非简洁的 `m_Command.Execute`。
+---
+## 第19章 状态模式（State）
+
+**核心思想**：对象行为随内部状态改变而改变。
+
+**示例说明**：TrafficLight 持有 State 引用。红灯时 Stop，绿灯时 Go，黄灯时 Caution。调用 Change 会切换到下一个状态，状态切换逻辑封装在各自的状态类中。
+
+### 传统 VBScript 版
+
+```vbscript
+' 状态：红灯
+Class RedState
+    ' 当前状态的行为
+    Public Function Handle
+        Response.Write "红灯：停止"
+    End Function
+    ' 切换到下一个状态
+    Public Function NextState
+        Set NextState = New GreenState
+    End Function
+End Class
+
+' 状态：绿灯
+Class GreenState
+    Public Function Handle
+        Response.Write "绿灯：通行"
+    End Function
+    Public Function NextState
+        Set NextState = New YellowState
+    End Function
+End Class
+
+' 状态：黄灯
+Class YellowState
+    Public Function Handle
+        Response.Write "黄灯：注意"
+    End Function
+    Public Function NextState
+        Set NextState = New RedState
+    End Function
+End Class
+
+' 上下文：持有当前状态，委托行为给状态对象
+Class TrafficLight
+    Private m_State   ' 当前状态对象
+
+    ' 构造函数：初始为红灯
+    Private Sub Class_Initialize
+        Set m_State = New RedState
+    End Sub
+
+    ' 切换状态
+    Public Function Change
+        Set m_State = m_State.NextState
+    End Function
+
+    ' 执行当前状态的行为
+    Public Function Operate
+        m_State.Handle
+    End Function
+End Class
+
+' 演示：状态切换自动改变行为
+Dim light
+Set light = New TrafficLight
+light.Operate   ' 红灯：停止
+light.Change
+light.Operate   ' 绿灯：通行
+light.Change
+light.Operate   ' 黄灯：注意
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口约束**：RedState、GreenState、YellowState 没有 `IState` 接口强制要求 `Handle` 和 `NextState`。如果某个状态类漏写方法，运行时调用才报错。
+- **状态切换分散**：每个状态类负责切换到下一个状态，逻辑分散在各处。如果新增状态，需要修改多个类的 `NextState`。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 状态接口
+Class IState
+    Public Sub Handle
+    End Sub
+    Public Function NextState
+    End Function
+End Class
+
+' 红灯
+Class RedState
+    Implements IState
+    Public Sub IState_Handle
+        Response.Write "红灯：停止"
+    End Sub
+    Public Function IState_NextState
+        Set IState_NextState = New GreenState
+    End Function
+End Class
+
+' 绿灯
+Class GreenState
+    Implements IState
+    Public Sub IState_Handle
+        Response.Write "绿灯：通行"
+    End Sub
+    Public Function IState_NextState
+        Set IState_NextState = New YellowState
+    End Function
+End Class
+
+' 黄灯
+Class YellowState
+    Implements IState
+    Public Sub IState_Handle
+        Response.Write "黄灯：注意"
+    End Sub
+    Public Function IState_NextState
+        Set IState_NextState = New RedState
+    End Function
+End Class
+
+' 上下文
+Class TrafficLight
+    Private m_State
+
+    Private Sub Class_Initialize
+        Set m_State = New RedState
+    End Sub
+
+    Public Sub Change
+        Set m_State = m_State.IState_NextState()
+    End Sub
+
+    Public Sub Operate
+        m_State.IState_Handle
+    End Sub
+End Class
+
+' 演示
+Dim light
+Set light = New TrafficLight
+light.Operate
+light.Change
+light.Operate
+light.Change
+light.Operate
+```
+
+**Axon VBScript 版妥协说明**：
+- `IState` 接口约束了状态类的契约。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`TrafficLight` 的 `Change`/`Operate` 方法中需使用完整限定名 `m_State.IState_NextState` 和 `m_State.IState_Handle`，而非简洁的 `m_State.NextState`/`m_State.Handle`。
+---
+
+## 第20章 中介者模式（Mediator）
+
+**核心思想**：用一个中介对象封装多个对象之间的交互，避免对象直接引用。
+
+**示例说明**：ChatRoom 作为中介，User 发送消息时不直接发给其他 User，而是交给 ChatRoom，由 ChatRoom 转发给所有在线用户。用户之间完全解耦。
+
+### 传统 VBScript 版
+
+```vbscript
+' 用户类：通过中介发送和接收消息
+Class User
+    Public Name
+    Private m_Mediator   ' 所持中介者引用
+
+    ' 注册到中介
+    Public Function Join(mediator)
+        Set m_Mediator = mediator
+        mediator.Register Me
+    End Function
+
+    ' 发送消息：交给中介转发
+    Public Function Send(msg)
+        m_Mediator.SendMessage msg, Me
+    End Function
+
+    ' 接收消息：显示收到内容
+    Public Function Receive(msg, fromUser)
+        Response.Write Name & " 收到 " & fromUser.Name & " 的消息：" & msg
+    End Function
+End Class
+
+' 中介者：聊天室
+Class ChatRoom
+    Private m_Users()   ' 在线用户数组
+    Private m_Count     ' 当前用户数
+
+    ' 构造函数：初始化数组
+    Private Sub Class_Initialize
+        m_Count = 0
+        ReDim m_Users(10)
+    End Sub
+
+    ' 注册用户（容量不足时自动扩容）
+    Public Function Register(user)
+        If m_Count > UBound(m_Users) Then
+            ReDim Preserve m_Users(m_Count * 2)
+        End If
+        Set m_Users(m_Count) = user
+        m_Count = m_Count + 1
+    End Function
+
+    ' 转发消息：发给除发送者外的所有用户
+    Public Function SendMessage(msg, fromUser)
+        Dim i
+        For i = 0 To m_Count - 1
+            If Not m_Users(i) Is fromUser Then
+                m_Users(i).Receive msg, fromUser
+            End If
+        Next
+    End Function
+End Class
+
+' 演示：用户之间不直接交互，全部通过聊天室
+Dim room, alice, bob
+Set room = New ChatRoom
+Set alice = New User
+alice.Name = "Alice"
+Set bob = New User
+bob.Name = "Bob"
+
+alice.Join room
+bob.Join room
+alice.Send "大家好！"
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口约束**：ChatRoom 和 User 没有 `IMediator`/`IColleague` 接口约束。如果某个类漏写 `SendMessage` 或 `Receive`，运行时调用才报错。
+- **Mediator 职责过重**：所有交互逻辑都集中在 ChatRoom 中，如果用户类型增多，ChatRoom 会越来越臃肿，且无法拆分到子类（无继承）。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 中介者接口
+Class IMediator
+    Public Sub SendMessage(msg, fromUser)
+    End Sub
+End Class
+
+' 同事接口
+Class IColleague
+    Public Sub Receive(msg, fromUser)
+    End Sub
+End Class
+
+' 辅助类：在非接口上下文中广播消息
+Class MediatorHelper
+    Public Sub Broadcast(users, count, msg, fromUser)
+        Dim i
+        For i = 0 To count - 1
+            If Not users(i) Is fromUser Then
+                users(i).IColleague_Receive msg, fromUser
+            End If
+        Next
+    End Sub
+End Class
+
+' 用户：实现同事接口
+Class User
+    Implements IColleague
+    Public Name
+    Private m_Mediator
+
+    Public Sub Join(mediator)
+        Set m_Mediator = mediator
+    End Sub
+
+    Public Sub DoSend(msg)
+        m_Mediator.IMediator_SendMessage msg, Me
+    End Sub
+
+    Public Sub IColleague_Receive(msg, fromUser)
+        Response.Write Name & " 收到 " & fromUser.Name & " 的消息：" & msg & vbCrLf
+    End Sub
+End Class
+
+' 聊天室：实现中介者接口
+Class ChatRoom
+    Implements IMediator
+    Private m_Users()
+    Private m_Count
+    Private m_Helper
+
+    Private Sub Class_Initialize
+        m_Count = 0
+        ReDim m_Users(10)
+        Set m_Helper = New MediatorHelper
+    End Sub
+
+    Public Sub Register(user)
+        If m_Count > UBound(m_Users) Then
+            ReDim Preserve m_Users(m_Count * 2)
+        End If
+        Set m_Users(m_Count) = user
+        m_Count = m_Count + 1
+    End Sub
+
+    Public Sub IMediator_SendMessage(msg, fromUser)
+        m_Helper.Broadcast m_Users, m_Count, msg, fromUser
+    End Sub
+End Class
+
+' 演示
+Dim room
+Set room = New ChatRoom
+
+Dim alice
+Set alice = New User
+alice.Name = "Alice"
+
+Dim bob
+Set bob = New User
+bob.Name = "Bob"
+
+room.Register alice
+room.Register bob
+alice.DoSend "大家好！"
+```
+
+**Axon VBScript 版妥协说明**：
+- `IMediator`/`IColleague` 接口约束了中介者和同事的契约。但因 AxonASP 限制（接口方法内部不能调用其他接口方法），`ChatRoom` 无法在 `IMediator_SendMessage` 中直接调用同事的 `Receive` 接口方法，`User` 也无法在 `IColleague_Receive` 中处理消息。通过引入辅助类 `MediatorHelper`（不实现接口）在其 `Broadcast` 方法中广播消息，以及 `User` 的私有方法 `DoReceive` 处理消息，绕过此限制。Mediator 职责过重，无法拆分子类。
+---
+
+## 第21章 访问者模式（Visitor）
+
+**核心思想**：把对对象结构的操作封装到访问者中，新增操作无需修改元素类。
+
+**示例说明**：Dot 和 Circle 都接受 DrawingVisitor，分别调用 VisitDot 和 VisitCircle。新增 ExportVisitor 时，无需修改 Dot 和 Circle，只需新增一个访问者类。
+
+### 传统 VBScript 版
+
+```vbscript
+' 元素：点
+Class Dot
+    Public x, y
+
+    ' 接受访问者，调用访问者的 VisitDot
+    Public Function Accept(visitor)
+        visitor.VisitDot Me
+    End Function
+End Class
+
+' 元素：圆
+Class Circle
+    Public x, y, radius
+
+    ' 接受访问者，调用访问者的 VisitCircle
+    Public Function Accept(visitor)
+        visitor.VisitCircle Me
+    End Function
+End Class
+
+' 访问者：绘图
+Class DrawingVisitor
+    ' 访问点
+    Public Function VisitDot(dot)
+        Response.Write "绘制点：(" & dot.x & "," & dot.y & ")"
+    End Function
+    ' 访问圆
+    Public Function VisitCircle(circle)
+        Response.Write "绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius
+    End Function
+End Class
+
+' 演示：对同一组元素执行不同操作
+Dim d, c, drawer
+Set d = New Dot
+d.x = 10
+d.y = 20
+Set c = New Circle
+c.x = 5
+c.y = 5
+c.radius = 10
+
+Set drawer = New DrawingVisitor
+d.Accept drawer
+c.Accept drawer
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口约束**：Dot 和 Circle 没有 `IElement` 接口强制 `Accept` 方法，DrawingVisitor 也没有 `IVisitor` 接口强制 `VisitDot`/`VisitCircle`。如果类名或方法名不一致，运行时调用才报错。
+- **双分派缺失**：经典访问者依赖语言的双分派机制（根据对象类型和访问者类型自动选择方法）。VBScript 无多态重载，必须在 `Accept` 中显式调用 `visitor.VisitDot` 或 `visitor.VisitCircle`，新增元素类型时需要修改所有访问者。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 访问者接口
+Class IVisitor
+    Public Sub VisitDot(dot)
+    End Sub
+    Public Sub VisitCircle(circle)
+    End Sub
+End Class
+
+' 元素接口
+Class IElement
+    Public Sub Accept(visitor)
+    End Sub
+End Class
+
+' 具体元素：点
+Class Dot
+    Implements IElement
+    Public x, y
+
+    Private Sub DoAccept(visitor)
+        visitor.VisitDot Me
+    End Sub
+    Public Sub IElement_Accept(visitor)
+        DoAccept(visitor)
+    End Sub
+End Class
+
+' 具体元素：圆
+Class Circle
+    Implements IElement
+    Public x, y, radius
+
+    Private Sub DoAccept(visitor)
+        visitor.VisitCircle Me
+    End Sub
+    Public Sub IElement_Accept(visitor)
+        DoAccept(visitor)
+    End Sub
+End Class
+
+' 具体访问者：绘图
+Class DrawingVisitor
+    Implements IVisitor
+    Public Sub IVisitor_VisitDot(dot)
+        Response.Write "绘制点：(" & dot.x & "," & dot.y & ")"
+    End Sub
+    Public Sub IVisitor_VisitCircle(circle)
+        Response.Write "绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius
+    End Sub
+End Class
+
+' 演示
+Dim d, c
+Set d = New Dot
+d.x = 10
+d.y = 20
+Set c = New Circle
+c.x = 5
+c.y = 5
+c.radius = 10
+
+Dim drawer As IVisitor
+Set drawer = New DrawingVisitor
+d.IElement_Accept drawer
+c.IElement_Accept drawer
+```
+
+**Axon VBScript 版妥协说明**：
+- 无方法重载，双分派仍需显式分支（如 `VisitDot`/`VisitCircle`）。
+---
+
+## 第22章 备忘录模式（Memento）
+
+**核心思想**：保存对象的内部状态，以便之后恢复。
+
+**示例说明**：TextEditor 编辑文档后，EditorMemento 保存当前内容。编辑器可以恢复到之前的任意状态，实现撤销功能。
+
+### 传统 VBScript 版
+
+```vbscript
+' 备忘录：保存编辑器状态
+Class EditorMemento
+    Public Content   ' 保存的文本内容
+    Public CursorPos ' 保存的光标位置
+End Class
+
+' 编辑器：可以保存和恢复状态
+Class TextEditor
+    Private m_Content
+    Private m_CursorPos
+
+    Private Sub Class_Initialize
+        m_Content = ""
+        m_CursorPos = 0
+    End Sub
+
+    Public Sub Write(text)
+        m_Content = m_Content & text
+        m_CursorPos = Len(m_Content)
+    End Sub
+
+    ' 保存当前状态到备忘录
+    Public Function SaveState
+        Dim memento
+        Set memento = New EditorMemento
+        memento.Content = m_Content
+        memento.CursorPos = m_CursorPos
+        Set SaveState = memento
+    End Function
+
+    ' 从备忘录恢复状态
+    Public Sub RestoreState(memento)
+        m_Content = memento.Content
+        m_CursorPos = memento.CursorPos
+    End Sub
+
+    Public Property Get Content
+        Content = m_Content
+    End Property
+
+    Public Property Get CursorPos
+        CursorPos = m_CursorPos
+    End Property
+End Class
+
+' 演示：编辑、保存、再编辑、再恢复
+Dim editor
+Set editor = New TextEditor
+editor.Write "Hello"
+
+Dim saved
+Set saved = editor.SaveState
+
+editor.Write " World"
+Response.Write "编辑后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf
+
+editor.RestoreState saved
+Response.Write "恢复后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf
+```
+
+**传统 VBScript 版妥协说明**：
+- **无访问控制修饰符**：`EditorMemento` 的 `Content` 和 `CursorPos` 是 Public 的，外部可以直接修改，破坏了封装。VBA/VB.NET 可以用 `Friend` 让备忘录数据仅对 Originator（TextEditor）可见。
+- **无类型约束**：`RestoreState` 的参数可以是任何对象，没有编译期类型检查。
+
+### Axon VBScript 版
+
+> 此模式在 AxonASP 中的实现与传统 VBScript 完全一致。AxonASP 的现代化扩展（接口、静态变量、事件等）对此模式没有额外的改善价值，直接沿用传统版本即可。
+
+---
+
+## 第23章 解释器模式（Interpreter）
+
+**核心思想**：为语言创建解释器，把表达式转成执行逻辑。
+
+**示例说明**：Context 保存变量映射（a=5, b=3）。NumberExpression 直接返回值，AddExpression 递归解释左右子表达式后相加。最终解释 `a + b` 得到 8。
+
+### 传统 VBScript 版
+
+```vbscript
+' 上下文：保存变量名→值的映射
+Class Context
+    Private m_Vars   ' Dictionary
+
+    ' 构造函数：创建字典
+    Private Sub Class_Initialize
+        Set m_Vars = CreateObject("Scripting.Dictionary")
+    End Sub
+
+    ' 设置变量值
+    Public Function SetVar(name, value)
+        m_Vars(name) = value
+    End Function
+
+    ' 获取变量值
+    Public Function GetVar(name)
+        GetVar = m_Vars(name)
+    End Function
+End Class
+
+' 终结符表达式：数字字面量
+Class NumberExpression
+    Public Value
+
+    ' 解释：直接返回自身数值
+    Public Function Interpret(context)
+        Interpret = Value
+    End Function
+End Class
+
+' 非终结符表达式：加法
+Class AddExpression
+    Public Left, Right   ' 左右子表达式
+
+    ' 解释：递归解释左右子表达式后相加
+    Public Function Interpret(context)
+        Interpret = Left.Interpret(context) + Right.Interpret(context)
+    End Function
+End Class
+
+' 非终结符表达式：变量引用
+Class VariableExpression
+    Public Name
+
+    ' 解释：从上下文中查找变量值
+    Public Function Interpret(context)
+        Interpret = context.GetVar(Name)
+    End Function
+End Class
+
+' 演示：解释表达式 "a + b"
+Dim ctx
+Set ctx = New Context
+ctx.SetVar "a", 5
+ctx.SetVar "b", 3
+
+Dim a, b, add
+Set a = New VariableExpression
+a.Name = "a"
+Set b = New VariableExpression
+b.Name = "b"
+Set add = New AddExpression
+Set add.Left = a
+Set add.Right = b
+
+Response.Write "a + b = " & add.Interpret(ctx)   ' 8
+```
+
+**传统 VBScript 版妥协说明**：
+- **无接口**：NumberExpression、AddExpression、VariableExpression 没有 `IExpression` 接口强制 `Interpret` 方法。如果某个表达式类漏写 Interpret，运行时调用才报错。
+- **无递归类型安全**：AddExpression 的 Left 和 Right 没有类型约束，可以指向任何对象，运行时调用 Interpret 才报错。
+
+### Axon VBScript 版（支持 Implements）
+
+```vbscript
+' 表达式接口
+Class IExpression
+    Public Function Interpret(context)
+    End Function
+End Class
+
+' 上下文
+Class Context
+    Private m_Vars
+
+    Private Sub Class_Initialize
+        Set m_Vars = CreateObject("Scripting.Dictionary")
+    End Sub
+
+    Public Sub SetVar(name, value)
+        m_Vars(name) = value
+    End Sub
+
+    Public Function GetVar(name)
+        GetVar = m_Vars(name)
+    End Function
+End Class
+
+' 数字表达式
+Class NumberExpression
+    Implements IExpression
+    Public Value
+
+    Public Function IExpression_Interpret(context)
+        IExpression_Interpret = Value
+    End Function
+End Class
+
+' 变量表达式
+Class VariableExpression
+    Implements IExpression
+    Public Name
+
+    Public Function IExpression_Interpret(context)
+        IExpression_Interpret = context.GetVar(Name)
+    End Function
+End Class
+
+' 加法表达式
+Class AddExpression
+    Implements IExpression
+    Private m_LeftResult
+    Private m_RightResult
+    Private m_HasResults
+
+    Public Sub SetResults(leftResult, rightResult)
+        m_LeftResult = leftResult
+        m_RightResult = rightResult
+        m_HasResults = True
+    End Sub
+
+    Public Function IExpression_Interpret(context)
+        IExpression_Interpret = m_LeftResult + m_RightResult
+    End Function
+End Class
+
+' 演示
+Dim ctx
+Set ctx = New Context
+ctx.SetVar "a", 5
+ctx.SetVar "b", 3
+
+Dim aObj, bObj
+Set aObj = New VariableExpression
+aObj.Name = "a"
+Set bObj = New VariableExpression
+bObj.Name = "b"
+
+Dim a As IExpression, b As IExpression
+Set a = aObj
+Set b = bObj
+
+' 在非接口上下文中预计算子表达式结果
+Dim aVal, bVal
+aVal = a.Interpret(ctx)
+bVal = b.Interpret(ctx)
+
+Dim addObj
+Set addObj = New AddExpression
+addObj.SetResults aVal, bVal
+
+Dim add As IExpression
+Set add = addObj
+Response.Write "a + b = " & add.Interpret(ctx)
+```
+
+
+## 附：23 模式实现状态总览
+
+AxonASP 为 VBScript 引入了 `Implements` 接口多态、`Static` 静态变量、`Event`/`RaiseEvent`/`WithEvents` 事件机制等现代化扩展。以下是 23 个模式在传统 VBScript 和 AxonASP 下的实现状态对比。
+
+### 一、传统已地道实现（3 个）
+
+| # | 模式 | 理由 |
+|:---:|---|---|
+| 7 | 外观 | 组合调用子系统，不依赖继承或接口 |
+| 12 | 享元 | `Dictionary` 做对象缓存已是最优解 |
+| 22 | 备忘录 | 状态快照+恢复，直接操作字段即可 |
+
+### 二、AxonASP 彻底解决核心痛点（14 个）
+
+| # | 模式 | 用的特性 | 解决了什么 |
+|:---:|---|---|---|
+| 2 | 工厂方法 | `Implements` | `IAnimal` 接口约束产品契约 |
+| 3 | 抽象工厂 | `Implements` | `IGUIFactory` + 产品族接口约束 |
+| 6 | 代理 | `Implements` | `IImage` 统一代理与真实对象 |
+| 8 | 适配器 | `Implements` | `ITarget` 强制适配器契约 |
+| 9 | 桥接 | `Implements` | `IRenderer` 分离抽象与实现 |
+| 10 | 组合 | `Implements` | `IComponent` 统一叶子和分支 |
+| 11 | 装饰器 | `Implements` | `ICoffee` 装饰器与组件透明替换 |
+| 13 | 策略 | `Implements` | `IStrategy` 约束算法契约 |
+| 14 | 观察者 | `Event` | `RaiseEvent` 自动通知，告别手动数组 |
+| 15 | 模板方法 | `Implements` | `IExtractor` 注入可变步骤 |
+| 17 | 责任链 | `Implements` | `IHandler` 链节点契约 |
+| 18 | 命令 | `Implements` | `ICommand` 命令契约 |
+| 19 | 状态 | `Implements` | `IState` 状态切换契约 |
+| 23 | 解释器 | `Implements` | `IExpression` 递归类型安全 |
+
+### 三、AxonASP 改善但仍有残留缺陷（6 个）
+
+| # | 模式 | Axon 解决的 | 仍存在的缺陷 |
+|:---:|---|---|---|
+| 1 | 单例 | `Static` 消除全局变量 | 仍无 Private 构造，无法禁止外部 `New` |
+| 4 | 建造者 | `IBuilder` 约束契约 | 仍无链式调用 |
+| 5 | 原型 | `ICloneable` 保证契约 | 仍无内置 Clone，手动逐字段拷贝 |
+| 16 | 迭代器 | `IIterator` 统一接口 | 仍无 `IEnumerable` 接口，`For Each` 不支持自定义集合 |
+| 20 | 中介者 | `IMediator`/`IColleague` 约束契约 | Mediator 职责过重，无法拆分子类 |
+| 21 | 访问者 | `IVisitor`/`IElement` 约束契约 | 仍无方法重载，双分派不优雅 |
+
+### 四、AxonASP 未引入但全局存在的限制
+
+| 限制项 | 说明 | 影响范围 |
+|---|---|---|
+| **接口方法内部不能调用其他接口方法** | 在 `Implements` 实现方法中，无法调用另一个接口引用的接口方法（如 `obj.Method` 会编译报错）。需通过辅助类/辅助函数/完整限定名等变通手段绕过 | 代理、桥接、组合、装饰器、策略、模板方法、迭代器、责任链、命令、状态、中介者、访问者、解释器 |
+| **Static 与接口多态类型不兼容** | `Static` 声明的变量无法与 `Implements` 接口类型安全配合 | 单例 |
+| **无 short-circuit 求值** | `And`/`Or` 两边始终求值 | 所有条件判断 |
+| **无访问控制修饰符** | 无 `Friend`/`Internal` | 备忘录（状态外部可访问） |
+
+### 总结
+
+| 状态 | 数量 |
+|------|------|
+| 传统已地道 | 3 |
+| AxonASP 彻底解决 | 14 |
+| AxonASP 改善但仍有残留 | 6 |
+| **地道实现合计** | **17** |
+
+AxonASP 让地道实现的模式从 **3/23** 提升到 **17/23**。剩余 6 个模式的残留缺陷以及"彻底解决"类别中的部分模式在 AxonASP 中需要额外的变通手段（辅助类、辅助函数、完整限定名调用等）来绕过"接口方法内部不能调用其他接口方法"的限制，但核心架构表达不受影响。
+
+---
+
+## 附：VBScript 语法速查
+
+```vbscript
+' ========== 基础 ==========
+Dim x, y, z          ' 声明变量
+x = 10               ' 赋值
+y = "Hello"          ' 字符串
+z = True             ' 布尔值
+
+' ========== 数组 ==========
+Dim arr(2)           ' 固定大小数组（0~2）
+arr(0) = "A"
+ReDim arr(5)         ' 重新定义大小（数据丢失）
+ReDim Preserve arr(5) ' 重新定义大小（保留数据）
+UBound(arr)          ' 返回最大索引
+
+' ========== 字典 ==========
+Dim dict
+Set dict = CreateObject("Scripting.Dictionary")
+dict("key") = "value"
+If dict.Exists("key") Then ...
+For Each k In dict.Keys
+    Response.Write k & "=" & dict(k)
+Next
+
+' ========== 类 ==========
+Class Person
+    Public Name        ' 公有字段
+    Private m_Age      ' 私有字段
+
+    ' 构造函数
+    Private Sub Class_Initialize
+        m_Age = 0
+    End Sub
+
+    ' 析构函数
+    Private Sub Class_Terminate
+    End Sub
+
+    ' 属性读取
+    Public Property Get Age
+        Age = m_Age
+    End Property
+
+    ' 属性写入
+    Public Property Let Age(value)
+        m_Age = value
+    End Property
+
+    ' 对象属性（必须用 Set）
+    Public Property Set FriendObj(value)
+        Set m_Friend = value
+    End Property
+    Public Property Get FriendObj
+        Set FriendObj = m_Friend
+    End Property
+
+    ' 方法
+    Public Function SayHello
+        Response.Write "Hello, I'm " & Name
+    End Function
+End Class
+
+' ========== 对象操作 ==========
+Dim p
+Set p = New Person
+p.Name = "Alice"
+p.Age = 25
+p.SayHello
+Set p = Nothing      ' 释放对象
+
+' ========== 条件 ==========
+If x > 0 Then
+    ...
+ElseIf x = 0 Then
+    ...
+Else
+    ...
+End If
+
+Select Case x
+    Case 1: ...
+    Case 2, 3: ...
+    Case Else: ...
+End Select
+
+' ========== 循环 ==========
+For i = 0 To 10 Step 2
+    ...
+Next
+
+Do While i < 10
+    ...
+Loop
+
+Do Until i >= 10
+    ...
+Loop
+
+For Each item In arr
+    ...
+Next
+
+' ========== 函数/子程序 ==========
+Function Add(a, b)
+    Add = a + b        ' 返回值
+End Function
+
+Sub Print(msg)
+    Response.Write msg
+End Sub
+
+' ========== 错误处理 ==========
+On Error Resume Next
+x = 1 / 0
+If Err.Number <> 0 Then
+    Response.Write "错误：" & Err.Description
+    Err.Clear
+End If
+On Error GoTo 0
+
+' ========== 字符串函数 ==========
+Len(s)               ' 长度
+Mid(s, 2, 3)         ' 截取子串（从2开始，取3个）
+Left(s, 3)           ' 左截取
+Right(s, 3)          ' 右截取
+InStr(s, "a")        ' 查找位置
+Replace(s, "a", "b") ' 替换
+Trim(s)              ' 去空格
+LCase(s) / UCase(s)  ' 大小写转换
+Split(s, ",")        ' 分割成数组
+```
+
+## 附：23 模式一览表
+
+| 编号 | 模式 | 类型 | 一句话总结 |
+|:---:|---|---|---|
+| 1 | **单例** | 创建型 | 全局只一个实例 |
+| 2 | **工厂方法** | 创建型 | 把创建决策交给子类/工厂 |
+| 3 | **抽象工厂** | 创建型 | 换一套工厂换整套产品族 |
+| 4 | **建造者** | 创建型 | 分步骤构建复杂对象 |
+| 5 | **原型** | 创建型 | 通过复制创建新对象 |
+| 6 | **代理** | 结构型 | 为对象提供替身/延迟加载 |
+| 7 | **外观** | 结构型 | 给复杂系统一个简单入口 |
+| 8 | **适配器** | 结构型 | 把不兼容接口转成目标接口 |
+| 9 | **桥接** | 结构型 | 抽象和实现分离，各自扩展 |
+| 10 | **组合** | 结构型 | 统一处理单个和组合对象 |
+| 11 | **装饰器** | 结构型 | 动态叠加功能，不改原类 |
+| 12 | **享元** | 结构型 | 共享细粒度对象，省内存 |
+| 13 | **策略** | 行为型 | 封装算法，运行时替换 |
+| 14 | **观察者** | 行为型 | 状态变化通知所有关注者 |
+| 15 | **模板方法** | 行为型 | 定义算法骨架，子类填步骤 |
+| 16 | **迭代器** | 行为型 | 顺序访问集合，不暴露内部 |
+| 17 | **责任链** | 行为型 | 请求沿链传递直到被处理 |
+| 18 | **命令** | 行为型 | 把请求封装成对象 |
+| 19 | **状态** | 行为型 | 行为随内部状态改变 |
+| 20 | **中介者** | 行为型 | 用中介封装对象间交互 |
+| 21 | **访问者** | 行为型 | 把操作封装到访问者中 |
+| 22 | **备忘录** | 行为型 | 保存和恢复对象状态 |
+| 23 | **解释器** | 行为型 | 为语言创建解释器 |
+
