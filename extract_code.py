@@ -10,6 +10,7 @@ import os, re, sys, glob
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 CLASSIC_DIR = os.path.join(BASE_DIR, "classicASPcode")
 AXON_DIR    = os.path.join(BASE_DIR, "axonASPcode")
+ASPPY_DIR   = os.path.join(BASE_DIR, "aspPycode")
 CHAPTER_DIR = os.path.join(BASE_DIR, "byChapterMDcn")
 
 # 章节标题里中文数字 -> 阿拉伯数字
@@ -78,9 +79,10 @@ def extract(md_path):
 def save(items):
     os.makedirs(CLASSIC_DIR, exist_ok=True)
     os.makedirs(AXON_DIR,    exist_ok=True)
+    os.makedirs(ASPPY_DIR,   exist_ok=True)
 
-    # 先清空两个目录里的旧文件
-    for d in (CLASSIC_DIR, AXON_DIR):
+    # 先清空三个目录里的旧文件
+    for d in (CLASSIC_DIR, AXON_DIR, ASPPY_DIR):
         for f in os.listdir(d):
             fp = os.path.join(d, f)
             if os.path.isfile(fp):
@@ -118,6 +120,16 @@ def save(items):
             f.write(data)
         saved.append({**item, "path": path})
         print(f"  {item['type']:10s} | ch{item['chapter']:02d} | {item['filename']}")
+
+        # ASPPY: 用传统版代码（不注入 ResponseStub），包裹 <% %>，UTF-8 编码
+        if item["type"] == "ClassicASP":
+            asppy_content = item["content"]
+            if "<%" not in asppy_content:
+                asppy_content = "<%\n" + asppy_content + "\n%>"
+            asppy_path = os.path.join(ASPPY_DIR, item["filename"].replace(".vbs", ".asp"))
+            with open(asppy_path, "wb") as f:
+                f.write(asppy_content.encode("utf-8"))
+            print(f"  ASPPY      | ch{item['chapter']:02d} | {os.path.basename(asppy_path)}")
     return saved
 
 def split_chapters(md_path):

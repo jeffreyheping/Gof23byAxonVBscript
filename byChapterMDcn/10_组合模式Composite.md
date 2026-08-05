@@ -109,7 +109,8 @@ End Class
 Class Composite
     Implements IComponent
     Private m_Name As String
-    Private m_Children    ' Collection
+    Private m_Children()
+    Private m_Count As Integer
 
     Public Property Get Name As String
         Name = m_Name
@@ -119,17 +120,23 @@ Class Composite
     End Property
 
     Private Sub Class_Initialize
-        Set m_Children = Server.CreateObject("Collection")
+        m_Count = 0
+        ReDim m_Children(10)
     End Sub
 
     Public Function IComponent_Add(child As IComponent)
-        m_Children.Add child
+        If m_Count >= UBound(m_Children) + 1 Then
+            ReDim Preserve m_Children(m_Count * 2)
+        End If
+        Set m_Children(m_Count) = child
+        m_Count = m_Count + 1
     End Function
 
     Public Function IComponent_Operation(indent As String)
         Response.Write indent & "组合：" & m_Name
-        Dim child As IComponent
-        For Each child In m_Children
+        Dim i As Integer, child As IComponent
+        For i = 0 To m_Count - 1
+            Set child = m_Children(i)
             child.Operation indent & "  "
         Next
     End Function
@@ -163,7 +170,8 @@ root.Operation ""
 ```
 
 **Axon VBScript 版妥协说明**：
-- 接口机制统一了叶子和组合节点的契约，`Composite` 通过 `IComponent` 类型的子节点引用直接调用 `child.Operation`，递归遍历整棵树，符合经典组合模式的透明组合语义。子节点存储用内置 `Collection` + `For Each` 迭代，无需手动管理数组。
+- 接口机制统一了叶子和组合节点的契约，`Composite` 通过 `IComponent` 类型的子节点引用直接调用 `child.Operation`，递归遍历整棵树，符合经典组合模式的透明组合语义。
 - 缺失语法点：**代码复用机制**（继承或 struct embedding）。`Leaf` 与 `Composite` 无法共享公共 `Component` 基类来复用默认实现。Go 用 struct embedding 解决此问题，AxonASP 只能各自实现。
+- 缺失语法点：**`For Each` 自定义集合迭代**。遍历子节点仍需用下标 `For` 循环配合手动扩容数组，无法用 `For Each child In m_Children` 简洁迭代（已提 issue #52，作者标记 `in progress`）。
 - `Leaf.IComponent_Add` 只能空实现：接口要求所有实现者都提供 `Add`，叶子节点本不应支持添加子节点，但无法在类型层面禁止，只能靠运行时空方法体"静默忽略"。
 ---

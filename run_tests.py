@@ -10,11 +10,13 @@ import os, subprocess, time, datetime
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 CLASSIC_DIR  = os.path.join(BASE_DIR, "classicASPcode")
 AXON_DIR     = os.path.join(BASE_DIR, "axonASPcode")
+ASPPY_DIR    = os.path.join(BASE_DIR, "aspPycode")
 REPORT_FILE  = os.path.join(BASE_DIR, "test_report.md")
 
 CSCRIPT      = r"C:\Windows\System32\cscript.exe"
 WSCRIPT      = r"C:\Windows\System32\wscript.exe"
 AXON_CLI     = r"C:\axonasp\axonasp-cli.exe"
+ASPPY_CLI    = r"C:\Users\jeffr\Documents\GitHub\ASPPY\asppycli.py"
 TIMEOUT      = 30   # seconds
 
 
@@ -89,6 +91,27 @@ def run_axon(filepath):
         return {"success": False, "output": "", "error": str(e), "duration": 0}
 
 
+def run_asppy(filepath):
+    """用 python asppycli.py 运行 .asp 文件"""
+    try:
+        t0 = time.monotonic()
+        r  = subprocess.run(
+            ["python", ASPPY_CLI, filepath],
+            capture_output=True, text=True, timeout=TIMEOUT,
+            encoding="utf-8", errors="replace",
+        )
+        return {
+            "success": r.returncode == 0,
+            "output":  r.stdout.strip(),
+            "error":   r.stderr.strip(),
+            "duration": round(time.monotonic() - t0, 3),
+        }
+    except subprocess.TimeoutExpired:
+        return {"success": False, "output": "", "error": "TIMEOUT", "duration": TIMEOUT}
+    except Exception as e:
+        return {"success": False, "output": "", "error": str(e), "duration": 0}
+
+
 # ── test runner ──────────────────────────────────────────────────
 def run_all():
     results = []
@@ -129,6 +152,24 @@ def run_all():
     else:
         print("  [WARN] axonASPcode/ not found")
 
+    # ASPPY
+    print("\n" + "=" * 60)
+    print("  ASPPY Tests (python asppycli.py)")
+    print("=" * 60)
+    if os.path.isdir(ASPPY_DIR):
+        for fn in sorted(os.listdir(ASPPY_DIR)):
+            if not fn.lower().endswith(".asp"):
+                continue
+            fp = os.path.join(ASPPY_DIR, fn)
+            print(f"\n  >>> {fn}")
+            r = run_asppy(fp)
+            r["filename"] = fn
+            r["type"]     = "ASPPY"
+            results.append(r)
+            _print_result(r)
+    else:
+        print("  [WARN] aspPycode/ not found")
+
     return results
 
 
@@ -147,11 +188,14 @@ def _print_result(r):
 def generate_report(results):
     classic = [r for r in results if r["type"] == "ClassicASP"]
     axon    = [r for r in results if r["type"] == "AxonASP"]
+    asppy   = [r for r in results if r["type"] == "ASPPY"]
 
     c_pass = sum(1 for r in classic if r["success"])
     a_pass = sum(1 for r in axon    if r["success"])
+    s_pass = sum(1 for r in asppy   if r["success"])
     c_avg  = sum(r["duration"] for r in classic) / len(classic) if classic else 0
     a_avg  = sum(r["duration"] for r in axon)    / len(axon)    if axon    else 0
+    s_avg  = sum(r["duration"] for r in asppy)   / len(asppy)   if asppy   else 0
 
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -166,6 +210,7 @@ def generate_report(results):
         f"|------------|-------|------|------|----------|",
         f"| ClassicASP | {len(classic):5d} | {c_pass:4d} | {len(classic)-c_pass:4d} | {c_avg:.3f}s  |",
         f"| AxonASP    | {len(axon):5d} | {a_pass:4d} | {len(axon)-a_pass:4d} | {a_avg:.3f}s  |",
+        f"| ASPPY      | {len(asppy):5d} | {s_pass:4d} | {len(asppy)-s_pass:4d} | {s_avg:.3f}s  |",
         f"",
     ]
 
@@ -185,6 +230,19 @@ def generate_report(results):
     # AxonASP detail
     lines += ["## AxonASP Details", ""]
     for r in axon:
+        s = "PASS" if r["success"] else "FAIL"
+        lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
+        if r["output"]:
+            for l in r["output"].splitlines():
+                lines.append(f"  - `{l}`")
+        if not r["success"] and r["error"]:
+            for l in r["error"].splitlines():
+                lines.append(f"  - ERR: `{l}`")
+    lines.append("")
+
+    # ASPPY detail
+    lines += ["## ASPPY Details", ""]
+    for r in asppy:
         s = "PASS" if r["success"] else "FAIL"
         lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
         if r["output"]:

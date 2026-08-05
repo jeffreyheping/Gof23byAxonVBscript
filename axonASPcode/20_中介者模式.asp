@@ -14,21 +14,28 @@ End Class
 ' 聊天室：实现中介者接口，持有所有同事对象
 Class ChatRoom
     Implements IMediator
-    Private m_Users    ' Collection
+    Private m_Users()
+    Private m_Count As Integer
 
     Private Sub Class_Initialize
-        Set m_Users = Server.CreateObject("Collection")
+        m_Count = 0
+        ReDim m_Users(10)
     End Sub
 
-    ' 注册同事（非接口公共方法）
+    ' 注册同事（非接口公共方法，容量不足时自动扩容）
     Public Function Register(user As User)
-        m_Users.Add user
+        If m_Count >= UBound(m_Users) + 1 Then
+            ReDim Preserve m_Users(m_Count * 2)
+        End If
+        Set m_Users(m_Count) = user
+        m_Count = m_Count + 1
     End Function
 
     ' 转发消息：遍历同事，调用接口方法 Receive，发送者除外
     Public Function IMediator_SendMessage(msg As String, fromUser As User)
-        Dim u As IColleague
-        For Each u In m_Users
+        Dim i As Integer, u As IColleague
+        For i = 0 To m_Count - 1
+            Set u = m_Users(i)
             If Not u Is fromUser Then
                 u.Receive msg, fromUser
             End If

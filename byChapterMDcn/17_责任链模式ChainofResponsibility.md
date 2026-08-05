@@ -125,7 +125,7 @@ Class Logger
         If ShouldHandle(level) Then
             Response.Write "【" & m_Name & "】" & msg
         End If
-        If m_Next IsNot Nothing Then
+        If Not m_Next Is Nothing Then
             m_Next.Log msg, level
         End If
     End Function
@@ -162,7 +162,7 @@ debugLog.Log "严重错误", LogLevel.ErrorLevel
 
 
 **Axon VBScript 版妥协说明**：
-- `IHandler` 接口约束了链节点的契约。`Logger` 持有 `IHandler` 引用（`m_Next`），在 `IHandler_Log` 中用 `m_Next IsNot Nothing` 检查链尾后直接调用 `m_Next.Log` 转发请求，无需辅助类。`Enum LogLevel` 替代了传统版的字符串比较，`ShouldHandle` 从 14 行数组查找简化为一行整数比较 `level >= m_Level`，既安全又高效。残留限制：缺失语法点：**代码复用机制**（继承或 struct embedding）。每个具体处理器都需自行维护 `m_Next` 字段与转发判断，无法提取到公共基类。Go 用 struct embedding 解决——嵌入一个 `BaseHandler` 结构体即自动获得 `SetNext` 和转发逻辑，只需覆盖 `ShouldHandle`。此外，链条的构建（`SetNext` 调用顺序）需调用方保证，编译期无法校验链是否闭合。
+- `IHandler` 接口约束了链节点的契约。`Logger` 持有 `IHandler` 引用（`m_Next`），在 `IHandler_Log` 中直接调用 `m_Next.Log` 转发请求，无需辅助类。`Enum LogLevel` 替代了传统版的字符串比较，`ShouldHandle` 从 14 行数组查找简化为一行整数比较 `level >= m_Level`，既安全又高效。残留限制：缺失语法点：**代码复用机制**（继承或 struct embedding）。每个具体处理器都需自行维护 `m_Next` 字段与转发判断，无法提取到公共基类。Go 用 struct embedding 解决——嵌入一个 `BaseHandler` 结构体即自动获得 `SetNext` 和转发逻辑，只需覆盖 `ShouldHandle`。此外，链条的构建（`SetNext` 调用顺序）需调用方保证，编译期无法校验链是否闭合。
 ---
 
 ---
