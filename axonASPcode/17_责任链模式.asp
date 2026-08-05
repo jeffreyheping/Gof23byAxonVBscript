@@ -47,7 +47,7 @@ Class Logger
         If ShouldHandle(level) Then
             Response.Write "【" & m_Name & "】" & msg
         End If
-        If Not m_Next Is Nothing Then
+        If m_Next IsNot Nothing Then
             m_Next.Log msg, level
         End If
     End Function

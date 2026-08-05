@@ -31,8 +31,7 @@ End Class
 Class Composite
     Implements IComponent
     Private m_Name As String
-    Private m_Children()
-    Private m_Count As Integer
+    Private m_Children    ' Collection
 
     Public Property Get Name As String
         Name = m_Name
@@ -42,23 +41,17 @@ Class Composite
     End Property
 
     Private Sub Class_Initialize
-        m_Count = 0
-        ReDim m_Children(10)
+        Set m_Children = Server.CreateObject("Collection")
     End Sub
 
     Public Function IComponent_Add(child As IComponent)
-        If m_Count >= UBound(m_Children) + 1 Then
-            ReDim Preserve m_Children(m_Count * 2)
-        End If
-        Set m_Children(m_Count) = child
-        m_Count = m_Count + 1
+        m_Children.Add child
     End Function
 
     Public Function IComponent_Operation(indent As String)
         Response.Write indent & "组合：" & m_Name
-        Dim i As Integer, child As IComponent
-        For i = 0 To m_Count - 1
-            Set child = m_Children(i)
+        Dim child As IComponent
+        For Each child In m_Children
             child.Operation indent & "  "
         Next
     End Function

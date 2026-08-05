@@ -153,23 +153,14 @@ def split_chapters(md_path):
         print("[SPLIT] No chapters found")
         return
     
-    # 头部：第一个 ## 之前的内容
-    head_end = matches[0].start()
-    head_content = content[:head_end].strip()
-    if head_content:
-        head_path = os.path.join(CHAPTER_DIR, "00_前言.md")
-        with open(head_path, "w", encoding="utf-8") as f:
-            f.write(head_content)
-        print(f"  [SPLIT] 00_前言.md")
-    
-    # 找出设计模式章节（第1-23章）和附录章节
+    # 先找出设计模式章节（第N章）和附录章节
     design_chapters = []
     appendix_start = len(content)
-    
+
     for i, m in enumerate(matches):
         line_end = content.find("\n", m.start())
         line_text = content[m.start():line_end].strip()
-        
+
         # 判断是否为设计模式章节（第N章格式）
         if re.match(r"^##\s*第\d+章", line_text) or re.match(r"^##\s*第[一二三四五六七八九十]+章", line_text):
             design_chapters.append(m)
@@ -177,6 +168,18 @@ def split_chapters(md_path):
         elif line_text.startswith("## 附："):
             appendix_start = m.start()
             break
+
+    # 头部：第一个"第N章"之前的内容（含前言各节）
+    if design_chapters:
+        head_end = design_chapters[0].start()
+    else:
+        head_end = matches[0].start()
+    head_content = content[:head_end].strip()
+    if head_content:
+        head_path = os.path.join(CHAPTER_DIR, "00_前言.md")
+        with open(head_path, "w", encoding="utf-8") as f:
+            f.write(head_content)
+        print(f"  [SPLIT] 00_前言.md")
     
     # 处理设计模式章节（只取前23个）
     for i, m in enumerate(design_chapters[:23]):

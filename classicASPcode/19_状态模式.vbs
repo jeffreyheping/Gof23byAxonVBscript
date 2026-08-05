@@ -6,12 +6,22 @@ Class RedState
     Public Function Handle
         Response.Write "红灯：停止"
     End Function
+
+    ' 切换到下一个状态：红灯自己知道下一个是绿灯
+    Public Function NextState
+        Set NextState = New GreenState
+    End Function
 End Class
 
 ' 状态：绿灯
 Class GreenState
     Public Function Handle
         Response.Write "绿灯：通行"
+    End Function
+
+    ' 切换到下一个状态：绿灯自己知道下一个是黄灯
+    Public Function NextState
+        Set NextState = New YellowState
     End Function
 End Class
 
@@ -20,9 +30,14 @@ Class YellowState
     Public Function Handle
         Response.Write "黄灯：注意"
     End Function
+
+    ' 切换到下一个状态：黄灯自己知道下一个是红灯（循环）
+    Public Function NextState
+        Set NextState = New RedState
+    End Function
 End Class
 
-' 上下文：持有当前状态，集中管理状态切换
+' 上下文：持有当前状态，委托给状态类处理行为和切换
 Class TrafficLight
     Private m_State   ' 当前状态对象
 
@@ -31,15 +46,9 @@ Class TrafficLight
         Set m_State = New RedState
     End Sub
 
-    ' 集中管理状态切换逻辑（替代分散在各状态类中的 NextState）
+    ' 切换状态：委托给当前状态类，无需 TypeName 判断
     Public Function Change
-        If TypeName(m_State) = "RedState" Then
-            Set m_State = New GreenState
-        ElseIf TypeName(m_State) = "GreenState" Then
-            Set m_State = New YellowState
-        ElseIf TypeName(m_State) = "YellowState" Then
-            Set m_State = New RedState
-        End If
+        Set m_State = m_State.NextState
     End Function
 
     ' 执行当前状态的行为

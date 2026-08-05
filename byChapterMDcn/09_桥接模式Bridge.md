@@ -105,18 +105,22 @@ Class Circle
     End Function
 End Class
 
-' 演示：同形状搭配不同引擎
+' 演示：同形状搭配不同引擎，通过 IShape 接口引用调用 Draw
 Dim c1 As Circle, c2 As Circle
+Dim s1 As IShape, s2 As IShape
+
 Set c1 = New Circle
 c1.Init 5, New VectorRenderer
-c1.IShape_Draw
+Set s1 = c1
+s1.Draw   ' 矢量引擎绘制半径5的圆
 
 Set c2 = New Circle
 c2.Init 5, New RasterRenderer
-c2.IShape_Draw
+Set s2 = c2
+s2.Draw   ' 光栅引擎绘制半径5的圆
 ```
 
 **Axon VBScript 版妥协说明**：
-- 接口机制解决了抽象与实现的分离问题，`Circle` 通过 `IRenderer` 接口引用调用渲染器，可在运行时自由搭配不同引擎。
+- 接口机制解决了抽象与实现的分离问题：`Circle` 通过 `IRenderer` 接口引用调用渲染器，可在运行时自由搭配不同引擎；调用方通过 `IShape` 接口引用调用 `Draw`，自动路由到 `Circle.IShape_Draw`，无需知道具体形状类型，体现了接口多态派发。
 - 缺失语法点：**代码复用机制**（继承或 struct embedding）。经典桥接要求 Abstraction 是抽象基类，子类继承复用。Go 同样无继承，但 Go 用 struct embedding 让 `Circle` 嵌入一个基础 `Shape` 结构体即可复用公共逻辑。AxonASP 目前只能为每种形状各写一个类，手动复制公共字段和逻辑。
 ---

@@ -79,7 +79,7 @@ csv.MineData "data.csv"
 ```
 
 **传统 VBScript 版妥协说明**：
-- **无继承、无 abstract**：VBScript 没有继承，"子类覆盖 Parse"只能靠同名方法覆盖（实际是两个独立类）。`DataMiner` 的 `MineData` 里调用 `Parse` 时，如果子类没写 Parse，就调用了父类的默认空实现——这不符合模板方法"必须实现"的语义。
+- **无继承、无 abstract**：VBScript 没有继承，"子类覆盖 Parse"只能靠同名方法覆盖（实际是两个独立类）。`DataMiner` 的 `MineData` 里调用的是传入的 `parser.Parse`，如果传入的对象没有 `Parse` 方法，运行时才报错——这不符合模板方法"必须实现"的语义。
 - **无强制覆盖**：VBScript 无法标记某个方法为"必须覆盖"，开发者可能忘记在子类中实现 Parse。
 
 ### Axon VBScript 版（支持 Implements）

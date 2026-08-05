@@ -43,13 +43,17 @@ Class Circle
     End Function
 End Class
 
-' 演示：同形状搭配不同引擎
+' 演示：同形状搭配不同引擎，通过 IShape 接口引用调用 Draw
 Dim c1 As Circle, c2 As Circle
+Dim s1 As IShape, s2 As IShape
+
 Set c1 = New Circle
 c1.Init 5, New VectorRenderer
-c1.IShape_Draw
+Set s1 = c1
+s1.Draw   ' 矢量引擎绘制半径5的圆
 
 Set c2 = New Circle
 c2.Init 5, New RasterRenderer
-c2.IShape_Draw
+Set s2 = c2
+s2.Draw   ' 光栅引擎绘制半径5的圆
 %>

@@ -146,6 +146,6 @@ Response.Write "恢复后: " & editor.Content & " (光标: " & editor.CursorPos 
 ```
 
 **Axon VBScript 版妥协说明**：
-- 传统版的 `Class EditorMemento` + `Property Get/Let` 已是 VBScript 中地道的实现方式。UDT 提供了一种更优雅的替代写法：值拷贝语义天然防止外部通过引用意外修改快照，且无需 Property 样板代码。这是表达层面的提升，而非对不地道代码的修复。
+- 传统版的 `Class EditorMemento` + `Property Get/Let` 已是 VBScript 中地道的实现方式。UDT + 强类型（`As String`/`As Integer`）提供了更优雅的写法：值拷贝语义天然防止外部通过引用意外修改快照，且无需 Property 样板代码。这是三个"传统已地道"模式中最早引入强类型的，但同样是表达/质量层面的提升，而非对不地道代码的修复——故仍归为"传统已地道"。
 
 ---
