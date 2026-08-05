@@ -1,2 +1,3 @@
 run_log.txt
 debug_*.py
+__pycache__
