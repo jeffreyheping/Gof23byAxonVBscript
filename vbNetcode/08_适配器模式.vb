@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -6,10 +6,10 @@ Imports System.Collections
 Imports System.Linq
 Module Ch08Module
     Public Interface IPrinter
-        Function Print(doc As Document)
+        Function Print(doc As Document) As Object
     End Interface
     Public Class OldPrinter
-        Public Function OldPrint(s As String)
+        Public Function OldPrint(s As String) As Object
             Console.WriteLine("【旧打印机】" & s)
         End Function
     End Class
@@ -27,7 +27,7 @@ Module Ch08Module
         End Sub
 
         ' Implements IPrinter.Print，编译器强制签名一致
-        Public Function Print(doc As Document) Implements IPrinter.Print
+        Public Function Print(doc As Document) As Object Implements IPrinter.Print
             m_OldPrinter.OldPrint(doc.Content)
         End Function
     End Class

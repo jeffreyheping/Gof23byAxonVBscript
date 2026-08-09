@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -6,14 +6,14 @@ Imports System.Collections
 Imports System.Linq
 Module Ch18Module
     Public Interface ICommand
-        Function Execute()
+        Function Execute() As Object
     End Interface
     Public Class Light
-        Public Function TurnOn()
+        Public Function TurnOn() As Object
             Console.WriteLine("灯已打开")
         End Function
 
-        Public Function TurnOff()
+        Public Function TurnOff() As Object
             Console.WriteLine("灯已关闭")
         End Function
     End Class
@@ -26,7 +26,7 @@ Module Ch18Module
             m_Light = light
         End Sub
 
-        Public Function Execute() Implements ICommand.Execute
+        Public Function Execute() As Object Implements ICommand.Execute
             m_Light.TurnOn()
         End Function
     End Class
@@ -39,18 +39,18 @@ Module Ch18Module
             m_Light = light
         End Sub
 
-        Public Function Execute() Implements ICommand.Execute
+        Public Function Execute() As Object Implements ICommand.Execute
             m_Light.TurnOff()
         End Function
     End Class
     Public Class RemoteControl
         Private m_Command As ICommand
 
-        Public Function SetCommand(cmd As ICommand)
+        Public Function SetCommand(cmd As ICommand) As Object
             m_Command = cmd
         End Function
 
-        Public Function PressButton()
+        Public Function PressButton() As Object
             m_Command.Execute()
         End Function
     End Class

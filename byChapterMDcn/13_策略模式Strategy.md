@@ -219,7 +219,7 @@ Public Class QuickSort
         Return a
     End Function
 
-    Private Function QuickSortHelper(a As Integer(), lo As Integer, hi As Integer)
+    Private Function QuickSortHelper(a As Integer(), lo As Integer, hi As Integer) As Object
         If lo < hi Then
             Dim pivot As Integer = a(hi)
             Dim i As Integer = lo
@@ -245,7 +245,7 @@ End Class
 Public Class Sorter
     Private m_Strategy As SortStrategy
 
-    Public Function SetStrategy(strategy As SortStrategy)
+    Public Function SetStrategy(strategy As SortStrategy) As Object
         m_Strategy = strategy
     End Function
 

@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -6,10 +6,10 @@ Imports System.Collections
 Imports System.Linq
 Module Ch03Module
     Public MustInherit Class Button
-        Public MustOverride Function Paint()
+        Public MustOverride Function Paint() As Object
     End Class
     Public MustInherit Class Checkbox
-        Public MustOverride Function Paint()
+        Public MustOverride Function Paint() As Object
     End Class
     Public MustInherit Class GUIFactory
         Public MustOverride Function CreateButton() As Button
@@ -17,25 +17,25 @@ Module Ch03Module
     End Class
     Public Class WinButton
         Inherits Button
-        Public Overrides Function Paint()
+        Public Overrides Function Paint() As Object
             Console.WriteLine("绘制 Windows 风格按钮")
         End Function
     End Class
     Public Class WinCheckbox
         Inherits Checkbox
-        Public Overrides Function Paint()
+        Public Overrides Function Paint() As Object
             Console.WriteLine("绘制 Windows 风格复选框")
         End Function
     End Class
     Public Class MacButton
         Inherits Button
-        Public Overrides Function Paint()
+        Public Overrides Function Paint() As Object
             Console.WriteLine("绘制 Mac 风格按钮")
         End Function
     End Class
     Public Class MacCheckbox
         Inherits Checkbox
-        Public Overrides Function Paint()
+        Public Overrides Function Paint() As Object
             Console.WriteLine("绘制 Mac 风格复选框")
         End Function
     End Class

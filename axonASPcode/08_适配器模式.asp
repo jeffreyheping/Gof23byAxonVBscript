@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 目标接口
 Class IPrinter
     Public Function Print(doc As Document)

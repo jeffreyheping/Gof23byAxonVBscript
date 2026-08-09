@@ -1,3 +1,4 @@
+Option Explicit
 Dim Response: Set Response = New ResponseStub
 ' -- inject: ResponseStub class below user code --
 ' 简历类：包含姓名、年龄、技能数组

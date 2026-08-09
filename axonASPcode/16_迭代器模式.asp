@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 自定义集合：内置 Collection + [DispId(-4)] 转发
 Class MyCollection
     Private m_Items

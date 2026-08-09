@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 元素：点
 Class Dot
     Public x, y

@@ -1,3 +1,4 @@
+Option Explicit
 Dim Response: Set Response = New ResponseStub
 ' -- inject: ResponseStub class below user code --
 ' ===== Windows 风格产品 =====

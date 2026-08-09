@@ -1,3 +1,4 @@
+Option Explicit
 Dim Response: Set Response = New ResponseStub
 ' -- inject: ResponseStub class below user code --
 ' 产品类：狗
@@ -35,7 +36,7 @@ Class AnimalFactory
 End Class
 
 ' 演示：通过工厂创建对象，不直接 New
-Dim factory
+Dim factory, myPet
 Set factory = New AnimalFactory
 Set myPet = factory.CreateAnimal("dog")
 myPet.Speak()   ' 汪汪

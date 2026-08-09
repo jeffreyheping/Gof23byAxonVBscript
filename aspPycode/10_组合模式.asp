@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 叶子节点：树形结构的最末端
 Class Leaf
     Public Name

@@ -1,3 +1,4 @@
+Option Explicit
 Dim Response: Set Response = New ResponseStub
 ' -- inject: ResponseStub class below user code --
 ' 上下文：保存变量名→值的映射

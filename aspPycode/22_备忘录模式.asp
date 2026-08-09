@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 备忘录：保存编辑器状态（通过 Property 封装，模拟访问控制）
 Class EditorMemento
     Private m_Content

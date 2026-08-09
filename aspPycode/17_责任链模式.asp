@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 日志处理器：形成责任链
 Class Logger
     Public Name

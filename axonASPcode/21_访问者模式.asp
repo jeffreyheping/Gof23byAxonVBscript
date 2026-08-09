@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 访问者接口
 Class IVisitor
     Public Function VisitDot(dot As Dot)

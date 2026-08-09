@@ -156,7 +156,7 @@ Public Class MyCollection(Of T)
     Private ReadOnly m_Items As New List(Of T)()
 
     ' 添加元素
-    Public Function Add(item As T)
+    Public Function Add(item As T) As Object
         m_Items.Add(item)
     End Function
 

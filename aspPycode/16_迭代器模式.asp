@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 集合类：内部用数组存储数据
 Class MyCollection
     Private m_Items()   ' 内部数组

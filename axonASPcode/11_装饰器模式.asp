@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 咖啡接口
 Class ICoffee
     Public Function Cost As Integer

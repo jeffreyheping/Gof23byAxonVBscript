@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 接收者：灯
 Class Light
     Public Function TurnOn

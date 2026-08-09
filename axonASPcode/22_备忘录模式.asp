@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 备忘录：保存编辑器状态（UDT 值类型，自动拷贝语义）
 Type EditorMemento
 

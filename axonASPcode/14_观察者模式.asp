@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 被观察者：声明事件
 Class NewsAgency
     Event OnNews(news As String)

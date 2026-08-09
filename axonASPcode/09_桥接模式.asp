@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 实现层接口
 Class IRenderer
     Public Function RenderCircle(radius As Integer)

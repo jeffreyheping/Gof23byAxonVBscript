@@ -176,7 +176,7 @@ VB.NET 拥有 `MustInherit`（抽象基类）+ `MustOverride`（抽象方法）+
 Public Class Context
     Private ReadOnly m_Vars As New Dictionary(Of String, Integer)()
 
-    Public Function SetVar(name As String, value As Integer)
+    Public Function SetVar(name As String, value As Integer) As Object
         m_Vars(name) = value
     End Function
 

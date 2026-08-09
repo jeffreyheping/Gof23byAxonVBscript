@@ -159,19 +159,19 @@ VB.NET 用 `Sub`/`Function` 替代 VBScript 的统一 `Function`，构造函数�
 ```vbnet
 ' ① 子系统：普通 Class，与 Axon 版一一对应
 Public Class CPU
-    Public Function Freeze()
+    Public Function Freeze() As Object
         Console.WriteLine("CPU 冻结")
     End Function
-    Public Function Jump(position As Long)
+    Public Function Jump(position As Long) As Object
         Console.WriteLine("CPU 跳转到 " & position)
     End Function
-    Public Function Execute()
+    Public Function Execute() As Object
         Console.WriteLine("CPU 执行")
     End Function
 End Class
 
 Public Class Memory
-    Public Function Load(position As Long, data As String)
+    Public Function Load(position As Long, data As String) As Object
         Console.WriteLine("内存加载 " & data & " 到 " & position)
     End Function
 End Class
@@ -196,7 +196,7 @@ Public Class ComputerFacade
     End Sub
 
     ' 一键开机：内部按顺序调用各子系统
-    Public Function Start()
+    Public Function Start() As Object
         m_CPU.Freeze()
         Dim bootData As String = m_HD.Read(0)
         m_Mem.Load(0, bootData)

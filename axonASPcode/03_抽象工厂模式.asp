@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 产品接口
 Class IButton
     Public Function Paint

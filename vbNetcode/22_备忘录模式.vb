@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -13,7 +13,7 @@ Module Ch22Module
         Private m_Content As String = ""
         Private m_CursorPos As Integer = 0
 
-        Public Function Write(text As String)
+        Public Function Write(text As String) As Object
             m_Content &= text
 
             m_CursorPos = m_Content.Length
@@ -28,7 +28,7 @@ Module Ch22Module
         End Function
 
         ' 从备忘录恢复状态（Structure 值拷贝传入，不修改原快照）
-        Public Function RestoreState(memento As EditorMemento)
+        Public Function RestoreState(memento As EditorMemento) As Object
             m_Content = memento.Content
             m_CursorPos = memento.CursorPos
         End Function

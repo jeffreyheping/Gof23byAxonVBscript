@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 日志级别枚举
 Enum LogLevel
     Debug = 0

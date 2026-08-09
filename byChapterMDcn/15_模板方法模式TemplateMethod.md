@@ -175,7 +175,7 @@ VB.NET 拥有 `MustInherit`（抽象类）+ `MustOverride`（抽象方法）+ `O
 ' ① 抽象基类：MustInherit 禁止直接 New，定义算法骨架
 Public MustInherit Class DataMiner
     ' ② 模板方法（骨架）：调用顺序固定，子类无需也无法改流程
-    Public Function MineData(filePath As String)
+    Public Function MineData(filePath As String) As Object
         Load(filePath)              ' 固定步骤1：加载
         Parse(filePath)             ' 可变步骤：解析（子类必须实现）
         Analyze()                   ' 固定步骤2：分析
@@ -183,27 +183,27 @@ Public MustInherit Class DataMiner
     End Function
 
     ' 固定步骤：Private 子类不可见，彻底防止被覆盖
-    Private Function Load(filePath As String)
+    Private Function Load(filePath As String) As Object
         Console.WriteLine($"加载文件：{filePath}")
     End Function
 
-    Private Function Analyze()
+    Private Function Analyze() As Object
         Console.WriteLine("分析数据")
     End Function
 
-    Private Function SendReport()
+    Private Function SendReport() As Object
         Console.WriteLine("发送报告")
     End Function
 
     ' ③ 可变步骤：MustOverride 强制所有子类必须实现，漏写直接编译报错
-    Public MustOverride Function Parse(filePath As String)
+    Public MustOverride Function Parse(filePath As String) As Object
 End Class
 
 ' ④ 具体子类1：PDF 解析器
 Public Class PDFMiner
     Inherits DataMiner
 
-    Public Overrides Function Parse(filePath As String)
+    Public Overrides Function Parse(filePath As String) As Object
         Console.WriteLine("【解析 PDF】")
     End Function
 End Class
@@ -212,7 +212,7 @@ End Class
 Public Class CSVMiner
     Inherits DataMiner
 
-    Public Overrides Function Parse(filePath As String)
+    Public Overrides Function Parse(filePath As String) As Object
         Console.WriteLine("【解析 CSV】")
     End Function
 End Class

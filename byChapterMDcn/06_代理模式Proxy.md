@@ -134,8 +134,8 @@ VB.NET 用 `MustInherit`/`Inherits`/`Overrides` 把 Axon 版的接口升级为�
 ```vbnet
 ' ① Subject 抽象基类（替代 Axon 版的 IImage 接口）
 Public MustInherit Class Image
-    Public MustOverride Function Init(filename As String)
-    Public MustOverride Function Display()
+    Public MustOverride Function Init(filename As String) As Object
+    Public MustOverride Function Display() As Object
 End Class
 
 ' ② RealSubject：真实对象
@@ -144,12 +144,12 @@ Public Class RealImage
 
     Private m_Filename As String
 
-    Public Overrides Function Init(filename As String)
+    Public Overrides Function Init(filename As String) As Object
         m_Filename = filename
         Console.WriteLine("【加载大图】" & filename)
     End Function
 
-    Public Overrides Function Display()
+    Public Overrides Function Display() As Object
         Console.WriteLine("显示图片：" & m_Filename)
     End Function
 End Class
@@ -161,11 +161,11 @@ Public Class ProxyImage
     Private m_Filename As String
     Private m_RealImage As Image   ' 基类引用，初始为 Nothing
 
-    Public Overrides Function Init(filename As String)
+    Public Overrides Function Init(filename As String) As Object
         m_Filename = filename
     End Function
 
-    Public Overrides Function Display()
+    Public Overrides Function Display() As Object
         If m_RealImage Is Nothing Then
             m_RealImage = New RealImage()
             m_RealImage.Init(m_Filename)

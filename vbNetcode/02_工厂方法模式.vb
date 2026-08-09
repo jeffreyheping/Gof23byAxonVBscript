@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -6,20 +6,20 @@ Imports System.Collections
 Imports System.Linq
 Module Ch02Module
     Public MustInherit Class Animal
-        Public MustOverride Function Speak()
+        Public MustOverride Function Speak() As Object
     End Class
     Public MustInherit Class AnimalFactory
         Public MustOverride Function CreateAnimal() As Animal
     End Class
     Public Class Dog
         Inherits Animal
-        Public Overrides Function Speak()
+        Public Overrides Function Speak() As Object
             Console.WriteLine("汪汪")
         End Function
     End Class
     Public Class Cat
         Inherits Animal
-        Public Overrides Function Speak()
+        Public Overrides Function Speak() As Object
             Console.WriteLine("喵喵")
         End Function
     End Class

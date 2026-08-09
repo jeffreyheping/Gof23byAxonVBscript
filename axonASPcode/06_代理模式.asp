@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 图像接口
 Class IImage
     Public Function Init(filename As String)

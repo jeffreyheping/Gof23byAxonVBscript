@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 简历类：包含姓名、年龄、技能数组
 Class MyResume
     Public Name, Age, Skills

@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 产品类：电脑
 Class Computer
     Public CPU, RAM, Disk

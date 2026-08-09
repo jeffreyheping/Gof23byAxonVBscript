@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -6,20 +6,20 @@ Imports System.Collections
 Imports System.Linq
 Module Ch06Module
     Public MustInherit Class Image
-        Public MustOverride Function Init(filename As String)
-        Public MustOverride Function Display()
+        Public MustOverride Function Init(filename As String) As Object
+        Public MustOverride Function Display() As Object
     End Class
     Public Class RealImage
         Inherits Image
 
         Private m_Filename As String
 
-        Public Overrides Function Init(filename As String)
+        Public Overrides Function Init(filename As String) As Object
             m_Filename = filename
             Console.WriteLine("【加载大图】" & filename)
         End Function
 
-        Public Overrides Function Display()
+        Public Overrides Function Display() As Object
             Console.WriteLine("显示图片：" & m_Filename)
         End Function
     End Class
@@ -29,11 +29,11 @@ Module Ch06Module
         Private m_Filename As String
         Private m_RealImage As Image   ' 基类引用，初始为 Nothing
 
-        Public Overrides Function Init(filename As String)
+        Public Overrides Function Init(filename As String) As Object
             m_Filename = filename
         End Function
 
-        Public Overrides Function Display()
+        Public Overrides Function Display() As Object
             If m_RealImage Is Nothing Then
                 m_RealImage = New RealImage()
                 m_RealImage.Init(m_Filename)

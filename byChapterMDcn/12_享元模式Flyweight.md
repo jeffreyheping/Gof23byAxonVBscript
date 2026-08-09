@@ -134,7 +134,7 @@ Public Class TreeType
     End Sub
 
     ' 在指定坐标绘制树（x, y 是外部状态，由调用方传入）
-    Public Function Draw(x As Long, y As Long)
+    Public Function Draw(x As Long, y As Long) As Object
         Console.WriteLine($"在 ({x},{y}) 绘制 {Color}{Name}")
     End Function
 End Class

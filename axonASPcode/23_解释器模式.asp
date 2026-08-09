@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 表达式接口
 Class IExpression
     Public Function Interpret(context As Context) As Integer

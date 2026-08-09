@@ -299,7 +299,7 @@ def _vbnet_wrap_module_and_main(code: str, module_name: str) -> str:
     # 注入的 Option/Imports（放在 Module 声明之后、第一行之前，无缩进或 4 空格缩进都行；
     # 为兼容 vbc /langversion 默认，这里保持缩进 4 空格，但要放在类型定义之前）
     injected_header_lines = [
-        "Option Strict Off",
+        "Option Strict On",
         "Option Explicit On",
         "Imports System",
         "Imports System.Collections.Generic",
@@ -461,13 +461,17 @@ def save(items):
                 content = _vbnet_wrap_module_and_main(content, module_name)
             data = content.encode("utf-8-sig")
         elif item["type"] == "AxonASP":
-            # AxonASP 没 <% %> 就包一层
+            # AxonASP 没 <% %> 就包一层，注入 Option Explicit（VBScript 语法：不带 On）
             if "<%" not in content:
-                content = "<%\n" + content + "\n%>"
+                content = "<%\nOption Explicit\n" + content + "\n%>"
+            else:
+                # 已有 <% %>，在开头的 <% 后面紧跟 Option Explicit
+                content = content.replace("<%", "<%\nOption Explicit\n", 1)
             data = content.encode("utf-8")
         else:
-            # ClassicASP: 注入 ResponseStub，GBK 编码
+            # ClassicASP: 注入 Option Explicit + ResponseStub，GBK 编码
             content = (
+                "Option Explicit\n"
                 "Dim Response: Set Response = New ResponseStub\n"
                 "' -- inject: ResponseStub class below user code --\n"
                 + content + "\n\n"
@@ -484,11 +488,13 @@ def save(items):
         saved.append({**item, "path": path})
         print(f"  {item['type']:10s} | ch{item['chapter']:02d} | {item['filename']}")
 
-        # ASPPY: 用传统版代码（不注入 ResponseStub），包裹 <% %>，UTF-8 编码
+        # ASPPY: 用传统版代码（不注入 ResponseStub），包裹 <% %>，UTF-8 编码；注入 Option Explicit（VBScript 语法不带 On）
         if item["type"] == "ClassicASP":
             asppy_content = item["content"]
             if "<%" not in asppy_content:
-                asppy_content = "<%\n" + asppy_content + "\n%>"
+                asppy_content = "<%\nOption Explicit\n" + asppy_content + "\n%>"
+            else:
+                asppy_content = asppy_content.replace("<%", "<%\nOption Explicit\n", 1)
             asppy_path = os.path.join(ASPPY_DIR, item["filename"].replace(".vbs", ".asp"))
             with open(asppy_path, "wb") as f:
                 f.write(asppy_content.encode("utf-8"))

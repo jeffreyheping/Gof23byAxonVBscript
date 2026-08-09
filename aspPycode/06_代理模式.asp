@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 真实对象：加载并显示大图
 Class RealImage
     Private m_Filename

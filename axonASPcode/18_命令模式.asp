@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 命令接口
 Class ICommand
     Public Function Execute

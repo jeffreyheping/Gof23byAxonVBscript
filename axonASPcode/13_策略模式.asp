@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 策略接口
 Class ISortStrategy
     Public Function Sort(arr) As Variant

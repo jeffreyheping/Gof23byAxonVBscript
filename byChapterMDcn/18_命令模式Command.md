@@ -183,16 +183,16 @@ VB.NET 拥有 `Interface` 接口、`Implements` 显式实现、带参构造函�
 ```vbnet
 ' 命令接口
 Public Interface ICommand
-    Function Execute()
+    Function Execute() As Object
 End Interface
 
 ' 接收者：灯
 Public Class Light
-    Public Function TurnOn()
+    Public Function TurnOn() As Object
         Console.WriteLine("灯已打开")
     End Function
 
-    Public Function TurnOff()
+    Public Function TurnOff() As Object
         Console.WriteLine("灯已关闭")
     End Function
 End Class
@@ -207,7 +207,7 @@ Public Class LightOnCommand
         m_Light = light
     End Sub
 
-    Public Function Execute() Implements ICommand.Execute
+    Public Function Execute() As Object Implements ICommand.Execute
         m_Light.TurnOn()
     End Function
 End Class
@@ -222,7 +222,7 @@ Public Class LightOffCommand
         m_Light = light
     End Sub
 
-    Public Function Execute() Implements ICommand.Execute
+    Public Function Execute() As Object Implements ICommand.Execute
         m_Light.TurnOff()
     End Function
 End Class
@@ -231,11 +231,11 @@ End Class
 Public Class RemoteControl
     Private m_Command As ICommand
 
-    Public Function SetCommand(cmd As ICommand)
+    Public Function SetCommand(cmd As ICommand) As Object
         m_Command = cmd
     End Function
 
-    Public Function PressButton()
+    Public Function PressButton() As Object
         m_Command.Execute()
     End Function
 End Class

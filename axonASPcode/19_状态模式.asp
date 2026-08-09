@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 状态接口：行为 + 切换
 Class IState
     Public Function Handle

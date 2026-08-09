@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 基础组件：普通咖啡
 Class SimpleCoffee
     ' 返回价格

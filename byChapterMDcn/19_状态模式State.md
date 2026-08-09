@@ -173,7 +173,7 @@ VB.NET 拥有 `MustInherit`（抽象基类）+ `MustOverride`（抽象方法）+
 ```vbnet
 ' 抽象状态基类：MustInherit 禁止直接实例化，MustOverride 强制实现双契约
 Public MustInherit Class StateBase
-    Public MustOverride Function Handle()
+    Public MustOverride Function Handle() As Object
     Public MustOverride Function NextState() As StateBase
 End Class
 
@@ -181,7 +181,7 @@ End Class
 Public Class RedState
     Inherits StateBase
 
-    Public Overrides Function Handle()
+    Public Overrides Function Handle() As Object
         Console.WriteLine("红灯：停止")
     End Function
 
@@ -194,7 +194,7 @@ End Class
 Public Class GreenState
     Inherits StateBase
 
-    Public Overrides Function Handle()
+    Public Overrides Function Handle() As Object
         Console.WriteLine("绿灯：通行")
     End Function
 
@@ -207,7 +207,7 @@ End Class
 Public Class YellowState
     Inherits StateBase
 
-    Public Overrides Function Handle()
+    Public Overrides Function Handle() As Object
         Console.WriteLine("黄灯：注意")
     End Function
 
@@ -224,11 +224,11 @@ Public Class TrafficLight
         m_State = New RedState()
     End Sub
 
-    Public Function Change()
+    Public Function Change() As Object
         m_State = m_State.NextState()
     End Function
 
-    Public Function Operate()
+    Public Function Operate() As Object
         m_State.Handle()
     End Function
 End Class

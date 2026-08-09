@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 组件接口
 Class IComponent
     Public Function Operation(indent As String)

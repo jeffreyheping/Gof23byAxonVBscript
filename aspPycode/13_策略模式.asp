@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 具体策略：冒泡排序
 Class BubbleSort
     ' 返回排序后数组的副本（原数组不被修改）

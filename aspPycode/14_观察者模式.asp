@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 观察者：报纸
 Class Newspaper
     Public Name

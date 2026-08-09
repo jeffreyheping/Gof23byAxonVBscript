@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 克隆接口
 Class ICloneable
     Public Function Clone As ICloneable

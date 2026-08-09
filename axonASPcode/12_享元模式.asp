@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 享元对象：树的固有属性（名称、颜色），可被多棵树共享
 Class TreeType
     Public Name As String

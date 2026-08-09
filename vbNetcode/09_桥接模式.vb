@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -6,17 +6,17 @@ Imports System.Collections
 Imports System.Linq
 Module Ch09Module
     Public Interface IRenderer
-        Function RenderCircle(radius As Integer)
+        Function RenderCircle(radius As Integer) As Object
     End Interface
     Public Class VectorRenderer
         Implements IRenderer
-        Public Function RenderCircle(radius As Integer) Implements IRenderer.RenderCircle
+        Public Function RenderCircle(radius As Integer) As Object Implements IRenderer.RenderCircle
             Console.WriteLine("矢量引擎绘制半径" & radius & "的圆")
         End Function
     End Class
     Public Class RasterRenderer
         Implements IRenderer
-        Public Function RenderCircle(radius As Integer) Implements IRenderer.RenderCircle
+        Public Function RenderCircle(radius As Integer) As Object Implements IRenderer.RenderCircle
             Console.WriteLine("光栅引擎绘制半径" & radius & "的圆")
         End Function
     End Class
@@ -27,7 +27,7 @@ Module Ch09Module
             m_Renderer = renderer
         End Sub
 
-        Public MustOverride Function Draw()
+        Public MustOverride Function Draw() As Object
     End Class
     Public Class Circle
         Inherits Shape
@@ -39,7 +39,7 @@ Module Ch09Module
             m_Radius = radius
         End Sub
 
-        Public Overrides Function Draw()
+        Public Overrides Function Draw() As Object
             m_Renderer.RenderCircle(m_Radius)
         End Function
     End Class

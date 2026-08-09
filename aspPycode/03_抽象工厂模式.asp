@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' ===== Windows 风格产品 =====
 Class WinButton
     ' 绘制 Windows 风格按钮

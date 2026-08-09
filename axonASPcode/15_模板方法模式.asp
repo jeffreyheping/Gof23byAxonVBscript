@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 提取器接口（可变步骤）
 Class IExtractor
     Public Function Extract(data As String) As String

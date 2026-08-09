@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 用户类：通过中介发送和接收消息
 Class User
     Public Name

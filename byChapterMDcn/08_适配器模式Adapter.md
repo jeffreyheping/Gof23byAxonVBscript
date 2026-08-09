@@ -118,12 +118,12 @@ VB.NET 拥有 `Interface` + `Implements` 完整语法，对象适配器写法与
 ```vbnet
 ' ① 目标接口：新系统期望的契约
 Public Interface IPrinter
-    Function Print(doc As Document)
+    Function Print(doc As Document) As Object
 End Interface
 
 ' ② 适配者（旧类）：接口不兼容，只有 OldPrint
 Public Class OldPrinter
-    Public Function OldPrint(s As String)
+    Public Function OldPrint(s As String) As Object
         Console.WriteLine("【旧打印机】" & s)
     End Function
 End Class
@@ -145,7 +145,7 @@ Public Class PrinterAdapter
     End Sub
 
     ' Implements IPrinter.Print，编译器强制签名一致
-    Public Function Print(doc As Document) Implements IPrinter.Print
+    Public Function Print(doc As Document) As Object Implements IPrinter.Print
         m_OldPrinter.OldPrint(doc.Content)
     End Function
 End Class

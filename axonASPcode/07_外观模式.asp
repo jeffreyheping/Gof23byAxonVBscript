@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 子系统：CPU
 Class CPU
     ' 冻结当前状态

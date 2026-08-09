@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 旧类：只有 OldPrint 方法，接收字符串
 Class OldPrinter
     ' 旧接口：直接打印字符串

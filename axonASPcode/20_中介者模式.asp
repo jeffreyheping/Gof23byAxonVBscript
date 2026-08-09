@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 中介者接口（契约声明）
 Class IMediator
     Public Function SendMessage(msg As String, fromUser As User)

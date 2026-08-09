@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 脚本级变量：全局唯一的实例引用
 Dim gInstance
 Set gInstance = Nothing

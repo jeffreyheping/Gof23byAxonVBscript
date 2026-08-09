@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 数据挖掘器：定义算法骨架
 Class DataMiner
     ' 模板方法：固定流程，parser 参数提供可变步骤

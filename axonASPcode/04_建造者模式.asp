@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 产品
 Class Computer
     Public CPU As String, RAM As String, Disk As String

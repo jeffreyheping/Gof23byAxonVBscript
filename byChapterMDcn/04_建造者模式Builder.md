@@ -174,7 +174,7 @@ Public Class Computer
     Public Property RAM As String
     Public Property Disk As String
 
-    Public Function ShowConfig()
+    Public Function ShowConfig() As Object
         Console.WriteLine($"配置：{CPU} / {RAM} / {Disk}")
     End Function
 End Class

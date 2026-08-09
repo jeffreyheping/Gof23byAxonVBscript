@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -11,7 +11,7 @@ Module Ch16Module
         Private ReadOnly m_Items As New List(Of T)()
 
         ' 添加元素
-        Public Function Add(item As T)
+        Public Function Add(item As T) As Object
             m_Items.Add(item)
         End Function
 

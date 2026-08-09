@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 状态：红灯
 Class RedState
     ' 当前状态的行为

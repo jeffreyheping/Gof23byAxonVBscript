@@ -185,13 +185,13 @@ End Enum
 Public MustInherit Class HandlerBase
     Protected m_Next As HandlerBase
 
-    ' SetNext 是 Sub，与 Axon 版一致（不返回 Me，不支持链式构建）
-    Public Function SetNext(nextHandler As HandlerBase)
+    ' SetNext 是 Function，与 Axon 版一致（不返回 Me，不支持链式构建）
+    Public Function SetNext(nextHandler As HandlerBase) As Object
         m_Next = nextHandler
     End Function
 
     ' 模板方法骨架：处理当前节点 → 若有下一个则继续转发
-    Public Function Log(msg As String, level As LogLevel)
+    Public Function Log(msg As String, level As LogLevel) As Object
         If ShouldHandle(level) Then
             Console.WriteLine($"【{Name}】{msg}")
         End If

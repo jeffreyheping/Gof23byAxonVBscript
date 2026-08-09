@@ -1,4 +1,5 @@
 <%
+Option Explicit
 ' 上下文：保存变量名→值的映射
 Class Context
     Private m_Vars   ' Dictionary

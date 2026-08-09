@@ -1,4 +1,4 @@
-﻿Option Strict Off
+﻿Option Strict On
 Option Explicit On
 Imports System
 Imports System.Collections.Generic
@@ -8,7 +8,7 @@ Module Ch23Module
     Public Class Context
         Private ReadOnly m_Vars As New Dictionary(Of String, Integer)()
 
-        Public Function SetVar(name As String, value As Integer)
+        Public Function SetVar(name As String, value As Integer) As Object
             m_Vars(name) = value
         End Function
 

@@ -194,8 +194,8 @@ VB.NET 用 `MustInherit ComponentBase` 抽象基类统一 Leaf 与 Composite 的
 ' ① 组件接口：定义所有节点必须支持的契约
 Public Interface IComponent
     Property Name As String
-    Function Add(child As IComponent)
-    Function Operation(indent As String)
+    Function Add(child As IComponent) As Object
+    Function Operation(indent As String) As Object
 End Interface
 
 ' ② MustInherit 基类：Name 属性写一次，子类共享；默认 Add 空实现（叶子继承）
@@ -205,17 +205,17 @@ Public MustInherit Class ComponentBase
     Public Overridable Property Name As String Implements IComponent.Name
 
     ' 默认空实现：叶子节点继承此默认，组合节点重写
-    Public Overridable Function Add(child As IComponent) Implements IComponent.Add
+    Public Overridable Function Add(child As IComponent) As Object Implements IComponent.Add
     End Function
 
-    Public MustOverride Function Operation(indent As String) Implements IComponent.Operation
+    Public MustOverride Function Operation(indent As String) As Object Implements IComponent.Operation
 End Class
 
 ' ③ 叶子节点：仅重写 Operation，其余继承基类默认
 Public Class Leaf
     Inherits ComponentBase
 
-    Public Overrides Function Operation(indent As String)
+    Public Overrides Function Operation(indent As String) As Object
         Console.WriteLine(indent & "叶子：" & Name)
     End Function
 End Class
@@ -226,11 +226,11 @@ Public Class Composite
 
     Private ReadOnly m_Children As New List(Of IComponent)()
 
-    Public Overrides Function Add(child As IComponent)
+    Public Overrides Function Add(child As IComponent) As Object
         m_Children.Add(child)
     End Function
 
-    Public Overrides Function Operation(indent As String)
+    Public Overrides Function Operation(indent As String) As Object
         Console.WriteLine(indent & "组合：" & Name)
         For Each child In m_Children
             child.Operation(indent & "  ")

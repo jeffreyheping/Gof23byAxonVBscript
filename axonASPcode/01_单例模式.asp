@@ -1,4 +1,5 @@
 <%
+Option Explicit
 Class Singleton
     Private m_Data As String
 
