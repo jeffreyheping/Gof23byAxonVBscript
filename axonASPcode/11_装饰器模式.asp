@@ -57,18 +57,21 @@ End Class
 ' 演示：接口引用实现透明嵌套，层层包裹
 Dim coffee As ICoffee
 Set coffee = New SimpleCoffee
-Response.Write coffee.Description & " = " & coffee.Cost & "元"
+Response.Write(coffee.Description & " = " & coffee.Cost & "元")
+
 
 Dim milk As ICoffee
 Dim milkObj As MilkDecorator
 Set milkObj = New MilkDecorator
-milkObj.Init coffee              ' milk 包裹 coffee
+milkObj.Init(coffee)              ' milk 包裹 coffee
+
 Set milk = milkObj
 
 Dim sugar As ICoffee
 Dim sugarObj As SugarDecorator
 Set sugarObj = New SugarDecorator
-sugarObj.Init milk               ' sugar 包裹 milk
+sugarObj.Init(milk)               ' sugar 包裹 milk
+
 Set sugar = sugarObj
-Response.Write sugar.Description & " = " & sugar.Cost & "元"
+Response.Write(sugar.Description & " = " & sugar.Cost & "元")
 %>

@@ -8,7 +8,8 @@ End Class
 ' 旧类
 Class OldPrinter
     Public Function OldPrint(s As String)
-        Response.Write "【旧打印机】" & s
+        Response.Write("【旧打印机】" & s)
+
     End Function
 End Class
 
@@ -27,7 +28,8 @@ Class PrinterAdapter
     End Function
 
     Public Function IPrinter_Print(doc As Document)
-        m_OldPrinter.OldPrint doc.Content
+        m_OldPrinter.OldPrint(doc.Content)
+
     End Function
 End Class
 
@@ -38,9 +40,10 @@ doc.Content = "Hello World"
 
 Dim adapter As PrinterAdapter
 Set adapter = New PrinterAdapter
-adapter.Init New OldPrinter
+adapter.Init(New OldPrinter)
+
 
 Dim ip As IPrinter
 Set ip = adapter
-ip.Print doc
+ip.Print(doc)
 %>

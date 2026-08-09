@@ -15,7 +15,8 @@ End Class
 Class Dog
     Implements IAnimal
     Public Function IAnimal_Speak
-        Response.Write "汪汪"
+        Response.Write("汪汪")
+
     End Function
 End Class
 
@@ -23,7 +24,8 @@ End Class
 Class Cat
     Implements IAnimal
     Public Function IAnimal_Speak
-        Response.Write "喵喵"
+        Response.Write("喵喵")
+
     End Function
 End Class
 
@@ -48,5 +50,5 @@ Dim factory As IFactory
 Dim myPet As IAnimal
 Set factory = New DogFactory
 Set myPet = factory.CreateAnimal
-myPet.Speak   ' 汪汪
+myPet.Speak()   ' 汪汪
 %>

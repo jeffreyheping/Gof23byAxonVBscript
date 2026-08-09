@@ -19,7 +19,8 @@ Class Dot
     Public x As Integer, y As Integer
 
     Public Function IElement_Accept(visitor As IVisitor)
-        visitor.VisitDot Me
+        visitor.VisitDot(Me)
+
     End Function
 End Class
 
@@ -29,7 +30,8 @@ Class Circle
     Public x As Integer, y As Integer, radius As Integer
 
     Public Function IElement_Accept(visitor As IVisitor)
-        visitor.VisitCircle Me
+        visitor.VisitCircle(Me)
+
     End Function
 End Class
 
@@ -37,10 +39,12 @@ End Class
 Class DrawingVisitor
     Implements IVisitor
     Public Function IVisitor_VisitDot(dot As Dot)
-        Response.Write "绘制点：(" & dot.x & "," & dot.y & ")"
+        Response.Write("绘制点：(" & dot.x & "," & dot.y & ")")
+
     End Function
     Public Function IVisitor_VisitCircle(circle As Circle)
-        Response.Write "绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius
+        Response.Write("绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius)
+
     End Function
 End Class
 
@@ -61,6 +65,7 @@ Set c = cObj
 
 Dim drawer As IVisitor
 Set drawer = New DrawingVisitor
-d.Accept drawer
-c.Accept drawer
+d.Accept(drawer)
+
+c.Accept(drawer)
 %>

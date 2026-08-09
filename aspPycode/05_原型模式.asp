@@ -33,6 +33,7 @@ Set r2 = r1.Clone
 r2.Name = "李四"
 r2.Skills(0) = "JavaScript"
 
-Response.Write r1.Name & " " & r1.Skills(0)   ' 张三 VBScript
-Response.Write r2.Name & " " & r2.Skills(0)   ' 李四 JavaScript
+Response.Write(r1.Name & " " & r1.Skills(0))   ' 张三 VBScript
+
+Response.Write(r2.Name & " " & r2.Skills(0))   ' 李四 JavaScript
 %>

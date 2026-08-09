@@ -4,7 +4,8 @@ Dim Response: Set Response = New ResponseStub
 Class Dog
     ' ÈÃ¹·½ĞÒ»Éù
     Public Function Speak
-        Response.Write "ÍôÍô"
+        Response.Write("ÍôÍô")
+
     End Function
 End Class
 
@@ -12,7 +13,8 @@ End Class
 Class Cat
     ' ÈÃÃ¨½ĞÒ»Éù
     Public Function Speak
-        Response.Write "ß÷ß÷"
+        Response.Write("ß÷ß÷")
+
     End Function
 End Class
 
@@ -36,7 +38,7 @@ End Class
 Dim factory
 Set factory = New AnimalFactory
 Set myPet = factory.CreateAnimal("dog")
-myPet.Speak   ' ÍôÍô
+myPet.Speak()   ' ÍôÍô
 
 Class ResponseStub
     Public Sub Write(s)

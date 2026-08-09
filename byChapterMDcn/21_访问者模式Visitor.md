@@ -13,7 +13,8 @@ Class Dot
 
     ' 接受访问者，调用访问者的 VisitDot
     Public Function Accept(visitor)
-        visitor.VisitDot Me
+        visitor.VisitDot(Me)
+
     End Function
 End Class
 
@@ -23,7 +24,8 @@ Class Circle
 
     ' 接受访问者，调用访问者的 VisitCircle
     Public Function Accept(visitor)
-        visitor.VisitCircle Me
+        visitor.VisitCircle(Me)
+
     End Function
 End Class
 
@@ -31,11 +33,13 @@ End Class
 Class DrawingVisitor
     ' 访问点
     Public Function VisitDot(dot)
-        Response.Write "绘制点：(" & dot.x & "," & dot.y & ")"
+        Response.Write("绘制点：(" & dot.x & "," & dot.y & ")")
+
     End Function
     ' 访问圆
     Public Function VisitCircle(circle)
-        Response.Write "绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius
+        Response.Write("绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius)
+
     End Function
 End Class
 
@@ -50,8 +54,10 @@ c.y = 5
 c.radius = 10
 
 Set drawer = New DrawingVisitor
-d.Accept drawer
-c.Accept drawer
+d.Accept(drawer)
+
+c.Accept(drawer)
+
 ```
 
 **传统 VBScript 版妥协说明**：
@@ -60,7 +66,7 @@ c.Accept drawer
 
 ### Axon VBScript 版（支持 Implements）
 
-```vbscript
+```vba
 ' 访问者接口
 Class IVisitor
     Public Function VisitDot(dot As Dot)
@@ -81,7 +87,8 @@ Class Dot
     Public x As Integer, y As Integer
 
     Public Function IElement_Accept(visitor As IVisitor)
-        visitor.VisitDot Me
+        visitor.VisitDot(Me)
+
     End Function
 End Class
 
@@ -91,7 +98,8 @@ Class Circle
     Public x As Integer, y As Integer, radius As Integer
 
     Public Function IElement_Accept(visitor As IVisitor)
-        visitor.VisitCircle Me
+        visitor.VisitCircle(Me)
+
     End Function
 End Class
 
@@ -99,10 +107,12 @@ End Class
 Class DrawingVisitor
     Implements IVisitor
     Public Function IVisitor_VisitDot(dot As Dot)
-        Response.Write "绘制点：(" & dot.x & "," & dot.y & ")"
+        Response.Write("绘制点：(" & dot.x & "," & dot.y & ")")
+
     End Function
     Public Function IVisitor_VisitCircle(circle As Circle)
-        Response.Write "绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius
+        Response.Write("绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius)
+
     End Function
 End Class
 
@@ -123,10 +133,85 @@ Set c = cObj
 
 Dim drawer As IVisitor
 Set drawer = New DrawingVisitor
-d.Accept drawer
-c.Accept drawer
+d.Accept(drawer)
+
+c.Accept(drawer)
+
 ```
 
 **Axon VBScript 版妥协说明**：
-- `IElement`/`IVisitor` 接口约束了元素和访问者的契约。AxonASP 接口方法派发已修复，元素在 `IElement_Accept` 中可直接调用访问者的 `VisitDot`/`VisitCircle` 接口方法，演示中通过 `IElement` 类型变量调用 `Accept` 即自动路由，无需 `DoAccept` 辅助方法或完整限定名。剩余限制：缺失语法点：**方法重载或双分派**。Go 同样无方法重载——Go 用 **type switch**（`switch v := element.(type)`）实现访问者的双分派，无需为每种元素写单独的 `Visit` 方法。AxonASP 目前只能在 `Accept` 中显式调用 `VisitDot`/`VisitCircle` 分支，新增元素类型时需修改所有访问者。
+- 改善但残留：缺方法重载/双分派。`IElement`/`IVisitor` 接口约束了元素和访问者的契约。AxonASP 接口方法派发已修复，元素在 `IElement_Accept` 中可直接调用访问者的 `VisitDot`/`VisitCircle` 接口方法，演示中通过 `IElement` 类型变量调用 `Accept` 即自动路由，无需 `DoAccept` 辅助方法或完整限定名。剩余限制：缺失语法点——**方法重载/双分派**。经典访问者需要语言层面的双分派：`visitor.Visit(element)` 能根据 `element` 的运行时类型自动匹配到 `Visit(Dot)` 或 `Visit(Circle)` 的重载版本。AxonASP 无方法重载，必须在每个元素的 `Accept` 中手动分支调用 `visitor.VisitDot Me` / `visitor.VisitCircle Me`，新增元素类型时需修改所有 `IVisitor` 接口 + 所有实现接口的访问者类。
+
+### VB.NET 版（语法完备的对照基准）
+
+VB.NET 拥有方法重载（Overloads），访问者模式与 Axon 版同结构：保留 `IElement`/`IVisitor` 接口 + `Dot`/`Circle`/`DrawingVisitor`，仅用 `Visit(Dot)`/`Visit(Circle)` 重载统一 `Accept` 中的分派写法，不引入 dynamic/DLR 等额外机制。
+
+```vbnet
+' 元素接口
+Public Interface IElement
+    Function Accept(visitor As IVisitor)
+End Interface
+
+' 访问者接口：每个具体元素对应一个 Visit 重载
+Public Interface IVisitor
+    Function Visit(dot As Dot)
+    Function Visit(circle As Circle)
+End Interface
+
+' 具体元素：点
+Public Class Dot
+    Implements IElement
+    Public X As Integer, Y As Integer
+
+    ' visitor.Visit(Me) 中 Me 编译期类型为 Dot，方法重载自动匹配 IVisitor.Visit(Dot)
+    Public Function Accept(visitor As IVisitor) Implements IElement.Accept
+        visitor.Visit(Me)
+    End Function
+End Class
+
+' 具体元素：圆
+Public Class Circle
+    Implements IElement
+    Public X As Integer, Y As Integer, Radius As Integer
+
+    Public Function Accept(visitor As IVisitor) Implements IElement.Accept
+        visitor.Visit(Me)   ' 自动匹配 IVisitor.Visit(Circle)
+    End Function
+End Class
+
+' 具体访问者：绘图
+Public Class DrawingVisitor
+    Implements IVisitor
+
+    Public Function Visit(dot As Dot) Implements IVisitor.Visit
+        Console.WriteLine($"绘制点：({dot.X},{dot.Y})")
+    End Function
+
+    Public Function Visit(circle As Circle) Implements IVisitor.Visit
+        Console.WriteLine($"绘制圆：中心({circle.X},{circle.Y}) 半径{circle.Radius}")
+    End Function
+End Class
+
+' 演示
+Dim d As IElement = New Dot With {.X = 10, .Y = 20}
+Dim c As IElement = New Circle With {.X = 5, .Y = 5, .Radius = 10}
+Dim drawer As IVisitor = New DrawingVisitor()
+d.Accept(drawer)   ' 绘制点：(10,20)
+c.Accept(drawer)   ' 绘制圆：中心(5,5) 半径10
+```
+
+**VB.NET 版说明**：
+- **方法重载 = 统一的 `Visit(Me)` 分派**：Axon 版 `Accept` 里必须写死 `visitor.VisitDot Me` / `visitor.VisitCircle Me`，不同元素方法名不同；VB.NET 版所有元素 `Accept` 都写 `visitor.Visit(Me)`，编译器按 `Me` 类型自动匹配 `Visit(Dot)`/`Visit(Circle)` 重载。
+- **`Interface` 重载 + `Implements` 编译期强制**：`IVisitor` 接口内 `Visit(Dot)`/`Visit(Circle)` 重载声明，漏写 `Implements IVisitor.Visit` 直接报错；与 Axon 版同结构，仅方法名免去 `VisitDot`/`VisitCircle` 分支。
+- **对象初始化器一行赋值**：`New Dot With {.X = 10, .Y = 20}` 替代 Axon 版逐字段 `dObj.x = 10` 赋值。
+- **无需 `Set` 区分对象赋值**：`Dim d As IElement = New Dot()` 直接赋值给接口变量，前两版需 `Set d = dObj`。
+
+**三版对照**：
+
+| 维度 | 传统 VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Accept 分派 | 写死 `visitor.VisitDot`/`VisitCircle` | 写死 `visitor.VisitDot`/`VisitCircle` | 统一 `visitor.Visit(Me)`，重载匹配 |
+| 访问者契约 | 方法名约定 | `IVisitor`/`IElement` 接口 | `Interface` 重载 + `Implements` 编译期强制 |
+| 元素字段初始化 | 逐字段赋值 | 逐字段赋值 | 对象初始化器 `With {.X=10}` 一行 |
+| 对象赋值 | `Set d = New Dot` | `Set d = dObj` | 直接 `d = New Dot()` |
 ---

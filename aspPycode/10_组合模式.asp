@@ -4,7 +4,8 @@ Class Leaf
     Public Name
     ' 显示自身信息，indent 控制缩进层级
     Public Function Operation(indent)
-        Response.Write indent & "叶子：" & Name
+        Response.Write(indent & "叶子：" & Name)
+
     End Function
 End Class
 
@@ -12,6 +13,7 @@ End Class
 Class Composite
     Public Name
     Private m_Children()   ' 子节点数组
+
     Private m_Count        ' 当前子节点数
 
     ' 构造函数：初始化数组
@@ -31,7 +33,8 @@ Class Composite
 
     ' 显示自身信息，并递归调用所有子节点的 Operation
     Public Function Operation(indent)
-        Response.Write indent & "组合：" & Name
+        Response.Write(indent & "组合：" & Name)
+
         Dim i
         For i = 0 To m_Count - 1
             m_Children(i).Operation indent & "  "
@@ -54,10 +57,14 @@ leaf2.Name = "员工B"
 Set leaf3 = New Leaf
 leaf3.Name = "员工C"
 
-branch1.Add leaf1
-branch1.Add leaf2
-root.Add branch1
-root.Add leaf3
+branch1.Add(leaf1)
 
-root.Operation ""   ' 统一遍历整棵树
+branch1.Add(leaf2)
+
+root.Add(branch1)
+
+root.Add(leaf3)
+
+
+root.Operation("")   ' 统一遍历整棵树
 %>

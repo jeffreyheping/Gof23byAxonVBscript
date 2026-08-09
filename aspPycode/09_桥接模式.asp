@@ -5,7 +5,8 @@
 Class VectorRenderer
     ' 用矢量方式绘制圆
     Public Function RenderCircle(radius)
-        Response.Write "矢量引擎绘制半径" & radius & "的圆"
+        Response.Write("矢量引擎绘制半径" & radius & "的圆")
+
     End Function
 End Class
 
@@ -13,7 +14,8 @@ End Class
 Class RasterRenderer
     ' 用光栅方式绘制圆
     Public Function RenderCircle(radius)
-        Response.Write "光栅引擎绘制半径" & radius & "的圆"
+        Response.Write("光栅引擎绘制半径" & radius & "的圆")
+
     End Function
 End Class
 
@@ -31,7 +33,8 @@ Class Circle
 
     ' 绘制：委托给所持引擎
     Public Function Draw
-        m_Renderer.RenderCircle m_Radius
+        m_Renderer.RenderCircle(m_Radius)
+
     End Function
 End Class
 
@@ -39,9 +42,10 @@ End Class
 Dim c1, c2
 Set c1 = New Circle
 c1.Init 5, New VectorRenderer
-c1.Draw   ' 矢量引擎...
+c1.Draw()   ' 矢量引擎...
+
 
 Set c2 = New Circle
 c2.Init 5, New RasterRenderer
-c2.Draw   ' 光栅引擎...
+c2.Draw()   ' 光栅引擎...
 %>

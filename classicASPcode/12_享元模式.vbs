@@ -6,7 +6,8 @@ Class TreeType
 
     ' 在指定坐标绘制树
     Public Function Draw(x, y)
-        Response.Write "在 (" & x & "," & y & ") 绘制 " & Color & Name
+        Response.Write("在 (" & x & "," & y & ") 绘制 " & Color & Name)
+
     End Function
 End Class
 
@@ -44,7 +45,7 @@ Set oakType = factory.GetTreeType("橡树", "绿色")
 For i = 0 To 2
     oakType.Draw i, i * 2
 Next
-Response.Write "3 棵树，实际只有 1 个 TreeType 对象"
+Response.Write("3 棵树，实际只有 1 个 TreeType 对象")
 
 Class ResponseStub
     Public Sub Write(s)

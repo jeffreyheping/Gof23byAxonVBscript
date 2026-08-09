@@ -3,6 +3,7 @@ Dim Response: Set Response = New ResponseStub
 ' 集合类：内部用数组存储数据
 Class MyCollection
     Private m_Items()   ' 内部数组
+
     Private m_Count     ' 当前元素数量
 
     ' 构造函数：初始化数组
@@ -33,7 +34,8 @@ Class MyCollection
     ' 创建迭代器
     Public Function CreateIterator
         Set CreateIterator = New MyIterator
-        CreateIterator.Init Me
+        CreateIterator.Init(Me)
+
     End Function
 End Class
 
@@ -63,13 +65,17 @@ End Class
 ' 演示：用迭代器遍历集合，不暴露内部数组
 Dim coll, iter
 Set coll = New MyCollection
-coll.Add "苹果"
-coll.Add "香蕉"
-coll.Add "橙子"
+coll.Add("苹果")
+
+coll.Add("香蕉")
+
+coll.Add("橙子")
+
 
 Set iter = coll.CreateIterator
 Do While iter.HasNext
-    Response.Write iter.NextItem
+    Response.Write(iter.NextItem)
+
 Loop
 
 Class ResponseStub

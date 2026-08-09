@@ -77,11 +77,15 @@ Dim mySorter, data
 Set mySorter = New Sorter
 data = Array(5, 2, 8, 1, 9)
 
-mySorter.SetStrategy New BubbleSort
-Response.Write Join(mySorter.Sort(data), ",")
+mySorter.SetStrategy(New BubbleSort)
 
-mySorter.SetStrategy New QuickSort
-Response.Write Join(mySorter.Sort(data), ",")
+Response.Write(Join(mySorter.Sort(data), ","))
+
+
+mySorter.SetStrategy(New QuickSort)
+
+Response.Write(Join(mySorter.Sort(data), ","))
+
 ```
 
 **传统 VBScript 版妥协说明**：
@@ -90,7 +94,7 @@ Response.Write Join(mySorter.Sort(data), ",")
 
 ### Axon VBScript 版（支持 Implements）
 
-```vbscript
+```vba
 ' 策略接口
 Class ISortStrategy
     Public Function Sort(arr) As Variant
@@ -164,13 +168,113 @@ Dim sorter As Sorter, data As Variant
 Set sorter = New Sorter
 data = Array(5, 2, 8, 1, 9)
 
-sorter.SetStrategy New BubbleSort
-Response.Write Join(sorter.Sort(data), ",")
+sorter.SetStrategy(New BubbleSort)
 
-sorter.SetStrategy New QuickSort
-Response.Write Join(sorter.Sort(data), ",")
+Response.Write(Join(sorter.Sort(data), ","))
+
+
+sorter.SetStrategy(New QuickSort)
+
+Response.Write(Join(sorter.Sort(data), ","))
+
 ```
 
 **Axon VBScript 版妥协说明**：
-- `ISortStrategy` 接口保证了所有策略类都有 `Sort` 方法，调用方可以通过接口类型安全地切换策略。`Sorter` 持有 `ISortStrategy` 引用，直接调用 `m_Strategy.Sort` 即可自动路由到具体策略实现，无需完整限定名。残留限制：缺失语法点：**泛型**。`Sort` 的参数与返回值只能用无类型（Variant）数组，编译期无法约束数组元素类型。Go 在 1.18 引入泛型前同样如此——用 `interface{}` 传参，靠运行时类型断言。AxonASP 当前状态等同于 Go 1.17 及之前。
+- 此模式在 AxonASP 中实现较为自然，`ISortStrategy` 接口保证了所有策略类都有 `Sort` 方法，调用方可以通过接口类型安全地切换策略。`Sorter` 持有 `ISortStrategy` 引用，直接调用 `m_Strategy.Sort` 即可自动路由到具体策略实现，无需完整限定名。残留限制：缺失语法点：**代码复用机制（继承）**。经典策略模式如果需要给所有策略加公共逻辑（如性能计时、日志埋点），需要抽象基类 + 子类 `Overrides`，AxonASP 无继承，每个策略类需各自重复写公共代码。Go 同样无继承，用 struct embedding 解决——嵌入一个 `BaseStrategy` 结构体即自动获得公共方法。
+
+### VB.NET 版（语法完备的对照基准）
+
+VB.NET 拥有 `MustInherit`（抽象基类）+ `Overrides`（重写），可以写出教科书式的策略模式——抽象基类约束算法契约，子类 `Overrides` 重写具体算法。
+
+```vbnet
+' ① 抽象策略基类：MustInherit 禁止直接实例化，MustOverride 强制子类实现 Sort
+Public MustInherit Class SortStrategy
+    Public MustOverride Function Sort(arr As Integer()) As Integer()
+End Class
+
+' ② 具体策略：冒泡排序
+Public Class BubbleSort
+    Inherits SortStrategy
+    Public Overrides Function Sort(arr As Integer()) As Integer()
+        Dim a As Integer() = CType(arr.Clone(), Integer())
+        For i = 0 To a.Length - 1
+            For j = 0 To a.Length - 2 - i
+                If a(j) > a(j + 1) Then
+                    Dim tmp As Integer = a(j)
+                    a(j) = a(j + 1)
+                    a(j + 1) = tmp
+                End If
+            Next
+        Next
+        Return a
+    End Function
+End Class
+
+' ③ 具体策略：快速排序
+Public Class QuickSort
+    Inherits SortStrategy
+    Public Overrides Function Sort(arr As Integer()) As Integer()
+        Dim a As Integer() = CType(arr.Clone(), Integer())
+        QuickSortHelper(a, 0, a.Length - 1)
+        Return a
+    End Function
+
+    Private Function QuickSortHelper(a As Integer(), lo As Integer, hi As Integer)
+        If lo < hi Then
+            Dim pivot As Integer = a(hi)
+            Dim i As Integer = lo
+            For j = lo To hi - 1
+                If a(j) <= pivot Then
+                    Dim tmp As Integer = a(i)
+                    a(i) = a(j)
+                    a(j) = tmp
+                    i += 1
+
+                End If
+            Next
+            Dim tmp2 As Integer = a(i)
+            a(i) = a(hi)
+            a(hi) = tmp2
+            QuickSortHelper(a, lo, i - 1)
+            QuickSortHelper(a, i + 1, hi)
+        End If
+    End Function
+End Class
+
+' ④ 上下文：持有抽象基类引用，与 Axon 版一致使用 SetStrategy 切换策略
+Public Class Sorter
+    Private m_Strategy As SortStrategy
+
+    Public Function SetStrategy(strategy As SortStrategy)
+        m_Strategy = strategy
+    End Function
+
+    Public Function Sort(arr As Integer()) As Integer()
+        Return m_Strategy.Sort(arr)
+    End Function
+End Class
+
+' 演示：同一 Sorter，换策略就换算法（与 Axon 版调用方式一致）
+Dim sorter As New Sorter()
+Dim data As Integer() = {5, 2, 8, 1, 9}
+sorter.SetStrategy(New BubbleSort())
+Console.WriteLine(String.Join(",", sorter.Sort(data)))
+
+sorter.SetStrategy(New QuickSort())
+Console.WriteLine(String.Join(",", sorter.Sort(data)))
+```
+
+**VB.NET 版说明**：
+- **真正的抽象基类 + 继承复用**：`MustInherit Class SortStrategy` 禁止 `New SortStrategy()`，`MustOverride Sort` 强制所有子类必须实现——编译期检查，漏写直接报错。若后续要给所有策略加公共字段或方法，只需在基类加一次，子类自动继承。Axon 版只能用 `ISortStrategy` 接口约束方法存在，但无法在基类加公共逻辑供子类继承。
+- **强类型数组**：`Sort(arr As Integer()) As Integer()` 编译期约束数组元素类型，传字符串数组直接编译报错。Axon 版 `As Variant` 可以传任何东西，类型不匹配运行时才崩。
+- **无需 `Set` / `Let` 区分**：VB.NET 对象赋值直接用 `=`，不再需要记忆 `Set` 给对象、`Let` 给值类型这一历史包袱。
+
+**三版对照**：
+
+| 维度 | 传统 VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| 策略契约 | 方法名约定（易漏写） | `ISortStrategy` 接口约束 `Sort` | `MustInherit` + `MustOverride` 编译期强制 |
+| 代码复用 | 无（各策略平行类） | 无（各策略平行类，无继承） | 基类字段/方法自动传给所有子类 |
+| 类型安全 | 全 Variant，运行时报错 | 接口引用强类型，Sort 参数/返回值仍 Variant | `Integer()` 编译期约束元素类型 |
+| 对象赋值 | `Set a = New X` | `Set a = New X` | 直接 `a = New X()` |
 ---

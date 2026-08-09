@@ -8,10 +8,12 @@ End Class
 ' 接收者
 Class Light
     Public Function TurnOn
-        Response.Write "灯已打开"
+        Response.Write("灯已打开")
+
     End Function
     Public Function TurnOff
-        Response.Write "灯已关闭"
+        Response.Write("灯已关闭")
+
     End Function
 End Class
 
@@ -62,17 +64,21 @@ Set light = New Light
 
 Dim onCmd As LightOnCommand
 Set onCmd = New LightOnCommand
-onCmd.Init light
+onCmd.Init(light)
+
 
 Dim offCmd As LightOffCommand
 Set offCmd = New LightOffCommand
-offCmd.Init light
+offCmd.Init(light)
+
 
 Dim remote As RemoteControl
 Set remote = New RemoteControl
-remote.SetCommand onCmd
+remote.SetCommand(onCmd)
+
 remote.PressButton
 
-remote.SetCommand offCmd
+remote.SetCommand(offCmd)
+
 remote.PressButton
 %>

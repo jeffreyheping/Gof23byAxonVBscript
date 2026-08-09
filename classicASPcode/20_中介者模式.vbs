@@ -8,7 +8,8 @@ Class User
     ' 注册到中介
     Public Function Join(mediator)
         Set m_Mediator = mediator
-        mediator.Register Me
+        mediator.Register(Me)
+
     End Function
 
     ' 发送消息：交给中介转发
@@ -18,13 +19,15 @@ Class User
 
     ' 接收消息：显示收到内容
     Public Function Receive(msg, fromUser)
-        Response.Write Name & " 收到 " & fromUser.Name & " 的消息：" & msg
+        Response.Write(Name & " 收到 " & fromUser.Name & " 的消息：" & msg)
+
     End Function
 End Class
 
 ' 中介者：聊天室
 Class ChatRoom
     Private m_Users()   ' 在线用户数组
+
     Private m_Count     ' 当前用户数
 
     ' 构造函数：初始化数组
@@ -61,9 +64,11 @@ alice.Name = "Alice"
 Set bob = New User
 bob.Name = "Bob"
 
-alice.Join room
-bob.Join room
-alice.Send "大家好！"
+alice.Join(room)
+
+bob.Join(room)
+
+alice.Send("大家好！")
 
 Class ResponseStub
     Public Sub Write(s)

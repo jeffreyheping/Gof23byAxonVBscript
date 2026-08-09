@@ -72,9 +72,12 @@ Dim sorter As Sorter, data As Variant
 Set sorter = New Sorter
 data = Array(5, 2, 8, 1, 9)
 
-sorter.SetStrategy New BubbleSort
-Response.Write Join(sorter.Sort(data), ",")
+sorter.SetStrategy(New BubbleSort)
 
-sorter.SetStrategy New QuickSort
-Response.Write Join(sorter.Sort(data), ",")
+Response.Write(Join(sorter.Sort(data), ","))
+
+
+sorter.SetStrategy(New QuickSort)
+
+Response.Write(Join(sorter.Sort(data), ","))
 %>

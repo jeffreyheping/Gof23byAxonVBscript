@@ -15,7 +15,8 @@ End Class
 Class VectorRenderer
     Implements IRenderer
     Public Function IRenderer_RenderCircle(radius As Integer)
-        Response.Write "矢量引擎绘制半径" & radius & "的圆"
+        Response.Write("矢量引擎绘制半径" & radius & "的圆")
+
     End Function
 End Class
 
@@ -23,7 +24,8 @@ End Class
 Class RasterRenderer
     Implements IRenderer
     Public Function IRenderer_RenderCircle(radius As Integer)
-        Response.Write "光栅引擎绘制半径" & radius & "的圆"
+        Response.Write("光栅引擎绘制半径" & radius & "的圆")
+
     End Function
 End Class
 
@@ -50,10 +52,11 @@ Dim s1 As IShape, s2 As IShape
 Set c1 = New Circle
 c1.Init 5, New VectorRenderer
 Set s1 = c1
-s1.Draw   ' 矢量引擎绘制半径5的圆
+s1.Draw()   ' 矢量引擎绘制半径5的圆
+
 
 Set c2 = New Circle
 c2.Init 5, New RasterRenderer
 Set s2 = c2
-s2.Draw   ' 光栅引擎绘制半径5的圆
+s2.Draw()   ' 光栅引擎绘制半径5的圆
 %>

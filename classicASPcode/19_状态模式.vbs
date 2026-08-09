@@ -4,7 +4,8 @@ Dim Response: Set Response = New ResponseStub
 Class RedState
     ' 当前状态的行为
     Public Function Handle
-        Response.Write "红灯：停止"
+        Response.Write("红灯：停止")
+
     End Function
 
     ' 切换到下一个状态：红灯自己知道下一个是绿灯
@@ -16,7 +17,8 @@ End Class
 ' 状态：绿灯
 Class GreenState
     Public Function Handle
-        Response.Write "绿灯：通行"
+        Response.Write("绿灯：通行")
+
     End Function
 
     ' 切换到下一个状态：绿灯自己知道下一个是黄灯
@@ -28,7 +30,8 @@ End Class
 ' 状态：黄灯
 Class YellowState
     Public Function Handle
-        Response.Write "黄灯：注意"
+        Response.Write("黄灯：注意")
+
     End Function
 
     ' 切换到下一个状态：黄灯自己知道下一个是红灯（循环）
@@ -60,11 +63,13 @@ End Class
 ' 演示：状态切换自动改变行为
 Dim light
 Set light = New TrafficLight
-light.Operate   ' 红灯：停止
+light.Operate()   ' 红灯：停止
+
 light.Change
-light.Operate   ' 绿灯：通行
+light.Operate()   ' 绿灯：通行
+
 light.Change
-light.Operate   ' 黄灯：注意
+light.Operate()   ' 黄灯：注意
 
 Class ResponseStub
     Public Sub Write(s)

@@ -3,7 +3,8 @@
 Class DataMiner
     ' 模板方法：固定流程，parser 参数提供可变步骤
     Public Function MineData(filePath, parser)
-        Load filePath
+        Load(filePath)
+
         parser.Parse
         Analyze
         SendReport
@@ -11,17 +12,20 @@ Class DataMiner
 
     ' 公共步骤：加载文件
     Private Function Load(filePath)
-        Response.Write "加载文件：" & filePath
+        Response.Write("加载文件：" & filePath)
+
     End Function
 
     ' 公共步骤：分析数据
     Private Function Analyze
-        Response.Write "分析数据"
+        Response.Write("分析数据")
+
     End Function
 
     ' 公共步骤：发送报告
     Private Function SendReport
-        Response.Write "发送报告"
+        Response.Write("发送报告")
+
     End Function
 End Class
 
@@ -39,7 +43,8 @@ Class PDFMiner
 
     ' 覆盖父类的 Parse 方法
     Public Function Parse
-        Response.Write "【解析 PDF】"
+        Response.Write("【解析 PDF】")
+
     End Function
 End Class
 
@@ -57,15 +62,17 @@ Class CSVMiner
 
     ' 覆盖父类的 Parse 方法
     Public Function Parse
-        Response.Write "【解析 CSV】"
+        Response.Write("【解析 CSV】")
+
     End Function
 End Class
 
 ' 演示：两个子类复用相同流程，只需实现 Parse
 Dim pdf, csv
 Set pdf = New PDFMiner
-pdf.MineData "data.pdf"
+pdf.MineData("data.pdf")
+
 
 Set csv = New CSVMiner
-csv.MineData "data.csv"
+csv.MineData("data.csv")
 %>

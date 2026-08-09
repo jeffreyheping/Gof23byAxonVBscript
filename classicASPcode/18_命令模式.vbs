@@ -3,10 +3,12 @@ Dim Response: Set Response = New ResponseStub
 ' 接收者：灯
 Class Light
     Public Function TurnOn
-        Response.Write "灯已打开"
+        Response.Write("灯已打开")
+
     End Function
     Public Function TurnOff
-        Response.Write "灯已关闭"
+        Response.Write("灯已关闭")
+
     End Function
 End Class
 
@@ -54,17 +56,22 @@ Dim myLight, onCmd, offCmd, remote
 Set myLight = New Light
 
 Set onCmd = New LightOnCommand
-onCmd.Init myLight
+onCmd.Init(myLight)
+
 
 Set offCmd = New LightOffCommand
-offCmd.Init myLight
+offCmd.Init(myLight)
+
 
 Set remote = New RemoteControl
-remote.SetCommand onCmd
-remote.PressButton   ' 灯已打开
+remote.SetCommand(onCmd)
 
-remote.SetCommand offCmd
-remote.PressButton   ' 灯已关闭
+remote.PressButton()   ' 灯已打开
+
+
+remote.SetCommand(offCmd)
+
+remote.PressButton()   ' 灯已关闭
 
 Class ResponseStub
     Public Sub Write(s)

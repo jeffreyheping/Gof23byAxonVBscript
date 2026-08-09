@@ -6,7 +6,8 @@ Class Dot
 
     ' 接受访问者，调用访问者的 VisitDot
     Public Function Accept(visitor)
-        visitor.VisitDot Me
+        visitor.VisitDot(Me)
+
     End Function
 End Class
 
@@ -16,7 +17,8 @@ Class Circle
 
     ' 接受访问者，调用访问者的 VisitCircle
     Public Function Accept(visitor)
-        visitor.VisitCircle Me
+        visitor.VisitCircle(Me)
+
     End Function
 End Class
 
@@ -24,11 +26,13 @@ End Class
 Class DrawingVisitor
     ' 访问点
     Public Function VisitDot(dot)
-        Response.Write "绘制点：(" & dot.x & "," & dot.y & ")"
+        Response.Write("绘制点：(" & dot.x & "," & dot.y & ")")
+
     End Function
     ' 访问圆
     Public Function VisitCircle(circle)
-        Response.Write "绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius
+        Response.Write("绘制圆：中心(" & circle.x & "," & circle.y & ") 半径" & circle.radius)
+
     End Function
 End Class
 
@@ -43,8 +47,9 @@ c.y = 5
 c.radius = 10
 
 Set drawer = New DrawingVisitor
-d.Accept drawer
-c.Accept drawer
+d.Accept(drawer)
+
+c.Accept(drawer)
 
 Class ResponseStub
     Public Sub Write(s)

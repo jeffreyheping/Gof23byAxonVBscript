@@ -76,5 +76,5 @@ addObj.Init aObj, bObj
 
 Dim add As IExpression
 Set add = addObj
-Response.Write "a + b = " & add.Interpret(ctx)
+Response.Write("a + b = " & add.Interpret(ctx))
 %>

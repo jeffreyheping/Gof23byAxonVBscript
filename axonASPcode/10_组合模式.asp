@@ -20,7 +20,8 @@ Class Leaf
     End Property
 
     Public Function IComponent_Operation(indent As String)
-        Response.Write indent & "叶子：" & m_Name
+        Response.Write(indent & "叶子：" & m_Name)
+
     End Function
     Public Function IComponent_Add(child As IComponent)
         ' 叶子无子节点，空实现
@@ -45,14 +46,17 @@ Class Composite
     End Sub
 
     Public Function IComponent_Add(child As IComponent)
-        m_Children.Add child
+        m_Children.Add(child)
+
     End Function
 
     Public Function IComponent_Operation(indent As String)
-        Response.Write indent & "组合：" & m_Name
+        Response.Write(indent & "组合：" & m_Name)
+
         Dim child As IComponent
         For Each child In m_Children
-            child.Operation indent & "  "
+            child.Operation(indent & "  ")
+
         Next
     End Function
 End Class
@@ -76,10 +80,14 @@ Set leaf1 = leaf1Obj
 Set leaf2 = leaf2Obj
 Set leaf3 = leaf3Obj
 
-root.Add branch1
-root.Add leaf3
-branch1.Add leaf1
-branch1.Add leaf2
+root.Add(branch1)
 
-root.Operation ""
+root.Add(leaf3)
+
+branch1.Add(leaf1)
+
+branch1.Add(leaf2)
+
+
+root.Operation("")
 %>

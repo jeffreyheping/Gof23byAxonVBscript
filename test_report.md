@@ -1,65 +1,66 @@
-# Design Pattern VBScript Test Report
+# Design Pattern VBScript + VB.NET Test Report
 
-Generated: 2026-08-05 14:07:15
+Generated: 2026-08-09 13:46:15
 
 ## Summary
 
 | Engine     | Total | Pass | Fail | Avg Time |
 |------------|-------|------|------|----------|
-| ClassicASP |    23 |   23 |    0 | 0.136s  |
-| AxonASP    |    23 |   23 |    0 | 0.115s  |
-| ASPPY      |    23 |   23 |    0 | 0.279s  |
+| ClassicASP |    23 |   23 |    0 | 0.149s  |
+| AxonASP    |    23 |   23 |    0 | 0.140s  |
+| ASPPY      |    23 |   23 |    0 | 0.315s  |
+| VB.NET     |    23 |   23 |    0 | 3.653s  |
 
 ## ClassicASP Details
 
-- **01_单例模式.vbs** : PASS (0.324s)
+- **01_单例模式.vbs** : PASS (0.145s)
   - `已修改`
-- **02_工厂方法模式.vbs** : PASS (0.127s)
+- **02_工厂方法模式.vbs** : PASS (0.144s)
   - `汪汪`
-- **03_抽象工厂模式.vbs** : PASS (0.132s)
+- **03_抽象工厂模式.vbs** : PASS (0.171s)
   - `绘制 Mac 风格按钮`
   - `绘制 Mac 风格复选框`
-- **04_建造者模式.vbs** : PASS (0.128s)
+- **04_建造者模式.vbs** : PASS (0.188s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.vbs** : PASS (0.126s)
+- **05_原型模式.vbs** : PASS (0.163s)
   - `张三 VBScript`
   - `李四 JavaScript`
-- **06_代理模式.vbs** : PASS (0.135s)
+- **06_代理模式.vbs** : PASS (0.163s)
   - `代理已创建，真实大图尚未加载`
   - `【加载大图】photo.jpg`
   - `显示图片：photo.jpg`
   - `显示图片：photo.jpg`
-- **07_外观模式.vbs** : PASS (0.119s)
+- **07_外观模式.vbs** : PASS (0.154s)
   - `CPU 冻结`
   - `内存加载 数据块(0) 到 0`
   - `CPU 跳转到 0`
   - `CPU 执行`
-- **08_适配器模式.vbs** : PASS (0.134s)
+- **08_适配器模式.vbs** : PASS (0.156s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.vbs** : PASS (0.124s)
+- **09_桥接模式.vbs** : PASS (0.149s)
   - `矢量引擎绘制半径5的圆`
   - `光栅引擎绘制半径5的圆`
-- **10_组合模式.vbs** : PASS (0.123s)
+- **10_组合模式.vbs** : PASS (0.146s)
   - `组合：总部`
   - `  组合：分公司`
   - `    叶子：员工A`
   - `    叶子：员工B`
   - `  叶子：员工C`
-- **11_装饰器模式.vbs** : PASS (0.124s)
+- **11_装饰器模式.vbs** : PASS (0.147s)
   - `普通咖啡 = 10元`
   - `普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.vbs** : PASS (0.133s)
+- **12_享元模式.vbs** : PASS (0.165s)
   - `在 (0,0) 绘制 绿色橡树`
   - `在 (1,2) 绘制 绿色橡树`
   - `在 (2,4) 绘制 绿色橡树`
   - `3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.vbs** : PASS (0.122s)
+- **13_策略模式.vbs** : PASS (0.146s)
   - `1,2,5,8,9`
   - `1,2,5,8,9`
-- **14_观察者模式.vbs** : PASS (0.131s)
+- **14_观察者模式.vbs** : PASS (0.154s)
   - `晨报 收到新闻：重大新闻！`
   - `晚报 收到新闻：重大新闻！`
-- **15_模板方法模式.vbs** : PASS (0.144s)
+- **15_模板方法模式.vbs** : PASS (0.13s)
   - `加载文件：data.pdf`
   - `【解析 PDF】`
   - `分析数据`
@@ -68,132 +69,279 @@ Generated: 2026-08-05 14:07:15
   - `【解析 CSV】`
   - `分析数据`
   - `发送报告`
-- **16_迭代器模式.vbs** : PASS (0.121s)
+- **16_迭代器模式.vbs** : PASS (0.133s)
   - `苹果`
   - `香蕉`
   - `橙子`
-- **17_责任链模式.vbs** : PASS (0.13s)
+- **17_责任链模式.vbs** : PASS (0.14s)
   - `【控制台】系统启动`
   - `【文件】系统启动`
   - `【邮件】系统启动`
   - `【控制台】严重错误`
   - `【文件】严重错误`
   - `【邮件】严重错误`
-- **18_命令模式.vbs** : PASS (0.125s)
+- **18_命令模式.vbs** : PASS (0.128s)
   - `灯已打开`
   - `灯已关闭`
-- **19_状态模式.vbs** : PASS (0.127s)
+- **19_状态模式.vbs** : PASS (0.137s)
   - `红灯：停止`
   - `绿灯：通行`
   - `黄灯：注意`
-- **20_中介者模式.vbs** : PASS (0.118s)
+- **20_中介者模式.vbs** : PASS (0.134s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.vbs** : PASS (0.119s)
+- **21_访问者模式.vbs** : PASS (0.14s)
   - `绘制点：(10,20)`
   - `绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.vbs** : PASS (0.123s)
+- **22_备忘录模式.vbs** : PASS (0.149s)
   - `编辑后: Hello World (光标: 11)`
   - ``
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.vbs** : PASS (0.143s)
+- **23_解释器模式.vbs** : PASS (0.149s)
   - `a + b = 8`
 
 ## AxonASP Details
 
-- **01_单例模式.asp** : PASS (0.384s)
+- **01_单例模式.asp** : PASS (0.361s)
   - `已修改`
-- **02_工厂方法模式.asp** : PASS (0.114s)
+- **02_工厂方法模式.asp** : PASS (0.132s)
   - `汪汪`
-- **03_抽象工厂模式.asp** : PASS (0.116s)
+- **03_抽象工厂模式.asp** : PASS (0.151s)
   - `绘制 Mac 风格按钮绘制 Mac 风格复选框`
-- **04_建造者模式.asp** : PASS (0.122s)
+- **04_建造者模式.asp** : PASS (0.14s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.asp** : PASS (0.12s)
+- **05_原型模式.asp** : PASS (0.15s)
   - `张三 VBScript李四 JavaScript`
-- **06_代理模式.asp** : PASS (0.121s)
+- **06_代理模式.asp** : PASS (0.142s)
   - `代理已创建，真实大图尚未加载【加载大图】photo.jpg显示图片：photo.jpg显示图片：photo.jpg`
-- **07_外观模式.asp** : PASS (0.127s)
+- **07_外观模式.asp** : PASS (0.136s)
   - `CPU 冻结内存加载 数据块(0) 到 0CPU 跳转到 0CPU 执行`
-- **08_适配器模式.asp** : PASS (0.11s)
+- **08_适配器模式.asp** : PASS (0.129s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.asp** : PASS (0.115s)
+- **09_桥接模式.asp** : PASS (0.139s)
   - `矢量引擎绘制半径5的圆光栅引擎绘制半径5的圆`
-- **10_组合模式.asp** : PASS (0.118s)
+- **10_组合模式.asp** : PASS (0.143s)
   - `组合：总部  组合：分公司    叶子：员工A    叶子：员工B  叶子：员工C`
-- **11_装饰器模式.asp** : PASS (0.12s)
+- **11_装饰器模式.asp** : PASS (0.145s)
   - `普通咖啡 = 10元普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.asp** : PASS (0.097s)
+- **12_享元模式.asp** : PASS (0.129s)
   - `在 (0,0) 绘制 绿色橡树在 (1,2) 绘制 绿色橡树在 (2,4) 绘制 绿色橡树3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.asp** : PASS (0.092s)
+- **13_策略模式.asp** : PASS (0.119s)
   - `1,2,5,8,91,2,5,8,9`
-- **14_观察者模式.asp** : PASS (0.087s)
+- **14_观察者模式.asp** : PASS (0.122s)
   - `晨报 收到新闻：重大新闻！晚报 收到新闻：重大新闻！`
-- **15_模板方法模式.asp** : PASS (0.087s)
+- **15_模板方法模式.asp** : PASS (0.131s)
   - `加载文件：data.pdf【解析 PDF】分析数据发送报告加载文件：data.csv【解析 CSV】分析数据发送报告`
-- **16_迭代器模式.asp** : PASS (0.096s)
+- **16_迭代器模式.asp** : PASS (0.125s)
   - `苹果香蕉橙子`
-- **17_责任链模式.asp** : PASS (0.088s)
+- **17_责任链模式.asp** : PASS (0.112s)
   - `【控制台】系统启动【文件】系统启动【控制台】严重错误【文件】严重错误【邮件】严重错误`
-- **18_命令模式.asp** : PASS (0.092s)
+- **18_命令模式.asp** : PASS (0.125s)
   - `灯已打开灯已关闭`
-- **19_状态模式.asp** : PASS (0.083s)
+- **19_状态模式.asp** : PASS (0.122s)
   - `红灯：停止绿灯：通行黄灯：注意`
-- **20_中介者模式.asp** : PASS (0.097s)
+- **20_中介者模式.asp** : PASS (0.123s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.asp** : PASS (0.089s)
+- **21_访问者模式.asp** : PASS (0.122s)
   - `绘制点：(10,20)绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.asp** : PASS (0.09s)
+- **22_备忘录模式.asp** : PASS (0.116s)
   - `编辑后: Hello World (光标: 11)`
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.asp** : PASS (0.091s)
+- **23_解释器模式.asp** : PASS (0.109s)
   - `a + b = 8`
 
 ## ASPPY Details
 
-- **01_单例模式.asp** : PASS (0.366s)
+- **01_单例模式.asp** : PASS (0.353s)
   - `已修改`
-- **02_工厂方法模式.asp** : PASS (0.322s)
+- **02_工厂方法模式.asp** : PASS (0.387s)
   - `汪汪`
-- **03_抽象工厂模式.asp** : PASS (0.306s)
+- **03_抽象工厂模式.asp** : PASS (0.379s)
   - `绘制 Mac 风格按钮绘制 Mac 风格复选框`
-- **04_建造者模式.asp** : PASS (0.308s)
+- **04_建造者模式.asp** : PASS (0.329s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.asp** : PASS (0.294s)
+- **05_原型模式.asp** : PASS (0.321s)
   - `张三 VBScript李四 JavaScript`
-- **06_代理模式.asp** : PASS (0.279s)
+- **06_代理模式.asp** : PASS (0.32s)
   - `代理已创建，真实大图尚未加载【加载大图】photo.jpg显示图片：photo.jpg显示图片：photo.jpg`
-- **07_外观模式.asp** : PASS (0.277s)
+- **07_外观模式.asp** : PASS (0.325s)
   - `CPU 冻结内存加载 数据块(0) 到 0CPU 跳转到 0CPU 执行`
-- **08_适配器模式.asp** : PASS (0.303s)
+- **08_适配器模式.asp** : PASS (0.335s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.asp** : PASS (0.29s)
+- **09_桥接模式.asp** : PASS (0.299s)
   - `矢量引擎绘制半径5的圆光栅引擎绘制半径5的圆`
-- **10_组合模式.asp** : PASS (0.26s)
+- **10_组合模式.asp** : PASS (0.3s)
   - `组合：总部  组合：分公司    叶子：员工A    叶子：员工B  叶子：员工C`
-- **11_装饰器模式.asp** : PASS (0.258s)
+- **11_装饰器模式.asp** : PASS (0.306s)
   - `普通咖啡 = 10元普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.asp** : PASS (0.251s)
+- **12_享元模式.asp** : PASS (0.293s)
   - `在 (0,0) 绘制 绿色橡树在 (1,2) 绘制 绿色橡树在 (2,4) 绘制 绿色橡树3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.asp** : PASS (0.255s)
+- **13_策略模式.asp** : PASS (0.303s)
   - `1,2,5,8,91,2,5,8,9`
-- **14_观察者模式.asp** : PASS (0.244s)
+- **14_观察者模式.asp** : PASS (0.298s)
   - `晨报 收到新闻：重大新闻！晚报 收到新闻：重大新闻！`
-- **15_模板方法模式.asp** : PASS (0.248s)
+- **15_模板方法模式.asp** : PASS (0.304s)
   - `加载文件：data.pdf【解析 PDF】分析数据发送报告加载文件：data.csv【解析 CSV】分析数据发送报告`
-- **16_迭代器模式.asp** : PASS (0.262s)
+- **16_迭代器模式.asp** : PASS (0.296s)
   - `苹果香蕉橙子`
-- **17_责任链模式.asp** : PASS (0.25s)
+- **17_责任链模式.asp** : PASS (0.31s)
   - `【控制台】系统启动【文件】系统启动【邮件】系统启动【控制台】严重错误【文件】严重错误【邮件】严重错误`
-- **18_命令模式.asp** : PASS (0.243s)
+- **18_命令模式.asp** : PASS (0.294s)
   - `灯已打开灯已关闭`
-- **19_状态模式.asp** : PASS (0.242s)
+- **19_状态模式.asp** : PASS (0.304s)
   - `红灯：停止绿灯：通行黄灯：注意`
-- **20_中介者模式.asp** : PASS (0.265s)
+- **20_中介者模式.asp** : PASS (0.297s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.asp** : PASS (0.352s)
+- **21_访问者模式.asp** : PASS (0.295s)
   - `绘制点：(10,20)绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.asp** : PASS (0.276s)
+- **22_备忘录模式.asp** : PASS (0.297s)
   - `编辑后: Hello World (光标: 11)`
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.asp** : PASS (0.257s)
+- **23_解释器模式.asp** : PASS (0.293s)
+  - `a + b = 8`
+
+## VB.NET Details
+
+- **01_单例模式.vb** : PASS (3.989s)
+  - `已修改`
+- **02_工厂方法模式.vb** : PASS (3.522s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_o63aqv5s\Program.vb(24,9): warning BC42105: 函数“Speak”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_o63aqv5s\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_o63aqv5s\Program.vb(18,9): warning BC42105: 函数“Speak”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_o63aqv5s\App.vbproj]`
+  - `汪汪`
+- **03_抽象工厂模式.vb** : PASS (3.711s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\Program.vb(40,9): warning BC42105: 函数“Paint”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\Program.vb(34,9): warning BC42105: 函数“Paint”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\Program.vb(22,9): warning BC42105: 函数“Paint”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\Program.vb(28,9): warning BC42105: 函数“Paint”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_x4ckoo1t\App.vbproj]`
+  - `绘制 Mac 风格按钮`
+  - `绘制 Mac 风格复选框`
+- **04_建造者模式.vb** : PASS (3.598s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_v9ceb8f9\Program.vb(15,9): warning BC42105: 函数“ShowConfig”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_v9ceb8f9\App.vbproj]`
+  - `配置：i9 / 32GB / 2TB SSD`
+- **05_原型模式.vb** : PASS (3.785s)
+  - `张三 VBScript`
+  - `李四 JavaScript`
+- **06_代理模式.vb** : PASS (4.258s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\Program.vb(34,9): warning BC42105: 函数“Init”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\Program.vb(20,9): warning BC42105: 函数“Init”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\Program.vb(42,9): warning BC42105: 函数“Display”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\Program.vb(24,9): warning BC42105: 函数“Display”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_0g6p09dz\App.vbproj]`
+  - `代理已创建，真实大图尚未加载`
+  - `【加载大图】photo.jpg`
+  - `显示图片：photo.jpg`
+  - `显示图片：photo.jpg`
+- **07_外观模式.vb** : PASS (3.783s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\Program.vb(48,9): warning BC42105: 函数“Start”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\Program.vb(11,9): warning BC42105: 函数“Freeze”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\Program.vb(22,9): warning BC42105: 函数“Load”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\Program.vb(14,9): warning BC42105: 函数“Jump”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\Program.vb(17,9): warning BC42105: 函数“Execute”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_gxsuh8mx\App.vbproj]`
+  - `CPU 冻结`
+  - `内存加载 数据块(0) 到 0`
+  - `CPU 跳转到 0`
+  - `CPU 执行`
+- **08_适配器模式.vb** : PASS (3.677s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_9dr2v_8w\Program.vb(32,9): warning BC42105: 函数“Print”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_9dr2v_8w\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_9dr2v_8w\Program.vb(14,9): warning BC42105: 函数“OldPrint”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_9dr2v_8w\App.vbproj]`
+  - `【旧打印机】Hello World`
+- **09_桥接模式.vb** : PASS (3.561s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qm8lm5ne\Program.vb(44,9): warning BC42105: 函数“Draw”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qm8lm5ne\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qm8lm5ne\Program.vb(15,9): warning BC42105: 函数“RenderCircle”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qm8lm5ne\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qm8lm5ne\Program.vb(21,9): warning BC42105: 函数“RenderCircle”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qm8lm5ne\App.vbproj]`
+  - `矢量引擎绘制半径5的圆`
+  - `光栅引擎绘制半径5的圆`
+- **10_组合模式.vb** : PASS (3.64s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\Program.vb(38,9): warning BC42105: 函数“Add”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\Program.vb(20,9): warning BC42105: 函数“Add”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\Program.vb(29,9): warning BC42105: 函数“Operation”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\Program.vb(45,9): warning BC42105: 函数“Operation”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_v4vnylft\App.vbproj]`
+  - `组合：总部`
+  - `  组合：分公司`
+  - `    叶子：员工A`
+  - `    叶子：员工B`
+  - `  叶子：员工C`
+- **11_装饰器模式.vb** : PASS (3.489s)
+  - `普通咖啡 = 10元`
+  - `普通咖啡 + 牛奶 + 糖 = 13元`
+- **12_享元模式.vb** : PASS (3.509s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_3kfywwpl\Program.vb(20,9): warning BC42105: 函数“Draw”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_3kfywwpl\App.vbproj]`
+  - `在 (0,0) 绘制 绿色橡树`
+  - `在 (1,2) 绘制 绿色橡树`
+  - `在 (2,4) 绘制 绿色橡树`
+  - `3 棵树，实际只有 1 个 TreeType 对象`
+- **13_策略模式.vb** : PASS (3.505s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_r2yqzku4\Program.vb(61,9): warning BC42105: 函数“SetStrategy”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_r2yqzku4\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_r2yqzku4\Program.vb(54,9): warning BC42105: 函数“QuickSortHelper”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_r2yqzku4\App.vbproj]`
+  - `1,2,5,8,9`
+  - `1,2,5,8,9`
+- **14_观察者模式.vb** : PASS (3.408s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_6vonitco\Program.vb(23,9): warning BC42105: 函数“Publish”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_6vonitco\App.vbproj]`
+  - `晨报 收到新闻：`
+  - `晚报 收到新闻：`
+- **15_模板方法模式.vb** : PASS (3.541s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\Program.vb(15,9): warning BC42105: 函数“MineData”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\Program.vb(38,9): warning BC42105: 函数“Parse”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\Program.vb(45,9): warning BC42105: 函数“Parse”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\Program.vb(20,9): warning BC42105: 函数“Load”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\Program.vb(24,9): warning BC42105: 函数“Analyze”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\Program.vb(28,9): warning BC42105: 函数“SendReport”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_q0v1by6a\App.vbproj]`
+  - `加载文件：data.pdf`
+  - `【解析 PDF】`
+  - `分析数据`
+  - `发送报告`
+  - `加载文件：data.csv`
+  - `【解析 CSV】`
+  - `分析数据`
+  - `发送报告`
+- **16_迭代器模式.vb** : PASS (4.266s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_fa78a5n1\Program.vb(16,9): warning BC42105: 函数“Add”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_fa78a5n1\App.vbproj]`
+  - `苹果`
+  - `香蕉`
+  - `橙子`
+- **17_责任链模式.vb** : PASS (3.427s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_ktnb6vht\Program.vb(19,9): warning BC42105: 函数“SetNext”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_ktnb6vht\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_ktnb6vht\Program.vb(29,9): warning BC42105: 函数“Log”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_ktnb6vht\App.vbproj]`
+  - `【控制台】系统启动`
+  - `【文件】系统启动`
+  - `【控制台】严重错误`
+  - `【文件】严重错误`
+  - `【邮件】严重错误`
+- **18_命令模式.vb** : PASS (3.524s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\Program.vb(31,9): warning BC42105: 函数“Execute”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\Program.vb(44,9): warning BC42105: 函数“Execute”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\Program.vb(51,9): warning BC42105: 函数“SetCommand”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\Program.vb(55,9): warning BC42105: 函数“PressButton”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\Program.vb(14,9): warning BC42105: 函数“TurnOn”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\Program.vb(18,9): warning BC42105: 函数“TurnOff”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_xei13jo1\App.vbproj]`
+  - `灯已打开`
+  - `灯已关闭`
+- **19_状态模式.vb** : PASS (3.547s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\Program.vb(54,9): warning BC42105: 函数“Change”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\Program.vb(58,9): warning BC42105: 函数“Operate”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\Program.vb(17,9): warning BC42105: 函数“Handle”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\Program.vb(39,9): warning BC42105: 函数“Handle”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\Program.vb(28,9): warning BC42105: 函数“Handle”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_qzttmxum\App.vbproj]`
+  - `红灯：停止`
+  - `绿灯：通行`
+  - `黄灯：注意`
+- **20_中介者模式.vb** : PASS (3.47s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\Program.vb(42,9): warning BC42105: 函数“Join”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\Program.vb(47,9): warning BC42105: 函数“Send”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\Program.vb(22,9): warning BC42105: 函数“Register”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\Program.vb(52,9): warning BC42105: 函数“Receive”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\Program.vb(31,9): warning BC42105: 函数“SendMessage”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_4t7xs7fu\App.vbproj]`
+  - `Bob 收到 Alice 的消息：大家好！`
+- **21_访问者模式.vb** : PASS (3.646s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\Program.vb(22,9): warning BC42105: 函数“Accept”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\Program.vb(30,9): warning BC42105: 函数“Accept”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\Program.vb(37,9): warning BC42105: 函数“Visit”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\Program.vb(41,9): warning BC42105: 函数“Visit”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_k6pd1kfs\App.vbproj]`
+  - `绘制点：(10,20)`
+  - `绘制圆：中心(5,5) 半径10`
+- **22_备忘录模式.vb** : PASS (3.633s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_os01wmoz\Program.vb(20,9): warning BC42105: 函数“Write”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_os01wmoz\App.vbproj]`
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_os01wmoz\Program.vb(34,9): warning BC42105: 函数“RestoreState”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_os01wmoz\App.vbproj]`
+  - `编辑后: Hello World (光标: 11)`
+  - `恢复后: Hello (光标: 5)`
+- **23_解释器模式.vb** : PASS (3.532s)
+  - `C:\Users\jeffr\AppData\Local\Temp\vbnet_yw88dp6y\Program.vb(13,9): warning BC42105: 函数“SetVar”不会在所有代码路径上都返回值。当使用结果时，可能会在运行时发生 null 引用异常。 [C:\Users\jeffr\AppData\Local\Temp\vbnet_yw88dp6y\App.vbproj]`
   - `a + b = 8`

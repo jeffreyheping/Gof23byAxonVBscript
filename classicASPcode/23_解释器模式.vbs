@@ -65,7 +65,7 @@ Set add = New AddExpression
 Set add.Left = a
 Set add.Right = b
 
-Response.Write "a + b = " & add.Interpret(ctx)   ' 8
+Response.Write("a + b = " & add.Interpret(ctx))   ' 8
 
 Class ResponseStub
     Public Sub Write(s)

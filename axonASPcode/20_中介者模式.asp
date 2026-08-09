@@ -22,7 +22,8 @@ Class ChatRoom
 
     ' 注册同事（非接口公共方法）
     Public Function Register(user As User)
-        m_Users.Add user
+        m_Users.Add(user)
+
     End Function
 
     ' 转发消息：遍历同事，调用接口方法 Receive，发送者除外
@@ -45,7 +46,8 @@ Class User
     ' 加入中介者：保存引用并注册自身
     Public Function Join(mediator As IMediator)
         Set m_Mediator = mediator
-        mediator.Register Me
+        mediator.Register(Me)
+
     End Function
 
     ' 发送消息：交给中介者转发，Me 关键字传递自身对象
@@ -55,7 +57,8 @@ Class User
 
     ' 接收消息：显示收到内容
     Public Function IColleague_Receive(msg As String, fromUser As User)
-        Response.Write Name & " 收到 " & fromUser.Name & " 的消息：" & msg & vbCrLf
+        Response.Write(Name & " 收到 " & fromUser.Name & " 的消息：" & msg & vbCrLf)
+
     End Function
 End Class
 
@@ -71,7 +74,9 @@ Dim bob As User
 Set bob = New User
 bob.Name = "Bob"
 
-alice.Join room
-bob.Join room
-alice.Send "大家好！"
+alice.Join(room)
+
+bob.Join(room)
+
+alice.Send("大家好！")
 %>

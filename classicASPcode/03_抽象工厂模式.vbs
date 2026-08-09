@@ -4,14 +4,16 @@ Dim Response: Set Response = New ResponseStub
 Class WinButton
     ' 绘制 Windows 风格按钮
     Public Function Paint
-        Response.Write "绘制 Windows 风格按钮"
+        Response.Write("绘制 Windows 风格按钮")
+
     End Function
 End Class
 
 Class WinCheckbox
     ' 绘制 Windows 风格复选框
     Public Function Paint
-        Response.Write "绘制 Windows 风格复选框"
+        Response.Write("绘制 Windows 风格复选框")
+
     End Function
 End Class
 
@@ -19,14 +21,16 @@ End Class
 Class MacButton
     ' 绘制 Mac 风格按钮
     Public Function Paint
-        Response.Write "绘制 Mac 风格按钮"
+        Response.Write("绘制 Mac 风格按钮")
+
     End Function
 End Class
 
 Class MacCheckbox
     ' 绘制 Mac 风格复选框
     Public Function Paint
-        Response.Write "绘制 Mac 风格复选框"
+        Response.Write("绘制 Mac 风格复选框")
+
     End Function
 End Class
 

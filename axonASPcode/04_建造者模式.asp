@@ -3,7 +3,8 @@
 Class Computer
     Public CPU As String, RAM As String, Disk As String
     Public Function ShowConfig
-        Response.Write "配置：" & CPU & " / " & RAM & " / " & Disk
+        Response.Write("配置：" & CPU & " / " & RAM & " / " & Disk)
+
     End Function
 End Class
 
@@ -45,15 +46,21 @@ End Class
 ' 指挥者
 Class Director
     Public Function ConstructGamingPC(builder As IBuilder)
-        builder.BuildCPU "i9"
-        builder.BuildRAM "32GB"
-        builder.BuildDisk "2TB SSD"
+        builder.BuildCPU("i9")
+
+        builder.BuildRAM("32GB")
+
+        builder.BuildDisk("2TB SSD")
+
     End Function
 
     Public Function ConstructOfficePC(builder As IBuilder)
-        builder.BuildCPU "i5"
-        builder.BuildRAM "16GB"
-        builder.BuildDisk "512GB SSD"
+        builder.BuildCPU("i5")
+
+        builder.BuildRAM("16GB")
+
+        builder.BuildDisk("512GB SSD")
+
     End Function
 End Class
 
@@ -63,7 +70,8 @@ Dim myDirector As Director
 Dim pc As Computer
 Set myBuilder = New ComputerBuilder
 Set myDirector = New Director
-myDirector.ConstructGamingPC myBuilder
+myDirector.ConstructGamingPC(myBuilder)
+
 Set pc = myBuilder.GetResult
 pc.ShowConfig
 %>

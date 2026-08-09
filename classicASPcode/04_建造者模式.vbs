@@ -5,7 +5,8 @@ Class Computer
     Public CPU, RAM, Disk
     ' 打印当前配置
     Public Function ShowConfig
-        Response.Write "配置：" & CPU & " / " & RAM & " / " & Disk
+        Response.Write("配置：" & CPU & " / " & RAM & " / " & Disk)
+
     End Function
 End Class
 
@@ -40,15 +41,21 @@ End Class
 Class Director
     ' 方案一：组装游戏 PC
     Public Function ConstructGamingPC(b)
-        b.BuildCPU "i9"
-        b.BuildRAM "32GB"
-        b.BuildDisk "2TB SSD"
+        b.BuildCPU("i9")
+
+        b.BuildRAM("32GB")
+
+        b.BuildDisk("2TB SSD")
+
     End Function
     ' 方案二：组装办公 PC
     Public Function ConstructOfficePC(b)
-        b.BuildCPU "i5"
-        b.BuildRAM "16GB"
-        b.BuildDisk "512GB SSD"
+        b.BuildCPU("i5")
+
+        b.BuildRAM("16GB")
+
+        b.BuildDisk("512GB SSD")
+
     End Function
 End Class
 
@@ -56,7 +63,8 @@ End Class
 Dim myBuilder, myDirector, pc
 Set myBuilder = New ComputerBuilder
 Set myDirector = New Director
-myDirector.ConstructGamingPC myBuilder
+myDirector.ConstructGamingPC(myBuilder)
+
 Set pc = myBuilder.GetResult
 pc.ShowConfig
 

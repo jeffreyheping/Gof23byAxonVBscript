@@ -18,6 +18,7 @@ End Class
 ' 全局访问点：Static 变量在函数调用间保持值，支持对象引用
 Function GetInstance() As Singleton
     Static instance As Singleton
+
     If instance Is Nothing Then
         Set instance = New Singleton
     End If
@@ -29,5 +30,5 @@ Dim s1 As Singleton, s2 As Singleton
 Set s1 = GetInstance()
 Set s2 = GetInstance()
 s1.Data = "已修改"
-Response.Write s2.Data   ' 已修改
+Response.Write(s2.Data)   ' 已修改
 %>

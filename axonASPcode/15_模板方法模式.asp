@@ -17,7 +17,8 @@ End Class
 Class PDFMiner
     Implements IExtractor
     Public Function IExtractor_Extract(data As String) As String
-        Response.Write "【解析 PDF】"
+        Response.Write("【解析 PDF】")
+
     End Function
 End Class
 
@@ -25,7 +26,8 @@ End Class
 Class CSVMiner
     Implements IExtractor
     Public Function IExtractor_Extract(data As String) As String
-        Response.Write "【解析 CSV】"
+        Response.Write("【解析 CSV】")
+
     End Function
 End Class
 
@@ -39,10 +41,14 @@ Class DataMiner
     End Function
 
     Public Function ITemplateMiner_MineData(filePath As String)
-        Response.Write "加载文件：" & filePath
-        m_Extractor.Extract filePath
-        Response.Write "分析数据"
-        Response.Write "发送报告"
+        Response.Write("加载文件：" & filePath)
+
+        m_Extractor.Extract(filePath)
+
+        Response.Write("分析数据")
+
+        Response.Write("发送报告")
+
     End Function
 End Class
 
@@ -51,11 +57,14 @@ Dim miner As ITemplateMiner
 Set miner = New DataMiner
 Dim pdfExtractor As IExtractor
 Set pdfExtractor = New PDFMiner
-miner.SetExtractor pdfExtractor
-miner.MineData "data.pdf"
+miner.SetExtractor(pdfExtractor)
+
+miner.MineData("data.pdf")
+
 
 Dim csvExtractor As IExtractor
 Set csvExtractor = New CSVMiner
-miner.SetExtractor csvExtractor
-miner.MineData "data.csv"
+miner.SetExtractor(csvExtractor)
+
+miner.MineData("data.csv")
 %>

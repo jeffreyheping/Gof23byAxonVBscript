@@ -62,16 +62,20 @@ End Class
 ' 演示：编辑、保存、再编辑、再恢复
 Dim editor
 Set editor = New TextEditor
-editor.Write "Hello"
+editor.Write("Hello")
+
 
 Dim saved
 Set saved = editor.SaveState
 
-editor.Write " World"
-Response.Write "编辑后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf
+editor.Write(" World")
 
-editor.RestoreState saved
-Response.Write "恢复后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf
+Response.Write("编辑后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf)
+
+
+editor.RestoreState(saved)
+
+Response.Write("恢复后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf)
 
 Class ResponseStub
     Public Sub Write(s)

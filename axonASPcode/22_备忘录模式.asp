@@ -1,8 +1,11 @@
 <%
 ' 备忘录：保存编辑器状态（UDT 值类型，自动拷贝语义）
 Type EditorMemento
+
     Content As String
+
     CursorPos As Integer
+
 End Type
 
 ' 编辑器：可以保存和恢复状态
@@ -44,14 +47,18 @@ End Class
 ' 演示：编辑、保存、再编辑、再恢复
 Dim editor As TextEditor
 Set editor = New TextEditor
-editor.Write "Hello"
+editor.Write("Hello")
+
 
 Dim saved As EditorMemento
 saved = editor.SaveState
 
-editor.Write " World"
-Response.Write "编辑后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf
+editor.Write(" World")
 
-editor.RestoreState saved
-Response.Write "恢复后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf
+Response.Write("编辑后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf)
+
+
+editor.RestoreState(saved)
+
+Response.Write("恢复后: " & editor.Content & " (光标: " & editor.CursorPos & ")" & vbCrLf)
 %>

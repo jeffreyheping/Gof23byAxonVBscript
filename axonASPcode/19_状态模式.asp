@@ -11,7 +11,8 @@ End Class
 Class RedState
     Implements IState
     Public Function IState_Handle
-        Response.Write "红灯：停止"
+        Response.Write("红灯：停止")
+
     End Function
     Public Function IState_NextState As IState
         Set IState_NextState = New GreenState
@@ -22,7 +23,8 @@ End Class
 Class GreenState
     Implements IState
     Public Function IState_Handle
-        Response.Write "绿灯：通行"
+        Response.Write("绿灯：通行")
+
     End Function
     Public Function IState_NextState As IState
         Set IState_NextState = New YellowState
@@ -33,7 +35,8 @@ End Class
 Class YellowState
     Implements IState
     Public Function IState_Handle
-        Response.Write "黄灯：注意"
+        Response.Write("黄灯：注意")
+
     End Function
     Public Function IState_NextState As IState
         Set IState_NextState = New RedState
@@ -62,9 +65,11 @@ End Class
 ' 演示
 Dim light As TrafficLight
 Set light = New TrafficLight
-light.Operate   ' 红灯：停止
+light.Operate()   ' 红灯：停止
+
 light.Change
-light.Operate   ' 绿灯：通行
+light.Operate()   ' 绿灯：通行
+
 light.Change
-light.Operate   ' 黄灯：注意
+light.Operate()   ' 黄灯：注意
 %>

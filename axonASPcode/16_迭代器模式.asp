@@ -10,7 +10,8 @@ Class MyCollection
 
     ' 添加元素
     Public Sub Add(item)
-        m_Items.Add item
+        m_Items.Add(item)
+
     End Sub
 
     ' 返回元素总数
@@ -33,11 +34,15 @@ End Class
 ' 演示：用 For Each 遍历集合，不暴露内部结构
 Dim coll, item
 Set coll = New MyCollection
-coll.Add "苹果"
-coll.Add "香蕉"
-coll.Add "橙子"
+coll.Add("苹果")
+
+coll.Add("香蕉")
+
+coll.Add("橙子")
+
 
 For Each item In coll
-    Response.Write item
+    Response.Write(item)
+
 Next
 %>

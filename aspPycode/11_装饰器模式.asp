@@ -50,12 +50,15 @@ End Class
 ' 演示：层层包裹，动态叠加功能
 Dim base, milk, sugar
 Set base = New SimpleCoffee
-Response.Write base.Description & " = " & base.Cost & "元"
+Response.Write(base.Description & " = " & base.Cost & "元")
+
 
 Set milk = New MilkDecorator
-milk.Init base              ' milk 包裹 base
+milk.Init(base)              ' milk 包裹 base
+
 
 Set sugar = New SugarDecorator
-sugar.Init milk             ' sugar 包裹 milk
-Response.Write sugar.Description & " = " & sugar.Cost & "元"
+sugar.Init(milk)             ' sugar 包裹 milk
+
+Response.Write(sugar.Description & " = " & sugar.Cost & "元")
 %>

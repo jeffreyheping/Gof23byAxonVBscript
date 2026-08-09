@@ -3,7 +3,8 @@
 Class Dog
     ' 让狗叫一声
     Public Function Speak
-        Response.Write "汪汪"
+        Response.Write("汪汪")
+
     End Function
 End Class
 
@@ -11,7 +12,8 @@ End Class
 Class Cat
     ' 让猫叫一声
     Public Function Speak
-        Response.Write "喵喵"
+        Response.Write("喵喵")
+
     End Function
 End Class
 
@@ -35,5 +37,5 @@ End Class
 Dim factory
 Set factory = New AnimalFactory
 Set myPet = factory.CreateAnimal("dog")
-myPet.Speak   ' 汪汪
+myPet.Speak()   ' 汪汪
 %>

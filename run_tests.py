@@ -1,23 +1,27 @@
 """
-设计模式 VBScript 测试运行器
+设计模式 VBScript + VB.NET 测试运行器
   - classicASPcode/*.vbs  -> cscript.exe //nologo //E:vbscript
   - axonASPcode/*.asp    -> axonasp-cli.exe --run
+  - aspPycode/*.asp      -> python asppycli.py
+  - vbNetcode/*.vb       -> dotnet run (VBCodeProvider/.NET CLI)
 用法:  python run_tests.py
 输出:  test_report.md
 """
-import os, subprocess, time, datetime
+import os, subprocess, time, datetime, tempfile, shutil
 
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 CLASSIC_DIR  = os.path.join(BASE_DIR, "classicASPcode")
 AXON_DIR     = os.path.join(BASE_DIR, "axonASPcode")
 ASPPY_DIR    = os.path.join(BASE_DIR, "aspPycode")
+VBNET_DIR    = os.path.join(BASE_DIR, "vbNetcode")
 REPORT_FILE  = os.path.join(BASE_DIR, "test_report.md")
 
 CSCRIPT      = r"C:\Windows\System32\cscript.exe"
 WSCRIPT      = r"C:\Windows\System32\wscript.exe"
 AXON_CLI     = r"C:\axonasp\axonasp-cli.exe"
 ASPPY_CLI    = r"C:\Users\jeffr\Documents\GitHub\ASPPY\asppycli.py"
-TIMEOUT      = 30   # seconds
+DOTNET       = r"dotnet"
+TIMEOUT      = 60   # seconds
 
 
 # ── runners ──────────────────────────────────────────────────────
@@ -28,7 +32,6 @@ def _ensure_vbscript_engine():
         ctypes.windll.vbscript.RegistrationFree()
     except Exception:
         pass
-    # 用 regsvr32 注册（不可用时静默失败）
     for dll in ("vbscript.dll",):
         try:
             subprocess.run(
@@ -49,8 +52,6 @@ def run_classic(filepath):
             capture_output=True, text=True, timeout=TIMEOUT,
             encoding="gbk", errors="replace",
         )
-        # cscript.exe 即使有运行时错误 returncode 也可能是 0
-        # 所以必须额外检查 stderr 中是否含"错误"字样
         has_error = False
         err_text = r.stderr.strip()
         if err_text:
@@ -100,16 +101,84 @@ def run_asppy(filepath):
             capture_output=True, text=True, timeout=TIMEOUT,
             encoding="utf-8", errors="replace",
         )
+        # ASPPY exit code: 0=OK(status<400), 1=server error(>=400), 2=usage error
+        success = (r.returncode == 0)
+        # asppycli: rendered body to stdout, errors may also appear in stderr
+        # 如果 stderr 里有明确的编译/运行错误信息，标记为失败
+        err_text = r.stderr.strip()
+        if err_text:
+            lower = err_text.lower()
+            if "error" in lower or "exception" in lower or "traceback" in lower:
+                success = False
         return {
-            "success": r.returncode == 0,
+            "success": success,
             "output":  r.stdout.strip(),
-            "error":   r.stderr.strip(),
+            "error":   err_text,
             "duration": round(time.monotonic() - t0, 3),
         }
     except subprocess.TimeoutExpired:
         return {"success": False, "output": "", "error": "TIMEOUT", "duration": TIMEOUT}
     except Exception as e:
         return {"success": False, "output": "", "error": str(e), "duration": 0}
+
+
+def run_vbnet(filepath):
+    """用 dotnet CLI 编译+运行 .vb 文件（.NET Core / .NET 5+）。
+    创建临时控制台项目，放入 .vb 文件，然后 dotnet run。
+    """
+    workdir = tempfile.mkdtemp(prefix="vbnet_")
+    try:
+        # 把 .vb 文件复制为 Program.vb
+        import shutil as _sh
+        target_vb = os.path.join(workdir, "Program.vb")
+        _sh.copy2(filepath, target_vb)
+
+        # 写 .vbproj
+        vbproj = os.path.join(workdir, "App.vbproj")
+        with open(vbproj, "w", encoding="utf-8") as f:
+            f.write(
+                '<?xml version="1.0" encoding="utf-8"?>\n'
+                '<Project Sdk="Microsoft.NET.Sdk">\n'
+                '  <PropertyGroup>\n'
+                '    <OutputType>Exe</OutputType>\n'
+                '    <TargetFramework>net10.0</TargetFramework>\n'
+                '    <RootNamespace>PatternApp</RootNamespace>\n'
+                '    <OptionStrict>Off</OptionStrict>\n'
+                '    <OptionExplicit>On</OptionExplicit>\n'
+                '    <Nullable>Disable</Nullable>\n'
+                '  </PropertyGroup>\n'
+                '</Project>\n'
+            )
+
+        t0 = time.monotonic()
+        # dotnet run --project <proj>
+        r = subprocess.run(
+            [DOTNET, "run", "--project", vbproj],
+            capture_output=True, text=True, timeout=TIMEOUT,
+            encoding="utf-8", errors="replace",
+            cwd=workdir,
+        )
+
+        success = (r.returncode == 0)
+        # 合并 stdout/stderr：dotnet 的编译错误在 stderr，运行输出在 stdout
+        combined_err = r.stderr.strip()
+        if not success and not combined_err:
+            combined_err = f"exit code = {r.returncode}"
+        return {
+            "success": success,
+            "output":  r.stdout.strip(),
+            "error":   combined_err,
+            "duration": round(time.monotonic() - t0, 3),
+        }
+    except subprocess.TimeoutExpired:
+        return {"success": False, "output": "", "error": "TIMEOUT", "duration": TIMEOUT}
+    except Exception as e:
+        return {"success": False, "output": "", "error": str(e), "duration": 0}
+    finally:
+        try:
+            shutil.rmtree(workdir, ignore_errors=True)
+        except Exception:
+            pass
 
 
 # ── test runner ──────────────────────────────────────────────────
@@ -170,6 +239,24 @@ def run_all():
     else:
         print("  [WARN] aspPycode/ not found")
 
+    # VB.NET
+    print("\n" + "=" * 60)
+    print("  VB.NET Tests (dotnet run)")
+    print("=" * 60)
+    if os.path.isdir(VBNET_DIR):
+        for fn in sorted(os.listdir(VBNET_DIR)):
+            if not fn.lower().endswith(".vb"):
+                continue
+            fp = os.path.join(VBNET_DIR, fn)
+            print(f"\n  >>> {fn}")
+            r = run_vbnet(fp)
+            r["filename"] = fn
+            r["type"]     = "VBNET"
+            results.append(r)
+            _print_result(r)
+    else:
+        print("  [WARN] vbNetcode/ not found")
+
     return results
 
 
@@ -189,18 +276,21 @@ def generate_report(results):
     classic = [r for r in results if r["type"] == "ClassicASP"]
     axon    = [r for r in results if r["type"] == "AxonASP"]
     asppy   = [r for r in results if r["type"] == "ASPPY"]
+    vbnet   = [r for r in results if r["type"] == "VBNET"]
 
     c_pass = sum(1 for r in classic if r["success"])
     a_pass = sum(1 for r in axon    if r["success"])
     s_pass = sum(1 for r in asppy   if r["success"])
+    v_pass = sum(1 for r in vbnet   if r["success"])
     c_avg  = sum(r["duration"] for r in classic) / len(classic) if classic else 0
     a_avg  = sum(r["duration"] for r in axon)    / len(axon)    if axon    else 0
     s_avg  = sum(r["duration"] for r in asppy)   / len(asppy)   if asppy   else 0
+    v_avg  = sum(r["duration"] for r in vbnet)   / len(vbnet)   if vbnet   else 0
 
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     lines = [
-        f"# Design Pattern VBScript Test Report",
+        f"# Design Pattern VBScript + VB.NET Test Report",
         f"",
         f"Generated: {now}",
         f"",
@@ -211,47 +301,24 @@ def generate_report(results):
         f"| ClassicASP | {len(classic):5d} | {c_pass:4d} | {len(classic)-c_pass:4d} | {c_avg:.3f}s  |",
         f"| AxonASP    | {len(axon):5d} | {a_pass:4d} | {len(axon)-a_pass:4d} | {a_avg:.3f}s  |",
         f"| ASPPY      | {len(asppy):5d} | {s_pass:4d} | {len(asppy)-s_pass:4d} | {s_avg:.3f}s  |",
+        f"| VB.NET     | {len(vbnet):5d} | {v_pass:4d} | {len(vbnet)-v_pass:4d} | {v_avg:.3f}s  |",
         f"",
     ]
 
-    # ClassicASP detail
-    lines += ["## ClassicASP Details", ""]
-    for r in classic:
-        s = "PASS" if r["success"] else "FAIL"
-        lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
-        if r["output"]:
-            for l in r["output"].splitlines():
-                lines.append(f"  - `{l}`")
-        if not r["success"] and r["error"]:
-            for l in r["error"].splitlines():
-                lines.append(f"  - ERR: `{l}`")
-    lines.append("")
-
-    # AxonASP detail
-    lines += ["## AxonASP Details", ""]
-    for r in axon:
-        s = "PASS" if r["success"] else "FAIL"
-        lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
-        if r["output"]:
-            for l in r["output"].splitlines():
-                lines.append(f"  - `{l}`")
-        if not r["success"] and r["error"]:
-            for l in r["error"].splitlines():
-                lines.append(f"  - ERR: `{l}`")
-    lines.append("")
-
-    # ASPPY detail
-    lines += ["## ASPPY Details", ""]
-    for r in asppy:
-        s = "PASS" if r["success"] else "FAIL"
-        lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
-        if r["output"]:
-            for l in r["output"].splitlines():
-                lines.append(f"  - `{l}`")
-        if not r["success"] and r["error"]:
-            for l in r["error"].splitlines():
-                lines.append(f"  - ERR: `{l}`")
-    lines.append("")
+    for section_title, section_list in [
+        ("ClassicASP", classic), ("AxonASP", axon), ("ASPPY", asppy), ("VB.NET", vbnet),
+    ]:
+        lines += [f"## {section_title} Details", ""]
+        for r in section_list:
+            s = "PASS" if r["success"] else "FAIL"
+            lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
+            if r["output"]:
+                for l in r["output"].splitlines():
+                    lines.append(f"  - `{l}`")
+            if not r["success"] and r["error"]:
+                for l in r["error"].splitlines():
+                    lines.append(f"  - ERR: `{l}`")
+        lines.append("")
 
     # Fix suggestions
     fixes = []
@@ -259,18 +326,8 @@ def generate_report(results):
         if r["success"]:
             continue
         fn = r["filename"]
-        if fn == "04_建造者模式.vbs":
-            fixes.append(f"- **{fn}**: 变量名 `director` 与类名 `Director` 冲突（VBScript 不区分大小写）。建议改为 `myDirector`。")
-        elif fn == "05_原型模式.vbs":
-            fixes.append(f"- **{fn}**: `ReDim copy.Skills(ub)` 语法错误。`ReDim` 只能用于数组变量，不能用于对象属性。建议改为临时数组赋值方式。")
-        elif fn == "06_代理模式.vbs":
-            fixes.append(f"- **{fn}**: `m_RealImage` 未初始化时值为 `Empty`，不是 `Nothing`。`If m_RealImage Is Nothing` 在 `Empty` 上会报'缺少对象'。建议在 `Class_Initialize` 中加 `Set m_RealImage = Nothing`。")
-        elif fn == "15_模板方法模式.vbs":
-            fixes.append(f"- **{fn}**: `PDFMiner` / `CSVMinder` 没有 `MineData` 方法。VBScript 不支持 `Extends` 继承，需要在这些类中各自实现 `MineData`，或改用组合模式包含一个 `DataMiner` 实例。")
-        elif fn == "17_责任链模式.vbs":
-            fixes.append(f"- **{fn}**: `m_Next` 未初始化时值为 `Empty`，不是 `Nothing`。`If m_Next Is Nothing` 在 `Empty` 上会报'缺少对象'。建议在 `Class_Initialize` 中加 `Set m_Next = Nothing`。")
-        elif fn == "20_中介者模式.asp":
-            fixes.append(f"- **{fn}**: Object required（对象引用为空）。可能是接口方法调用时对象未初始化。")
+        if r["type"] == "VBNET":
+            fixes.append(f"- **{fn}**: VB.NET 编译或运行错误，请检查代码（类/模块结构、Sub Main、引用）。")
         else:
             fixes.append(f"- **{fn}**: 运行时/编译错误，请检查代码。")
 
@@ -289,7 +346,7 @@ def generate_report(results):
 # ── main ─────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("=" * 60)
-    print("  Design Pattern VBScript Test Framework")
+    print("  Design Pattern VBScript + VB.NET Test Framework")
     print("=" * 60)
     results = run_all()
     generate_report(results)

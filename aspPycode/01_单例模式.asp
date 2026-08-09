@@ -36,5 +36,5 @@ Dim s1, s2
 Set s1 = GetInstance()
 Set s2 = GetInstance()
 s1.Data = "已修改"
-Response.Write s2.Data   ' 已修改（同一个对象）
+Response.Write(s2.Data)   ' 已修改（同一个对象）
 %>

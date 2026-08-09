@@ -5,13 +5,15 @@ Class Newspaper
 
     ' 收到新闻时的响应
     Public Function Update(news)
-        Response.Write Name & " 收到新闻：" & news
+        Response.Write(Name & " 收到新闻：" & news)
+
     End Function
 End Class
 
 ' 被观察者：新闻社
 Class NewsAgency
     Private m_Observers()   ' 观察者数组
+
     Private m_Count         ' 当前观察者数量
 
     ' 构造函数：初始化数组
@@ -39,7 +41,8 @@ Class NewsAgency
 
     ' 发布新闻：先更新自身状态，再通知所有观察者
     Public Function Publish(news)
-        Notify news
+        Notify(news)
+
     End Function
 End Class
 
@@ -51,7 +54,9 @@ paper1.Name = "晨报"
 Set paper2 = New Newspaper
 paper2.Name = "晚报"
 
-agency.Subscribe paper1
-agency.Subscribe paper2
-agency.Publish "重大新闻！"
+agency.Subscribe(paper1)
+
+agency.Subscribe(paper2)
+
+agency.Publish("重大新闻！")
 %>

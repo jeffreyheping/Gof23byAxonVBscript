@@ -4,15 +4,18 @@ Dim Response: Set Response = New ResponseStub
 Class CPU
     ' 冻结当前状态
     Public Function Freeze
-        Response.Write "CPU 冻结"
+        Response.Write("CPU 冻结")
+
     End Function
     ' 跳转到指定地址
     Public Function Jump(pos)
-        Response.Write "CPU 跳转到 " & pos
+        Response.Write("CPU 跳转到 " & pos)
+
     End Function
     ' 开始执行
     Public Function Execute
-        Response.Write "CPU 执行"
+        Response.Write("CPU 执行")
+
     End Function
 End Class
 
@@ -20,7 +23,8 @@ End Class
 Class Memory
     ' 将数据加载到指定地址
     Public Function Load(pos, data)
-        Response.Write "内存加载 " & data & " 到 " & pos
+        Response.Write("内存加载 " & data & " 到 " & pos)
+
     End Function
 End Class
 
@@ -50,7 +54,8 @@ Class ComputerFacade
         Dim bootData
         bootData = m_HD.Read(0)
         m_Mem.Load 0, bootData
-        m_CPU.Jump 0
+        m_CPU.Jump(0)
+
         m_CPU.Execute
     End Function
 End Class
@@ -58,7 +63,7 @@ End Class
 ' 演示：外部只需调用 Start，无需了解内部细节
 Dim pc
 Set pc = New ComputerFacade
-pc.Start   ' 对外只暴露一个 Start
+pc.Start()   ' 对外只暴露一个 Start
 
 Class ResponseStub
     Public Sub Write(s)

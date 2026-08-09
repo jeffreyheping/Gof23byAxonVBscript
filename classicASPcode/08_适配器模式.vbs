@@ -4,7 +4,8 @@ Dim Response: Set Response = New ResponseStub
 Class OldPrinter
     ' 旧接口：直接打印字符串
     Public Function OldPrint(s)
-        Response.Write "【旧打印机】" & s
+        Response.Write("【旧打印机】" & s)
+
     End Function
 End Class
 
@@ -19,7 +20,8 @@ Class PrinterAdapter
 
     ' 新接口：接收 Document 对象，提取 Content 后转调旧接口
     Public Function Print(doc)
-        m_OldPrinter.OldPrint doc.Content
+        m_OldPrinter.OldPrint(doc.Content)
+
     End Function
 End Class
 
@@ -35,8 +37,9 @@ doc.Content = "Hello World"
 
 Dim adapter
 Set adapter = New PrinterAdapter
-adapter.Init New OldPrinter
-adapter.Print doc   ' 用新接口调用旧打印机
+adapter.Init(New OldPrinter)
+
+adapter.Print(doc)   ' 用新接口调用旧打印机
 
 Class ResponseStub
     Public Sub Write(s)

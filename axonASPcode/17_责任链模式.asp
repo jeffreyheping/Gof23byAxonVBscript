@@ -45,7 +45,8 @@ Class Logger
 
     Public Function IHandler_Log(msg As String, level As LogLevel)
         If ShouldHandle(level) Then
-            Response.Write "【" & m_Name & "】" & msg
+            Response.Write("【" & m_Name & "】" & msg)
+
         End If
         If m_Next IsNot Nothing Then
             m_Next.Log msg, level
@@ -75,8 +76,10 @@ errObj.Name = "邮件"
 errObj.Level = LogLevel.ErrorLevel
 Set errorLog = errObj
 
-debugLog.SetNext infoLog
-infoLog.SetNext errorLog
+debugLog.SetNext(infoLog)
+
+infoLog.SetNext(errorLog)
+
 
 debugLog.Log "系统启动", LogLevel.Info
 debugLog.Log "严重错误", LogLevel.ErrorLevel

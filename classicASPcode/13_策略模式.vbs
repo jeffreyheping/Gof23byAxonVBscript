@@ -70,11 +70,14 @@ Dim mySorter, data
 Set mySorter = New Sorter
 data = Array(5, 2, 8, 1, 9)
 
-mySorter.SetStrategy New BubbleSort
-Response.Write Join(mySorter.Sort(data), ",")
+mySorter.SetStrategy(New BubbleSort)
 
-mySorter.SetStrategy New QuickSort
-Response.Write Join(mySorter.Sort(data), ",")
+Response.Write(Join(mySorter.Sort(data), ","))
+
+
+mySorter.SetStrategy(New QuickSort)
+
+Response.Write(Join(mySorter.Sort(data), ","))
 
 Class ResponseStub
     Public Sub Write(s)

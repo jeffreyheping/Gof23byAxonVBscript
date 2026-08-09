@@ -17,7 +17,8 @@ Class Logger
     ' 处理日志请求：若级别匹配则输出，然后传递给下一个
     Public Function Log(msg, level)
         If ShouldHandle(level) Then
-            Response.Write "【" & Name & "】" & msg
+            Response.Write("【" & Name & "】" & msg)
+
         End If
         If Not m_Next Is Nothing Then
             m_Next.Log msg, level
@@ -56,8 +57,10 @@ Set errorLog = New Logger
 errorLog.Name = "邮件"
 errorLog.Level = "ERRORLEVEL"
 
-debugLog.SetNext infoLog
-infoLog.SetNext errorLog
+debugLog.SetNext(infoLog)
+
+infoLog.SetNext(errorLog)
+
 
 debugLog.Log "系统启动", "INFO"     ' 文件和邮件都输出
 debugLog.Log "严重错误", "ERRORLEVEL"    ' 三个都输出

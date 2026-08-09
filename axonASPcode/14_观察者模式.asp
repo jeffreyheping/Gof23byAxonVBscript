@@ -15,7 +15,8 @@ Class Newspaper
 
     ' 收到新闻时的响应
     Public Function Update(news As String)
-        Response.Write Name & " 收到新闻：" & news
+        Response.Write(Name & " 收到新闻：" & news)
+
     End Function
 End Class
 
@@ -25,8 +26,10 @@ Dim WithEvents agency As NewsAgency
 ' 事件处理程序：命名规则为 变量名_事件名
 Sub agency_OnNews(news As String)
     ' 通过全局引用分发到具体观察者
-    paper1.Update news
-    paper2.Update news
+    paper1.Update(news)
+
+    paper2.Update(news)
+
 End Sub
 
 Dim paper1 As Newspaper, paper2 As Newspaper
@@ -36,5 +39,5 @@ Set paper2 = New Newspaper
 paper2.Name = "晚报"
 
 Set agency = New NewsAgency
-agency.Publish "重大新闻！"
+agency.Publish("重大新闻！")
 %>
