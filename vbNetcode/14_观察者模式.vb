@@ -18,9 +18,9 @@ Module Ch14Module
         Public Event NewsPublished As EventHandler(Of NewsEventArgs)
 
         ' 发布新闻：触发事件，所有订阅者自动收到通知
-        Public Function Publish(news As String) As Object
+        Public Sub Publish(news As String)
             RaiseEvent NewsPublished(Me, New NewsEventArgs(news))
-        End Function
+        End Sub
     End Class
     Public Class Newspaper
         Private ReadOnly m_Name As String

@@ -179,13 +179,13 @@ VB.NET 拥有 `Interface` 接口、`Implements` 显式实现、`List(Of T)` 泛�
 ```vbnet
 ' 中介者接口
 Public Interface IMediator
-    Function Register(user As User) As Object
-    Function SendMessage(msg As String, fromUser As User) As Object
+    Sub Register(user As User)
+    Sub SendMessage(msg As String, fromUser As User)
 End Interface
 
 ' 同事接口
 Public Interface IColleague
-    Function Receive(msg As String, fromUser As User) As Object
+    Sub Receive(msg As String, fromUser As User)
 End Interface
 
 ' 聊天室：实现中介者接口，持有所有同事对象
@@ -194,18 +194,18 @@ Public Class ChatRoom
     Private ReadOnly m_Users As New List(Of User)()
 
     ' 注册同事
-    Public Function Register(user As User) As Object Implements IMediator.Register
+    Public Sub Register(user As User) Implements IMediator.Register
         m_Users.Add(user)
-    End Function
+    End Sub
 
     ' 转发消息：遍历同事，调用 Receive，发送者除外
-    Public Function SendMessage(msg As String, fromUser As User) As Object Implements IMediator.SendMessage
+    Public Sub SendMessage(msg As String, fromUser As User) Implements IMediator.SendMessage
         For Each u As User In m_Users
             If Not u Is fromUser Then
                 u.Receive(msg, fromUser)
             End If
         Next
-    End Function
+    End Sub
 End Class
 
 ' 用户：实现同事接口
@@ -215,20 +215,20 @@ Public Class User
     Private m_Mediator As IMediator
 
     ' 加入中介者：保存引用并注册自身
-    Public Function Join(mediator As IMediator) As Object
+    Public Sub Join(mediator As IMediator)
         m_Mediator = mediator
         mediator.Register(Me)
-    End Function
+    End Sub
 
     ' 发送消息：交给中介者转发
-    Public Function Send(msg As String) As Object
+    Public Sub Send(msg As String)
         m_Mediator.SendMessage(msg, Me)
-    End Function
+    End Sub
 
     ' 接收消息：显示收到内容
-    Public Function Receive(msg As String, fromUser As User) As Object Implements IColleague.Receive
+    Public Sub Receive(msg As String, fromUser As User) Implements IColleague.Receive
         Console.WriteLine(Name & " 收到 " & fromUser.Name & " 的消息：" & msg)
-    End Function
+    End Sub
 End Class
 
 ' 演示：用户之间不直接交互，全部通过聊天室

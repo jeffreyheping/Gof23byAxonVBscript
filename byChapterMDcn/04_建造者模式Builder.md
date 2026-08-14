@@ -174,9 +174,9 @@ Public Class Computer
     Public Property RAM As String
     Public Property Disk As String
 
-    Public Function ShowConfig() As Object
+    Public Sub ShowConfig()
         Console.WriteLine($"配置：{CPU} / {RAM} / {Disk}")
-    End Function
+    End Sub
 End Class
 
 ' ② 建造者接口：每个 Build* 方法返回自身类型，支持链式

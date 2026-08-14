@@ -13,20 +13,20 @@ Module Ch17Module
     Public MustInherit Class HandlerBase
         Protected m_Next As HandlerBase
 
-        ' SetNext 是 Function，与 Axon 版一致（不返回 Me，不支持链式构建）
-        Public Function SetNext(nextHandler As HandlerBase) As Object
+        ' SetNext 是 Sub，与 Axon 版一致（不返回 Me，不支持链式构建）
+        Public Sub SetNext(nextHandler As HandlerBase)
             m_Next = nextHandler
-        End Function
+        End Sub
 
         ' 模板方法骨架：处理当前节点 → 若有下一个则继续转发
-        Public Function Log(msg As String, level As LogLevel) As Object
+        Public Sub Log(msg As String, level As LogLevel)
             If ShouldHandle(level) Then
                 Console.WriteLine($"【{Name}】{msg}")
             End If
             If m_Next IsNot Nothing Then
                 m_Next.Log(msg, level)
             End If
-        End Function
+        End Sub
 
         ' MustOverride：强制子类实现级别判断
         Protected MustOverride Function ShouldHandle(level As LogLevel) As Boolean

@@ -7,8 +7,8 @@ Imports System.Linq
 Module Ch10Module
     Public Interface IComponent
         Property Name As String
-        Function Add(child As IComponent) As Object
-        Function Operation(indent As String) As Object
+        Sub Add(child As IComponent)
+        Sub Operation(indent As String)
     End Interface
     Public MustInherit Class ComponentBase
         Implements IComponent
@@ -16,33 +16,33 @@ Module Ch10Module
         Public Overridable Property Name As String Implements IComponent.Name
 
         ' 默认空实现：叶子节点继承此默认，组合节点重写
-        Public Overridable Function Add(child As IComponent) As Object Implements IComponent.Add
-        End Function
+        Public Overridable Sub Add(child As IComponent) Implements IComponent.Add
+        End Sub
 
-        Public MustOverride Function Operation(indent As String) As Object Implements IComponent.Operation
+        Public MustOverride Sub Operation(indent As String) Implements IComponent.Operation
     End Class
     Public Class Leaf
         Inherits ComponentBase
 
-        Public Overrides Function Operation(indent As String) As Object
+        Public Overrides Sub Operation(indent As String)
             Console.WriteLine(indent & "叶子：" & Name)
-        End Function
+        End Sub
     End Class
     Public Class Composite
         Inherits ComponentBase
 
         Private ReadOnly m_Children As New List(Of IComponent)()
 
-        Public Overrides Function Add(child As IComponent) As Object
+        Public Overrides Sub Add(child As IComponent)
             m_Children.Add(child)
-        End Function
+        End Sub
 
-        Public Overrides Function Operation(indent As String) As Object
+        Public Overrides Sub Operation(indent As String)
             Console.WriteLine(indent & "组合：" & Name)
             For Each child In m_Children
                 child.Operation(indent & "  ")
             Next
-        End Function
+        End Sub
     End Class
     Sub Main()
 

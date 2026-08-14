@@ -134,9 +134,9 @@ Public Class TreeType
     End Sub
 
     ' 在指定坐标绘制树（x, y 是外部状态，由调用方传入）
-    Public Function Draw(x As Long, y As Long) As Object
+    Public Sub Draw(x As Long, y As Long)
         Console.WriteLine($"在 ({x},{y}) 绘制 {Color}{Name}")
-    End Function
+    End Sub
 End Class
 
 ' ② 享元工厂：缓存并复用 TreeType

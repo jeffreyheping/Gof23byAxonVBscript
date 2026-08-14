@@ -103,10 +103,10 @@ Class MyCollection
     End Sub
 
     ' 添加元素
-    Public Sub Add(item)
+    Public Function Add(item)
         m_Items.Add(item)
 
-    End Sub
+    End Function
 
     ' 返回元素总数
     Public Function Count
@@ -156,9 +156,9 @@ Public Class MyCollection(Of T)
     Private ReadOnly m_Items As New List(Of T)()
 
     ' 添加元素
-    Public Function Add(item As T) As Object
+    Public Sub Add(item As T)
         m_Items.Add(item)
-    End Function
+    End Sub
 
     ' 返回元素总数
     Public ReadOnly Property Count As Integer

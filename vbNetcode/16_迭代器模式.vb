@@ -11,9 +11,9 @@ Module Ch16Module
         Private ReadOnly m_Items As New List(Of T)()
 
         ' 添加元素
-        Public Function Add(item As T) As Object
+        Public Sub Add(item As T)
             m_Items.Add(item)
-        End Function
+        End Sub
 
         ' 返回元素总数
         Public ReadOnly Property Count As Integer

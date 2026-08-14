@@ -149,13 +149,13 @@ VB.NET 拥有方法重载（Overloads），访问者模式与 Axon 版同结构�
 ```vbnet
 ' 元素接口
 Public Interface IElement
-    Function Accept(visitor As IVisitor) As Object
+    Sub Accept(visitor As IVisitor)
 End Interface
 
 ' 访问者接口：每个具体元素对应一个 Visit 重载
 Public Interface IVisitor
-    Function Visit(dot As Dot) As Object
-    Function Visit(circle As Circle) As Object
+    Sub Visit(dot As Dot)
+    Sub Visit(circle As Circle)
 End Interface
 
 ' 具体元素：点
@@ -164,9 +164,9 @@ Public Class Dot
     Public X As Integer, Y As Integer
 
     ' visitor.Visit(Me) 中 Me 编译期类型为 Dot，方法重载自动匹配 IVisitor.Visit(Dot)
-    Public Function Accept(visitor As IVisitor) As Object Implements IElement.Accept
+    Public Sub Accept(visitor As IVisitor) Implements IElement.Accept
         visitor.Visit(Me)
-    End Function
+    End Sub
 End Class
 
 ' 具体元素：圆
@@ -174,22 +174,22 @@ Public Class Circle
     Implements IElement
     Public X As Integer, Y As Integer, Radius As Integer
 
-    Public Function Accept(visitor As IVisitor) As Object Implements IElement.Accept
+    Public Sub Accept(visitor As IVisitor) Implements IElement.Accept
         visitor.Visit(Me)   ' 自动匹配 IVisitor.Visit(Circle)
-    End Function
+    End Sub
 End Class
 
 ' 具体访问者：绘图
 Public Class DrawingVisitor
     Implements IVisitor
 
-    Public Function Visit(dot As Dot) As Object Implements IVisitor.Visit
+    Public Sub Visit(dot As Dot) Implements IVisitor.Visit
         Console.WriteLine($"绘制点：({dot.X},{dot.Y})")
-    End Function
+    End Sub
 
-    Public Function Visit(circle As Circle) As Object Implements IVisitor.Visit
+    Public Sub Visit(circle As Circle) Implements IVisitor.Visit
         Console.WriteLine($"绘制圆：中心({circle.X},{circle.Y}) 半径{circle.Radius}")
-    End Function
+    End Sub
 End Class
 
 ' 演示

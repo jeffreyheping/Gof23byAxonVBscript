@@ -177,11 +177,11 @@ Public Class TextEditor
     Private m_Content As String = ""
     Private m_CursorPos As Integer = 0
 
-    Public Function Write(text As String) As Object
+    Public Sub Write(text As String)
         m_Content &= text
 
         m_CursorPos = m_Content.Length
-    End Function
+    End Sub
 
     ' 保存当前状态到备忘录（Structure 值拷贝返回）
     Public Function SaveState() As EditorMemento
@@ -192,10 +192,10 @@ Public Class TextEditor
     End Function
 
     ' 从备忘录恢复状态（Structure 值拷贝传入，不修改原快照）
-    Public Function RestoreState(memento As EditorMemento) As Object
+    Public Sub RestoreState(memento As EditorMemento)
         m_Content = memento.Content
         m_CursorPos = memento.CursorPos
-    End Function
+    End Sub
 
     Public ReadOnly Property Content As String
         Get

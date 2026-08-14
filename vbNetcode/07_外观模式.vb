@@ -6,20 +6,20 @@ Imports System.Collections
 Imports System.Linq
 Module Ch07Module
     Public Class CPU
-        Public Function Freeze() As Object
+        Public Sub Freeze()
             Console.WriteLine("CPU 冻结")
-        End Function
-        Public Function Jump(position As Long) As Object
+        End Sub
+        Public Sub Jump(position As Long)
             Console.WriteLine("CPU 跳转到 " & position)
-        End Function
-        Public Function Execute() As Object
+        End Sub
+        Public Sub Execute()
             Console.WriteLine("CPU 执行")
-        End Function
+        End Sub
     End Class
     Public Class Memory
-        Public Function Load(position As Long, data As String) As Object
+        Public Sub Load(position As Long, data As String)
             Console.WriteLine("内存加载 " & data & " 到 " & position)
-        End Function
+        End Sub
     End Class
     Public Class HardDrive
         Public Function Read(lba As Long) As String
@@ -39,13 +39,13 @@ Module Ch07Module
         End Sub
 
         ' 一键开机：内部按顺序调用各子系统
-        Public Function Start() As Object
+        Public Sub Start()
             m_CPU.Freeze()
             Dim bootData As String = m_HD.Read(0)
             m_Mem.Load(0, bootData)
             m_CPU.Jump(0)
             m_CPU.Execute()
-        End Function
+        End Sub
     End Class
     Sub Main()
 

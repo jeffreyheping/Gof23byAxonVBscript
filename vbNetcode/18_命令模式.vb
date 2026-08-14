@@ -6,16 +6,16 @@ Imports System.Collections
 Imports System.Linq
 Module Ch18Module
     Public Interface ICommand
-        Function Execute() As Object
+        Sub Execute()
     End Interface
     Public Class Light
-        Public Function TurnOn() As Object
+        Public Sub TurnOn()
             Console.WriteLine("灯已打开")
-        End Function
+        End Sub
 
-        Public Function TurnOff() As Object
+        Public Sub TurnOff()
             Console.WriteLine("灯已关闭")
-        End Function
+        End Sub
     End Class
     Public Class LightOnCommand
         Implements ICommand
@@ -26,9 +26,9 @@ Module Ch18Module
             m_Light = light
         End Sub
 
-        Public Function Execute() As Object Implements ICommand.Execute
+        Public Sub Execute() Implements ICommand.Execute
             m_Light.TurnOn()
-        End Function
+        End Sub
     End Class
     Public Class LightOffCommand
         Implements ICommand
@@ -39,20 +39,20 @@ Module Ch18Module
             m_Light = light
         End Sub
 
-        Public Function Execute() As Object Implements ICommand.Execute
+        Public Sub Execute() Implements ICommand.Execute
             m_Light.TurnOff()
-        End Function
+        End Sub
     End Class
     Public Class RemoteControl
         Private m_Command As ICommand
 
-        Public Function SetCommand(cmd As ICommand) As Object
+        Public Sub SetCommand(cmd As ICommand)
             m_Command = cmd
-        End Function
+        End Sub
 
-        Public Function PressButton() As Object
+        Public Sub PressButton()
             m_Command.Execute()
-        End Function
+        End Sub
     End Class
     Sub Main()
 

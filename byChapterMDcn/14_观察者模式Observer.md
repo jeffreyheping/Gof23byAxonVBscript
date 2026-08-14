@@ -102,13 +102,13 @@ End Class
 Dim WithEvents agency As NewsAgency
 
 ' 事件处理程序：命名规则为 变量名_事件名
-Sub agency_OnNews(news As String)
+Function agency_OnNews(news As String)
     ' 通过全局引用分发到具体观察者
     paper1.Update(news)
 
     paper2.Update(news)
 
-End Sub
+End Function
 
 Dim paper1 As Newspaper, paper2 As Newspaper
 Set paper1 = New Newspaper
@@ -145,9 +145,9 @@ Public Class NewsAgency
     Public Event NewsPublished As EventHandler(Of NewsEventArgs)
 
     ' 发布新闻：触发事件，所有订阅者自动收到通知
-    Public Function Publish(news As String) As Object
+    Public Sub Publish(news As String)
         RaiseEvent NewsPublished(Me, New NewsEventArgs(news))
-    End Function
+    End Sub
 End Class
 
 ' ③ 观察者：通过 WithEvents + Handles 声明式订阅

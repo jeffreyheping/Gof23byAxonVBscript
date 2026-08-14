@@ -219,7 +219,7 @@ Public Class QuickSort
         Return a
     End Function
 
-    Private Function QuickSortHelper(a As Integer(), lo As Integer, hi As Integer) As Object
+    Private Sub QuickSortHelper(a As Integer(), lo As Integer, hi As Integer)
         If lo < hi Then
             Dim pivot As Integer = a(hi)
             Dim i As Integer = lo
@@ -238,16 +238,16 @@ Public Class QuickSort
             QuickSortHelper(a, lo, i - 1)
             QuickSortHelper(a, i + 1, hi)
         End If
-    End Function
+    End Sub
 End Class
 
 ' ④ 上下文：持有抽象基类引用，与 Axon 版一致使用 SetStrategy 切换策略
 Public Class Sorter
     Private m_Strategy As SortStrategy
 
-    Public Function SetStrategy(strategy As SortStrategy) As Object
+    Public Sub SetStrategy(strategy As SortStrategy)
         m_Strategy = strategy
-    End Function
+    End Sub
 
     Public Function Sort(arr As Integer()) As Integer()
         Return m_Strategy.Sort(arr)

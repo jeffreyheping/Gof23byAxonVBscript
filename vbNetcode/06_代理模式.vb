@@ -6,22 +6,22 @@ Imports System.Collections
 Imports System.Linq
 Module Ch06Module
     Public MustInherit Class Image
-        Public MustOverride Function Init(filename As String) As Object
-        Public MustOverride Function Display() As Object
+        Public MustOverride Sub Init(filename As String)
+        Public MustOverride Sub Display()
     End Class
     Public Class RealImage
         Inherits Image
 
         Private m_Filename As String
 
-        Public Overrides Function Init(filename As String) As Object
+        Public Overrides Sub Init(filename As String)
             m_Filename = filename
             Console.WriteLine("【加载大图】" & filename)
-        End Function
+        End Sub
 
-        Public Overrides Function Display() As Object
+        Public Overrides Sub Display()
             Console.WriteLine("显示图片：" & m_Filename)
-        End Function
+        End Sub
     End Class
     Public Class ProxyImage
         Inherits Image
@@ -29,17 +29,17 @@ Module Ch06Module
         Private m_Filename As String
         Private m_RealImage As Image   ' 基类引用，初始为 Nothing
 
-        Public Overrides Function Init(filename As String) As Object
+        Public Overrides Sub Init(filename As String)
             m_Filename = filename
-        End Function
+        End Sub
 
-        Public Overrides Function Display() As Object
+        Public Overrides Sub Display()
             If m_RealImage Is Nothing Then
                 m_RealImage = New RealImage()
                 m_RealImage.Init(m_Filename)
             End If
             m_RealImage.Display()
-        End Function
+        End Sub
     End Class
     Sub Main()
 

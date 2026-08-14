@@ -10,9 +10,9 @@ Module Ch04Module
         Public Property RAM As String
         Public Property Disk As String
 
-        Public Function ShowConfig() As Object
+        Public Sub ShowConfig()
             Console.WriteLine($"配置：{CPU} / {RAM} / {Disk}")
-        End Function
+        End Sub
     End Class
     Public Interface IComputerBuilder
         Function BuildCPU(cpu As String) As IComputerBuilder

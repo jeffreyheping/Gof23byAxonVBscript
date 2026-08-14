@@ -6,22 +6,22 @@ Imports System.Collections
 Imports System.Linq
 Module Ch02Module
     Public MustInherit Class Animal
-        Public MustOverride Function Speak() As Object
+        Public MustOverride Sub Speak()
     End Class
     Public MustInherit Class AnimalFactory
         Public MustOverride Function CreateAnimal() As Animal
     End Class
     Public Class Dog
         Inherits Animal
-        Public Overrides Function Speak() As Object
+        Public Overrides Sub Speak()
             Console.WriteLine("汪汪")
-        End Function
+        End Sub
     End Class
     Public Class Cat
         Inherits Animal
-        Public Overrides Function Speak() As Object
+        Public Overrides Sub Speak()
             Console.WriteLine("喵喵")
-        End Function
+        End Sub
     End Class
     Public Class DogFactory
         Inherits AnimalFactory

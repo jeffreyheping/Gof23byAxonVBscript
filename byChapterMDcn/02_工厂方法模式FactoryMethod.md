@@ -121,7 +121,7 @@ VB.NET 拥有 `MustInherit`（抽象类）+ `MustOverride`（抽象方法）+ `I
 ```vbnet
 ' ① 抽象产品基类：MustInherit 禁止直接实例化，MustOverride 强制子类实现 Speak
 Public MustInherit Class Animal
-    Public MustOverride Function Speak() As Object
+    Public MustOverride Sub Speak()
 End Class
 
 ' ② 抽象工厂基类：定义 CreateAnimal 骨架，不写具体创建逻辑，留给子类
@@ -132,16 +132,16 @@ End Class
 ' ③ 具体产品
 Public Class Dog
     Inherits Animal
-    Public Overrides Function Speak() As Object
+    Public Overrides Sub Speak()
         Console.WriteLine("汪汪")
-    End Function
+    End Sub
 End Class
 
 Public Class Cat
     Inherits Animal
-    Public Overrides Function Speak() As Object
+    Public Overrides Sub Speak()
         Console.WriteLine("喵喵")
-    End Function
+    End Sub
 End Class
 
 ' ④ 具体工厂：每个 Factory 子类只负责一种产品，天然符合开闭原则

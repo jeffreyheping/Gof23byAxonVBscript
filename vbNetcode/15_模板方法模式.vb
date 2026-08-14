@@ -7,42 +7,42 @@ Imports System.Linq
 Module Ch15Module
     Public MustInherit Class DataMiner
         ' ② 模板方法（骨架）：调用顺序固定，子类无需也无法改流程
-        Public Function MineData(filePath As String) As Object
+        Public Sub MineData(filePath As String)
             Load(filePath)              ' 固定步骤1：加载
             Parse(filePath)             ' 可变步骤：解析（子类必须实现）
             Analyze()                   ' 固定步骤2：分析
             SendReport()                ' 固定步骤3：发送报告
-        End Function
+        End Sub
 
         ' 固定步骤：Private 子类不可见，彻底防止被覆盖
-        Private Function Load(filePath As String) As Object
+        Private Sub Load(filePath As String)
             Console.WriteLine($"加载文件：{filePath}")
-        End Function
+        End Sub
 
-        Private Function Analyze() As Object
+        Private Sub Analyze()
             Console.WriteLine("分析数据")
-        End Function
+        End Sub
 
-        Private Function SendReport() As Object
+        Private Sub SendReport()
             Console.WriteLine("发送报告")
-        End Function
+        End Sub
 
         ' ③ 可变步骤：MustOverride 强制所有子类必须实现，漏写直接编译报错
-        Public MustOverride Function Parse(filePath As String) As Object
+        Public MustOverride Sub Parse(filePath As String)
     End Class
     Public Class PDFMiner
         Inherits DataMiner
 
-        Public Overrides Function Parse(filePath As String) As Object
+        Public Overrides Sub Parse(filePath As String)
             Console.WriteLine("【解析 PDF】")
-        End Function
+        End Sub
     End Class
     Public Class CSVMiner
         Inherits DataMiner
 
-        Public Overrides Function Parse(filePath As String) As Object
+        Public Overrides Sub Parse(filePath As String)
             Console.WriteLine("【解析 CSV】")
-        End Function
+        End Sub
     End Class
     Sub Main()
 

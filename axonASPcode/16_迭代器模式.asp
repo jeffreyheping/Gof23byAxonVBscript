@@ -10,10 +10,10 @@ Class MyCollection
     End Sub
 
     ' 添加元素
-    Public Sub Add(item)
+    Public Function Add(item)
         m_Items.Add(item)
 
-    End Sub
+    End Function
 
     ' 返回元素总数
     Public Function Count

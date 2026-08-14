@@ -142,21 +142,21 @@ VB.NET 用 `MustInherit Shape` 抽象基类持有 `Protected m_Renderer As IRend
 ' ===== 实现层：渲染引擎接口 + 具体实现 =====
 
 Public Interface IRenderer
-    Function RenderCircle(radius As Integer) As Object
+    Sub RenderCircle(radius As Integer)
 End Interface
 
 Public Class VectorRenderer
     Implements IRenderer
-    Public Function RenderCircle(radius As Integer) As Object Implements IRenderer.RenderCircle
+    Public Sub RenderCircle(radius As Integer) Implements IRenderer.RenderCircle
         Console.WriteLine("矢量引擎绘制半径" & radius & "的圆")
-    End Function
+    End Sub
 End Class
 
 Public Class RasterRenderer
     Implements IRenderer
-    Public Function RenderCircle(radius As Integer) As Object Implements IRenderer.RenderCircle
+    Public Sub RenderCircle(radius As Integer) Implements IRenderer.RenderCircle
         Console.WriteLine("光栅引擎绘制半径" & radius & "的圆")
-    End Function
+    End Sub
 End Class
 
 ' ===== 抽象层：MustInherit 基类，子类共享 m_Renderer =====
@@ -168,7 +168,7 @@ Public MustInherit Class Shape
         m_Renderer = renderer
     End Sub
 
-    Public MustOverride Function Draw() As Object
+    Public MustOverride Sub Draw()
 End Class
 
 ' ===== 具体形状：Inherits Shape，自动获得 m_Renderer =====
@@ -183,9 +183,9 @@ Public Class Circle
         m_Radius = radius
     End Sub
 
-    Public Overrides Function Draw() As Object
+    Public Overrides Sub Draw()
         m_Renderer.RenderCircle(m_Radius)
-    End Function
+    End Sub
 End Class
 
 ' 演示：同一个形状搭配不同引擎

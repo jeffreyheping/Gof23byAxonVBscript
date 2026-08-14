@@ -6,15 +6,15 @@ Imports System.Collections
 Imports System.Linq
 Module Ch19Module
     Public MustInherit Class StateBase
-        Public MustOverride Function Handle() As Object
+        Public MustOverride Sub Handle()
         Public MustOverride Function NextState() As StateBase
     End Class
     Public Class RedState
         Inherits StateBase
 
-        Public Overrides Function Handle() As Object
+        Public Overrides Sub Handle()
             Console.WriteLine("红灯：停止")
-        End Function
+        End Sub
 
         Public Overrides Function NextState() As StateBase
             Return New GreenState()
@@ -23,9 +23,9 @@ Module Ch19Module
     Public Class GreenState
         Inherits StateBase
 
-        Public Overrides Function Handle() As Object
+        Public Overrides Sub Handle()
             Console.WriteLine("绿灯：通行")
-        End Function
+        End Sub
 
         Public Overrides Function NextState() As StateBase
             Return New YellowState()
@@ -34,9 +34,9 @@ Module Ch19Module
     Public Class YellowState
         Inherits StateBase
 
-        Public Overrides Function Handle() As Object
+        Public Overrides Sub Handle()
             Console.WriteLine("黄灯：注意")
-        End Function
+        End Sub
 
         Public Overrides Function NextState() As StateBase
             Return New RedState()
@@ -49,13 +49,13 @@ Module Ch19Module
             m_State = New RedState()
         End Sub
 
-        Public Function Change() As Object
+        Public Sub Change()
             m_State = m_State.NextState()
-        End Function
+        End Sub
 
-        Public Function Operate() As Object
+        Public Sub Operate()
             m_State.Handle()
-        End Function
+        End Sub
     End Class
     Sub Main()
 

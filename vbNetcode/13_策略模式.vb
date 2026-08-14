@@ -32,7 +32,7 @@ Module Ch13Module
             Return a
         End Function
 
-        Private Function QuickSortHelper(a As Integer(), lo As Integer, hi As Integer) As Object
+        Private Sub QuickSortHelper(a As Integer(), lo As Integer, hi As Integer)
             If lo < hi Then
                 Dim pivot As Integer = a(hi)
                 Dim i As Integer = lo
@@ -51,14 +51,14 @@ Module Ch13Module
                 QuickSortHelper(a, lo, i - 1)
                 QuickSortHelper(a, i + 1, hi)
             End If
-        End Function
+        End Sub
     End Class
     Public Class Sorter
         Private m_Strategy As SortStrategy
 
-        Public Function SetStrategy(strategy As SortStrategy) As Object
+        Public Sub SetStrategy(strategy As SortStrategy)
             m_Strategy = strategy
-        End Function
+        End Sub
 
         Public Function Sort(arr As Integer()) As Integer()
             Return m_Strategy.Sort(arr)

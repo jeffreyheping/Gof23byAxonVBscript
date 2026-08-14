@@ -25,13 +25,13 @@ End Class
 Dim WithEvents agency As NewsAgency
 
 ' 事件处理程序：命名规则为 变量名_事件名
-Sub agency_OnNews(news As String)
+Function agency_OnNews(news As String)
     ' 通过全局引用分发到具体观察者
     paper1.Update(news)
 
     paper2.Update(news)
 
-End Sub
+End Function
 
 Dim paper1 As Newspaper, paper2 As Newspaper
 Set paper1 = New Newspaper

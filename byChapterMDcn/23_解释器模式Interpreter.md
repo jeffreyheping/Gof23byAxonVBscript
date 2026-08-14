@@ -72,7 +72,7 @@ Set add = New AddExpression
 Set add.Left = a
 Set add.Right = b
 
-Response.Write("a + b = " & add.Interpret(ctx)   ' 8)
+Response.Write("a + b = " & add.Interpret(ctx))   ' 8
 
 ```
 
@@ -176,9 +176,9 @@ VB.NET 拥有 `MustInherit`（抽象基类）+ `MustOverride`（抽象方法）+
 Public Class Context
     Private ReadOnly m_Vars As New Dictionary(Of String, Integer)()
 
-    Public Function SetVar(name As String, value As Integer) As Object
+    Public Sub SetVar(name As String, value As Integer)
         m_Vars(name) = value
-    End Function
+    End Sub
 
     Public Function GetVar(name As String) As Integer
         Return m_Vars(name)

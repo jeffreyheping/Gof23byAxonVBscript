@@ -194,8 +194,8 @@ VB.NET 用 `MustInherit ComponentBase` 抽象基类统一 Leaf 与 Composite 的
 ' ① 组件接口：定义所有节点必须支持的契约
 Public Interface IComponent
     Property Name As String
-    Function Add(child As IComponent) As Object
-    Function Operation(indent As String) As Object
+    Sub Add(child As IComponent)
+    Sub Operation(indent As String)
 End Interface
 
 ' ② MustInherit 基类：Name 属性写一次，子类共享；默认 Add 空实现（叶子继承）
@@ -205,19 +205,19 @@ Public MustInherit Class ComponentBase
     Public Overridable Property Name As String Implements IComponent.Name
 
     ' 默认空实现：叶子节点继承此默认，组合节点重写
-    Public Overridable Function Add(child As IComponent) As Object Implements IComponent.Add
-    End Function
+    Public Overridable Sub Add(child As IComponent) Implements IComponent.Add
+    End Sub
 
-    Public MustOverride Function Operation(indent As String) As Object Implements IComponent.Operation
+    Public MustOverride Sub Operation(indent As String) Implements IComponent.Operation
 End Class
 
 ' ③ 叶子节点：仅重写 Operation，其余继承基类默认
 Public Class Leaf
     Inherits ComponentBase
 
-    Public Overrides Function Operation(indent As String) As Object
+    Public Overrides Sub Operation(indent As String)
         Console.WriteLine(indent & "叶子：" & Name)
-    End Function
+    End Sub
 End Class
 
 ' ④ 组合节点：用 List(Of IComponent) 管理子节点，递归遍历
@@ -226,16 +226,16 @@ Public Class Composite
 
     Private ReadOnly m_Children As New List(Of IComponent)()
 
-    Public Overrides Function Add(child As IComponent) As Object
+    Public Overrides Sub Add(child As IComponent)
         m_Children.Add(child)
-    End Function
+    End Sub
 
-    Public Overrides Function Operation(indent As String) As Object
+    Public Overrides Sub Operation(indent As String)
         Console.WriteLine(indent & "组合：" & Name)
         For Each child In m_Children
             child.Operation(indent & "  ")
         Next
-    End Function
+    End Sub
 End Class
 
 ' 演示：构建 总部→分公司→员工 树，统一接口遍历
