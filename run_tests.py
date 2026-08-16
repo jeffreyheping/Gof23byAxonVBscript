@@ -18,7 +18,7 @@ REPORT_FILE  = os.path.join(BASE_DIR, "test_report.md")
 
 CSCRIPT      = r"C:\Windows\System32\cscript.exe"
 WSCRIPT      = r"C:\Windows\System32\wscript.exe"
-AXON_CLI     = r"C:\axonasp\axonasp-cli.exe"
+AXON_CLI     = r"C:\Users\jeffr\Documents\GitHub\axonasp\axonasp-cli.exe"
 ASPPY_CLI    = r"C:\Users\jeffr\Documents\GitHub\ASPPY\asppycli.py"
 DOTNET       = r"dotnet"
 TIMEOUT      = 60   # seconds
