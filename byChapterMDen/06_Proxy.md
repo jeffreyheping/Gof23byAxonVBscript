@@ -113,6 +113,75 @@ img.Display
 ```
 
 **Axon VBScript trade-offs**:
-- The interface mechanism lets both proxy and real object implement the same `IImage` interface, enabling transparent substitution. `ProxyImage` holds the real object as an `IImage` field, creates it on demand in `Display`, and delegates the call — matching the classic proxy's lazy-loading semantics.
-- Missing syntax: **Delegation forwarding** (or inheritance, or struct embedding). Every interface method in the proxy requires a manual forwarding line. The more methods, the more boilerplate. Go also lacks inheritance, but Go has **struct embedding** — embed the real type and automatically get its methods; the proxy only overrides what it needs to intercept. AxonASP currently requires manual forwarding for every method — no automatic delegation syntax.
+- The interface mechanism lets both proxy and real object implement the same `IImage` interface, enabling transparent substitution. `ProxyImage` holds the real object via an `IImage`-typed field, creates it on demand in `Display`, and delegates the call — matching classic proxy lazy-loading semantics. Remaining gap: **missing code reuse mechanism (inheritance / struct embedding) causes verbose delegation forwarding boilerplate**. The classic Proxy structure is "abstract Subject base class + RealSubject + Proxy", all sharing base class code (e.g., common `Filename` property, logging logic), with Proxy only overriding methods it needs to intercept. AxonASP has no inheritance — even if the interface has many methods, each must be manually forwarded in Proxy with one line like `m_RealImage.SomeMethod(...)`. Ten methods means ten forwarding lines; if the interface adds methods later, Proxy must follow. Go also lacks inheritance but uses **struct embedding** to solve this: embedding `*RealImage` automatically gets all its methods, Proxy only writes the `Display` it needs to intercept, all other methods pass through at zero cost. AxonASP currently requires manual forwarding for every method.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET uses `MustInherit`/`Inherits`/`Overrides` to upgrade Axon's interface into an abstract base class. Same scenario as Axon version — lazy loading.
+
+```vbnet
+' ① Subject abstract base class (replacing Axon's IImage interface)
+Public MustInherit Class Image
+    Public MustOverride Sub Init(filename As String)
+    Public MustOverride Sub Display()
+End Class
+
+' ② RealSubject: real object
+Public Class RealImage
+    Inherits Image
+
+    Private m_Filename As String
+
+    Public Overrides Sub Init(filename As String)
+        m_Filename = filename
+        Console.WriteLine("[Loading large image] " & filename)
+    End Sub
+
+    Public Overrides Sub Display()
+        Console.WriteLine("Displaying image: " & m_Filename)
+    End Sub
+End Class
+
+' ③ Proxy: lazy loading, holds real object via base class reference
+Public Class ProxyImage
+    Inherits Image
+
+    Private m_Filename As String
+    Private m_RealImage As Image   ' Base class reference, initially Nothing
+
+    Public Overrides Sub Init(filename As String)
+        m_Filename = filename
+    End Sub
+
+    Public Overrides Sub Display()
+        If m_RealImage Is Nothing Then
+            m_RealImage = New RealImage()
+            m_RealImage.Init(m_Filename)
+        End If
+        m_RealImage.Display()
+    End Sub
+End Class
+
+' Demo: transparently use proxy via abstract base class reference
+Dim img As Image = New ProxyImage()
+img.Init("photo.jpg")
+Console.WriteLine("Proxy created; real image not yet loaded")
+img.Display()   ' Only now triggers real loading
+img.Display()   ' Second time: no loading
+```
+
+**VB.NET version notes**:
+- **Abstract base class instead of interface**: `MustInherit Class Image` prevents `New Image()`, `MustOverride` forces subclass implementation — compile-time check. Axon's `IImage` is just an empty shell; external code can still `New IImage`.
+- **Code reuse through inheritance**: If you want to add shared fields/methods to RealImage and ProxyImage, just add once in `Image` base class, subclasses inherit automatically. Axon's RealImage and ProxyImage are parallel classes, `m_Filename` must be written in both.
+- **`Overrides` explicitly marks overrides**: Subclass overrides must write `Public Overrides Sub Display()`, missing or wrong signature causes compile error. Axon's `IImage_Display` is just a method name prefix convention.
+- **No `Set` needed**: VB.NET object assignment uses `=` directly, `m_RealImage = New RealImage()` doesn't need `Set`.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Subject contract | None (method name convention) | `IImage` interface constraints | `MustInherit` base class + `MustOverride` compile-time enforced |
+| Code reuse | None (fields written separately) | None (Proxy and Real are parallel classes, no inheritance) | Base class fields/methods automatically inherited by all subclasses |
+| Abstract non-instantiable | Cannot | Cannot (interface classes are just regular Classes) | `MustInherit` compile-time prevents `New` |
+| Object assignment | `Set a = New X` | `Set a = New X` | Direct `a = New X()` |
 ---

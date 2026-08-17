@@ -176,5 +176,100 @@ Response.Write Join(sorter.Sort(data), ",")
 ```
 
 **Axon VBScript trade-offs**:
-- `ISortStrategy` guarantees all strategy classes have a `Sort` method. Callers can switch strategies through a type-safe interface reference. `Sorter` holds an `ISortStrategy` reference and calls `m_Strategy.Sort` directly — auto-dispatches to the concrete strategy. Remaining gap: **Generics**. `Sort` parameters and return value can only be untyped (Variant) arrays. The compiler can't constrain array element types. Before Go 1.18 introduced generics, it was the same — using `interface{}` for parameters and relying on runtime type assertions. AxonASP's current state is equivalent to Go 1.17 and earlier.
+- This pattern maps naturally to AxonASP. `ISortStrategy` interface guarantees all strategy classes have a `Sort` method. Callers can switch strategies through a type-safe interface reference. `Sorter` holds an `ISortStrategy` reference, calls `m_Strategy.Sort` directly — auto-dispatches to the concrete strategy without fully-qualified names. Remaining gap: **missing code reuse mechanism (inheritance)**. If you need to add common logic to all strategies (e.g., performance timing, logging), you need an abstract base class + subclass `Overrides`. AxonASP has no inheritance — every strategy class must duplicate the common code. Go also lacks inheritance, solved with struct embedding — embedding a `BaseStrategy` struct auto-provides common methods.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET has `MustInherit` (abstract base class) + `Overrides` (override), enabling textbook Strategy — abstract base class constrains algorithm contract, subclasses `Overrides` to implement specific algorithms.
+
+```vbnet
+' ① Abstract strategy base class: MustInherit prevents direct instantiation, MustOverride forces subclasses to implement Sort
+Public MustInherit Class SortStrategy
+    Public MustOverride Function Sort(arr As Integer()) As Integer()
+End Class
+
+' ② Concrete strategy: Bubble Sort
+Public Class BubbleSort
+    Inherits SortStrategy
+    Public Overrides Function Sort(arr As Integer()) As Integer()
+        Dim a As Integer() = CType(arr.Clone(), Integer())
+        For i = 0 To a.Length - 1
+            For j = 0 To a.Length - 2 - i
+                If a(j) > a(j + 1) Then
+                    Dim tmp As Integer = a(j)
+                    a(j) = a(j + 1)
+                    a(j + 1) = tmp
+                End If
+            Next
+        Next
+        Return a
+    End Function
+End Class
+
+' ③ Concrete strategy: Quick Sort
+Public Class QuickSort
+    Inherits SortStrategy
+    Public Overrides Function Sort(arr As Integer()) As Integer()
+        Dim a As Integer() = CType(arr.Clone(), Integer())
+        QuickSortHelper(a, 0, a.Length - 1)
+        Return a
+    End Function
+
+    Private Sub QuickSortHelper(a As Integer(), lo As Integer, hi As Integer)
+        If lo < hi Then
+            Dim pivot As Integer = a(hi)
+            Dim i As Integer = lo
+            For j = lo To hi - 1
+                If a(j) <= pivot Then
+                    Dim tmp As Integer = a(i)
+                    a(i) = a(j)
+                    a(j) = tmp
+                    i += 1
+                End If
+            Next
+            Dim tmp2 As Integer = a(i)
+            a(i) = a(hi)
+            a(hi) = tmp2
+            QuickSortHelper(a, lo, i - 1)
+            QuickSortHelper(a, i + 1, hi)
+        End If
+    End Sub
+End Class
+
+' ④ Context: holds abstract base class reference, same SetStrategy switching as Axon version
+Public Class Sorter
+    Private m_Strategy As SortStrategy
+
+    Public Sub SetStrategy(strategy As SortStrategy)
+        m_Strategy = strategy
+    End Sub
+
+    Public Function Sort(arr As Integer()) As Integer()
+        Return m_Strategy.Sort(arr)
+    End Function
+End Class
+
+' Demo: same Sorter, switch strategy to change algorithm (same call pattern as Axon version)
+Dim sorter As New Sorter()
+Dim data As Integer() = {5, 2, 8, 1, 9}
+sorter.SetStrategy(New BubbleSort())
+Console.WriteLine(String.Join(",", sorter.Sort(data)))
+
+sorter.SetStrategy(New QuickSort())
+Console.WriteLine(String.Join(",", sorter.Sort(data)))
+```
+
+**VB.NET version notes**:
+- **Real abstract base class + inheritance for code reuse**: `MustInherit Class SortStrategy` prevents `New SortStrategy()`, `MustOverride Sort` forces all subclasses to implement — compile-time check, missing implementation causes immediate error. If you later want to add common fields/methods to all strategies, just add once in base class, subclasses inherit automatically. Axon version can only use `ISortStrategy` interface to constrain method existence, but can't add common logic for subclass inheritance.
+- **Strongly-typed arrays**: `Sort(arr As Integer()) As Integer()` constrains array element types at compile time, passing a string array causes compile error. Axon version `As Variant` can accept anything, type mismatch only crashes at runtime.
+- **No `Set`/`Let` distinction**: VB.NET object assignment uses `=` directly, no need to remember `Set` for objects, `Let` for value types.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Strategy contract | Method name convention (easy to miss) | `ISortStrategy` interface constrains `Sort` | `MustInherit` + `MustOverride` compile-time enforced |
+| Code reuse | None (parallel strategy classes) | None (parallel strategy classes, no inheritance) | Base class fields/methods automatically inherited by all subclasses |
+| Type safety | All Variant, runtime errors | Interface reference strongly typed, Sort params/return still Variant | `Integer()` compile-time constrains element type |
+| Object assignment | `Set a = New X` | `Set a = New X` | Direct `a = New X()` |
 ---

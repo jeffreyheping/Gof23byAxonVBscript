@@ -101,6 +101,63 @@ Response.Write r2Copy.Name & " " & r2Copy.Skills(0)   ' Li Si JavaScript
 ```
 
 **Axon VBScript trade-offs**:
-- `ICloneable` guarantees all prototype classes have a `Clone` method, and you can call `Clone()` directly through an interface reference. But manual field-by-field copying is still required — the interface solves the contract problem, not the syntactic sugar problem. VBScript still has no built-in deep copy or serialization.
-- Missing syntax: **Built-in deep copy**. Go also lacks inheritance, but Go also has no built-in Clone — Go's approach is for each type to implement its own `Clone()` method (same as VBScript), or use serialization (`encoding/gob`) for deep copies. The real pain point here isn't "no inheritance" — it's the lack of automatic deep-copy syntax sugar.
+- `ICloneable` interface guarantees all prototype classes have a `Clone` method, and you can call `Clone()` directly through interface references for automatic dispatch to concrete implementations. Remaining gap: **deep copy still requires manual implementation**. The interface solves the contract problem, not the syntax sugar problem — VBScript has no built-in deep copy or serialization mechanism. Every added field, every nested object level, requires manually adding Clone logic (if Skills were an object array instead of a string array, each object would need its own Clone call; more nesting means more code). Go also has no built-in Clone; Go's approach is for each type to implement its own `Clone()` (same as VBScript), or use `encoding/gob` serialization for generic deep copy. The real pain point here is **lacking automatic deep-copy syntax sugar**, not inheritance.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET implements the standard `System.ICloneable` interface, with manual deep copy of fields. Same scenario as Axon version: just MyResume class + Name/Age/Skills fields.
+
+```vbnet
+' ① Resume class: implements System.ICloneable interface, fields same as Axon version
+Public Class MyResume
+    Implements ICloneable
+
+    Public Property Name As String
+    Public Property Age As Integer
+    Public Property Skills As String()   ' Same as Axon version, using array
+
+    ' Standard ICloneable interface method: manual deep copy
+    Public Function Clone() As Object Implements ICloneable.Clone
+        Dim copy As New MyResume() With {
+            .Name = Me.Name,
+            .Age = Me.Age
+        }
+        ' Array deep copy: element-by-element (same logic as Axon version)
+        If Me.Skills IsNot Nothing Then
+            copy.Skills = New String(Me.Skills.Length - 1) {}
+            Array.Copy(Me.Skills, copy.Skills, Me.Skills.Length)
+        End If
+        Return copy
+    End Function
+End Class
+
+' Demo: modify clone, original unaffected
+Dim original As New MyResume() With {
+    .Name = "Zhang San",
+    .Age = 25,
+    .Skills = {"VBScript", "HTML"}
+}
+
+Dim clone As MyResume = DirectCast(original.Clone(), MyResume)
+clone.Name = "Li Si"
+clone.Skills(0) = "JavaScript"
+
+Console.WriteLine(original.Name & " " & original.Skills(0))   ' Zhang San VBScript
+Console.WriteLine(clone.Name & " " & clone.Skills(0))         ' Li Si JavaScript
+```
+
+**VB.NET version notes**:
+- **Standard `System.ICloneable` interface**: .NET BCL's built-in universal contract, recognized by all framework class libraries. Axon version needs to define its own `Class ICloneable` empty shell.
+- **Array deep copy with `Array.Copy`**: VB.NET has standard library `Array.Copy` for one-line array copying. Axon version needs manual `ReDim` + `For` loop element-by-element assignment.
+- **No `Set` needed**: VB.NET object assignment uses `=` directly, `Dim clone As Resume = DirectCast(...)` doesn't need `Set`.
+- **Deep copy still manual**: Same as Axon version — every added reference type field requires adding copy logic in Clone. This is Prototype pattern's inherent pain point, VB.NET is no exception.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Clone contract | None (method name convention) | Custom `ICloneable` interface | Standard `System.ICloneable` interface |
+| Deep copy implementation | Manual `ReDim` + `For` loop | Manual `ReDim` + `For` loop | `Array.Copy` one-line array copy |
+| Object assignment | `Set a = New X` | `Set a = New X` | Direct `a = New X()` |
+| Interface dispatch | No interface | `r1.Clone()` via interface dispatch | `DirectCast(original.Clone(), Resume)` |
 ---

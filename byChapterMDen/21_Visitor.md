@@ -128,5 +128,79 @@ c.Accept drawer
 ```
 
 **Axon VBScript trade-offs**:
-- `IElement`/`IVisitor` interfaces constrain the element and visitor contracts. AxonASP's interface method dispatch is fixed — elements call the visitor's `VisitDot`/`VisitCircle` interface methods directly in `IElement_Accept`. The demo calls `Accept` through `IElement`-typed variables which auto-dispatches — no `DoAccept` helper or fully-qualified names needed. Remaining gap: **Method overloading or double dispatch**. Go also lacks method overloading — Go uses **type switch** (`switch v := element.(type)`) for the visitor's double dispatch, without writing a separate `Visit` method for each element type. AxonASP currently requires explicit `VisitDot`/`VisitCircle` branches in `Accept` — adding a new element type requires modifying all visitors.
+- Improved but with residual gaps: no method overloading/double dispatch. `IElement`/`IVisitor` interfaces constrain the element and visitor contracts. AxonASP's interface method dispatch is fixed — elements call the visitor's `VisitDot`/`VisitCircle` interface methods directly in `IElement_Accept`. Calling `Accept` through `IElement`-typed variables auto-dispatches — no `DoAccept` helper or fully-qualified names needed. Remaining gap: **Method overloading/double dispatch**. Classic Visitor requires language-level double dispatch: `visitor.Visit(element)` should auto-match `Visit(Dot)` or `Visit(Circle)` overloads based on `element`'s runtime type. AxonASP has no method overloading — each element's `Accept` must manually branch to `visitor.VisitDot Me` / `visitor.VisitCircle Me`. Adding a new element type requires modifying all `IVisitor` interfaces + all visitor classes.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET has method overloading (`Overloads`). The Visitor pattern follows the same structure as the Axon version: `IElement`/`IVisitor` interfaces + `Dot`/`Circle`/`DrawingVisitor`. Using `Visit(Dot)`/`Visit(Circle)` overloads unifies the dispatch in `Accept` — no dynamic/DLR or other extra mechanisms needed.
+
+```vbnet
+' Element interface
+Public Interface IElement
+    Sub Accept(visitor As IVisitor)
+End Interface
+
+' Visitor interface: one Visit overload per concrete element
+Public Interface IVisitor
+    Sub Visit(dot As Dot)
+    Sub Visit(circle As Circle)
+End Interface
+
+' Concrete element: Dot
+Public Class Dot
+    Implements IElement
+    Public X As Integer, Y As Integer
+
+    ' In visitor.Visit(Me), Me's compile-time type is Dot; overload auto-matches IVisitor.Visit(Dot)
+    Public Sub Accept(visitor As IVisitor) Implements IElement.Accept
+        visitor.Visit(Me)
+    End Sub
+End Class
+
+' Concrete element: Circle
+Public Class Circle
+    Implements IElement
+    Public X As Integer, Y As Integer, Radius As Integer
+
+    Public Sub Accept(visitor As IVisitor) Implements IElement.Accept
+        visitor.Visit(Me)   ' Auto-matches IVisitor.Visit(Circle)
+    End Sub
+End Class
+
+' Concrete visitor: Drawing
+Public Class DrawingVisitor
+    Implements IVisitor
+
+    Public Sub Visit(dot As Dot) Implements IVisitor.Visit
+        Console.WriteLine($"Drawing dot: ({dot.X},{dot.Y})")
+    End Sub
+
+    Public Sub Visit(circle As Circle) Implements IVisitor.Visit
+        Console.WriteLine($"Drawing circle: center({circle.X},{circle.Y}) radius{circle.Radius}")
+    End Sub
+End Class
+
+' Demo
+Dim d As IElement = New Dot With {.X = 10, .Y = 20}
+Dim c As IElement = New Circle With {.X = 5, .Y = 5, .Radius = 10}
+Dim drawer As IVisitor = New DrawingVisitor()
+d.Accept(drawer)   ' Drawing dot: (10,20)
+c.Accept(drawer)   ' Drawing circle: center(5,5) radius10
+```
+
+**VB.NET version notes**:
+- **Method overloading = unified `Visit(Me)` dispatch**: Axon's `Accept` must hardcode `visitor.VisitDot Me` / `visitor.VisitCircle Me` with different method names per element; VB.NET's `Accept` always writes `visitor.Visit(Me)` — the compiler auto-matches `Visit(Dot)`/`Visit(Circle)` overloads by `Me`'s type.
+- **`Interface` overloading + `Implements` compile-time enforcement**: `IVisitor` declares `Visit(Dot)`/`Visit(Circle)` overloads; forgetting `Implements IVisitor.Visit` is a compile error. Same structure as Axon, just without `VisitDot`/`VisitCircle` branching.
+- **Object initializer one-liner**: `New Dot With {.X = 10, .Y = 20}` replaces Axon's field-by-field `dObj.x = 10` assignment.
+- **No `Set` for object assignment**: `Dim d As IElement = New Dot()` assigns directly to an interface variable; the other two versions need `Set d = dObj`.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|-----------|-----------------|---------------|--------|
+| Accept dispatch | Hardcoded `VisitDot`/`VisitCircle` | Hardcoded `VisitDot`/`VisitCircle` | Unified `visitor.Visit(Me)`, overload matching |
+| Visitor contract | Method name convention | `IVisitor`/`IElement` interface | `Interface` overloading + `Implements` compile-time |
+| Element field init | Field-by-field | Field-by-field | Object initializer `With {.X=10}` one-liner |
+| Object assignment | `Set d = New Dot` | `Set d = dObj` | Direct `d = New Dot()` |
+
 ---

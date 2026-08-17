@@ -164,6 +164,92 @@ root.Operation ""
 
 **Axon VBScript trade-offs**:
 - The interface mechanism unifies the contract for leaves and composites. `Composite` calls `child.Operation` directly through `IComponent`-typed child references, recursively traversing the whole tree — matching the classic Composite's transparent composition semantics. Child storage uses the built-in `Collection` with `For Each` iteration — no manual array management needed.
-- Missing syntax: **Code reuse mechanism** (inheritance or struct embedding). `Leaf` and `Composite` can't share a common `Component` base class to reuse default implementations. Go uses struct embedding to solve this; AxonASP requires each to implement separately.
-- `Leaf.IComponent_Add` must be a no-op: the interface requires all implementors to provide `Add`, but a leaf shouldn't support adding children. There's no way to prohibit this at the type level — we can only silently ignore it at runtime.
+- Missing syntax: **code reuse mechanism (inheritance)**. `Leaf` and `Composite` cannot share a common `Component` base class to reuse default implementations — the `Name` property is written in both classes. If you add `Parent` field, `GetPath()` relative path method, `Depth` property, each implementation class must manually copy. Go uses struct embedding to solve this (`type Leaf struct { Component }`, embedding base class auto-promotes fields/methods). AxonASP requires each to implement separately.
+- `Leaf.IComponent_Add` must be a no-op: transparent composition requires the interface to include `Add`, but leaf nodes shouldn't support adding children. Cannot prohibit this at the type level, can only "silently ignore" at runtime with an empty method body.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET uses `MustInherit ComponentBase` abstract base class to unify Leaf and Composite common code (`Name` property written once, shared by subclasses). Composite uses strongly-typed `List(Of IComponent)` to hold children and recursively `Operation`. Same scenario as Axon version: HQ → Branch → Employee tree traversal.
+
+```vbnet
+' ① Component interface: defines contract all nodes must support
+Public Interface IComponent
+    Property Name As String
+    Sub Add(child As IComponent)
+    Sub Operation(indent As String)
+End Interface
+
+' ② MustInherit base class: Name property written once, shared by subclasses; default empty Add (inherited by leaves)
+Public MustInherit Class ComponentBase
+    Implements IComponent
+
+    Public Overridable Property Name As String Implements IComponent.Name
+
+    ' Default empty implementation: leaves inherit this default, composites override
+    Public Overridable Sub Add(child As IComponent) Implements IComponent.Add
+    End Sub
+
+    Public MustOverride Sub Operation(indent As String) Implements IComponent.Operation
+End Class
+
+' ③ Leaf node: only overrides Operation, everything else inherited from base
+Public Class Leaf
+    Inherits ComponentBase
+
+    Public Overrides Sub Operation(indent As String)
+        Console.WriteLine(indent & "Leaf: " & Name)
+    End Sub
+End Class
+
+' ④ Composite node: uses List(Of IComponent) to manage children, recursive traversal
+Public Class Composite
+    Inherits ComponentBase
+
+    Private ReadOnly m_Children As New List(Of IComponent)()
+
+    Public Overrides Sub Add(child As IComponent)
+        m_Children.Add(child)
+    End Sub
+
+    Public Overrides Sub Operation(indent As String)
+        Console.WriteLine(indent & "Composite: " & Name)
+        For Each child In m_Children
+            child.Operation(indent & "  ")
+        Next
+    End Sub
+End Class
+
+' Demo: build HQ→Branch→Employee tree, unified interface traversal
+Dim root As IComponent = New Composite With {.Name = "HQ"}
+Dim branch1 As IComponent = New Composite With {.Name = "Branch"}
+Dim leaf1 As IComponent = New Leaf With {.Name = "Alice"}
+Dim leaf2 As IComponent = New Leaf With {.Name = "Bob"}
+Dim leaf3 As IComponent = New Leaf With {.Name = "Charlie"}
+
+root.Add(branch1)
+root.Add(leaf3)
+branch1.Add(leaf1)
+branch1.Add(leaf2)
+
+root.Operation("")
+' Composite: HQ
+'   Composite: Branch
+'     Leaf: Alice
+'     Leaf: Bob
+'   Leaf: Charlie
+```
+
+**VB.NET version notes**:
+- **`MustInherit` base class eliminates common code duplication**: `Name` property written once in `ComponentBase`, `Leaf` and `Composite` automatically get it via `Inherits`. Axon version writes `Name` in both classes.
+- **`List(Of IComponent)` strongly-typed container**: Compile-time guarantee that children can only be `IComponent`, with native `For Each` support. Classic version manually `ReDim` arrays prone to out-of-bounds, Axon `Collection` has no type safety.
+- **Leaf Add empty implementation**: Same as Axon version — leaf node's `Add` inherits the base class's empty implementation, silently ignored. `MustOverride Operation` forces every node type to implement its own traversal logic.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Node contract | Method name convention | `Implements IComponent` interface constraint | `MustInherit ComponentBase` + `Interface IComponent` |
+| Name property reuse | Leaf/Composite each write their own | Leaf/Composite each write their own | Base class writes once, subclasses inherit |
+| Child container | Manual `ReDim` array (prone to out-of-bounds) | Built-in `Collection` (no type safety) | Generic `List(Of IComponent)` (compile-time type check) |
+| Leaf Add behavior | Method doesn't exist | Empty implementation (inherits base class default) | Empty implementation (inherits base class default) |
 ---

@@ -1,66 +1,67 @@
 # Design Pattern VBScript + VB.NET Test Report
 
-Generated: 2026-08-16 11:40:36
+Generated: 2026-08-17 13:30:45
 
 ## Summary
 
-| Engine     | Total | Pass | Fail | Avg Time |
-|------------|-------|------|------|----------|
-| ClassicASP |    23 |   23 |    0 | 0.113s  |
-| AxonASP    |    23 |   22 |    1 | 0.102s  |
-| ASPPY      |    23 |   23 |    0 | 0.245s  |
-| VB.NET     |    23 |   23 |    0 | 2.837s  |
+| Engine         | Total | Pass | Fail | Avg Time |
+|----------------|-------|------|------|----------|
+| ClassicASP     |    23 |   23 |    0 | 0.107s  |
+| AxonASP-Modern |    23 |   23 |    0 | 0.102s  |
+| AxonASP-Classic|    23 |   21 |    2 | 0.092s  |
+| ASPPY          |    23 |   23 |    0 | 0.247s  |
+| VB.NET         |    23 |   23 |    0 | 0.233s  |
 
 ## ClassicASP Details
 
-- **01_单例模式.vbs** : PASS (0.115s)
+- **01_单例模式.vbs** : PASS (0.113s)
   - `已修改`
-- **02_工厂方法模式.vbs** : PASS (0.114s)
+- **02_工厂方法模式.vbs** : PASS (0.117s)
   - `汪汪`
-- **03_抽象工厂模式.vbs** : PASS (0.112s)
+- **03_抽象工厂模式.vbs** : PASS (0.11s)
   - `绘制 Mac 风格按钮`
   - `绘制 Mac 风格复选框`
-- **04_建造者模式.vbs** : PASS (0.134s)
+- **04_建造者模式.vbs** : PASS (0.103s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.vbs** : PASS (0.112s)
+- **05_原型模式.vbs** : PASS (0.111s)
   - `张三 VBScript`
   - `李四 JavaScript`
-- **06_代理模式.vbs** : PASS (0.127s)
+- **06_代理模式.vbs** : PASS (0.107s)
   - `代理已创建，真实大图尚未加载`
   - `【加载大图】photo.jpg`
   - `显示图片：photo.jpg`
   - `显示图片：photo.jpg`
-- **07_外观模式.vbs** : PASS (0.112s)
+- **07_外观模式.vbs** : PASS (0.108s)
   - `CPU 冻结`
   - `内存加载 数据块(0) 到 0`
   - `CPU 跳转到 0`
   - `CPU 执行`
-- **08_适配器模式.vbs** : PASS (0.116s)
+- **08_适配器模式.vbs** : PASS (0.107s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.vbs** : PASS (0.118s)
+- **09_桥接模式.vbs** : PASS (0.115s)
   - `矢量引擎绘制半径5的圆`
   - `光栅引擎绘制半径5的圆`
-- **10_组合模式.vbs** : PASS (0.108s)
+- **10_组合模式.vbs** : PASS (0.101s)
   - `组合：总部`
   - `  组合：分公司`
   - `    叶子：员工A`
   - `    叶子：员工B`
   - `  叶子：员工C`
-- **11_装饰器模式.vbs** : PASS (0.115s)
+- **11_装饰器模式.vbs** : PASS (0.107s)
   - `普通咖啡 = 10元`
   - `普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.vbs** : PASS (0.139s)
+- **12_享元模式.vbs** : PASS (0.106s)
   - `在 (0,0) 绘制 绿色橡树`
   - `在 (1,2) 绘制 绿色橡树`
   - `在 (2,4) 绘制 绿色橡树`
   - `3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.vbs** : PASS (0.11s)
+- **13_策略模式.vbs** : PASS (0.103s)
   - `1,2,5,8,9`
   - `1,2,5,8,9`
-- **14_观察者模式.vbs** : PASS (0.113s)
+- **14_观察者模式.vbs** : PASS (0.109s)
   - `晨报 收到新闻：重大新闻！`
   - `晚报 收到新闻：重大新闻！`
-- **15_模板方法模式.vbs** : PASS (0.107s)
+- **15_模板方法模式.vbs** : PASS (0.102s)
   - `加载文件：data.pdf`
   - `【解析 PDF】`
   - `分析数据`
@@ -69,204 +70,254 @@ Generated: 2026-08-16 11:40:36
   - `【解析 CSV】`
   - `分析数据`
   - `发送报告`
-- **16_迭代器模式.vbs** : PASS (0.108s)
+- **16_迭代器模式.vbs** : PASS (0.11s)
   - `苹果`
   - `香蕉`
   - `橙子`
-- **17_责任链模式.vbs** : PASS (0.103s)
+- **17_责任链模式.vbs** : PASS (0.104s)
   - `【控制台】系统启动`
   - `【文件】系统启动`
   - `【邮件】系统启动`
   - `【控制台】严重错误`
   - `【文件】严重错误`
   - `【邮件】严重错误`
-- **18_命令模式.vbs** : PASS (0.105s)
+- **18_命令模式.vbs** : PASS (0.108s)
   - `灯已打开`
   - `灯已关闭`
-- **19_状态模式.vbs** : PASS (0.101s)
+- **19_状态模式.vbs** : PASS (0.103s)
   - `红灯：停止`
   - `绿灯：通行`
   - `黄灯：注意`
-- **20_中介者模式.vbs** : PASS (0.109s)
+- **20_中介者模式.vbs** : PASS (0.101s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.vbs** : PASS (0.103s)
+- **21_访问者模式.vbs** : PASS (0.109s)
   - `绘制点：(10,20)`
   - `绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.vbs** : PASS (0.103s)
+- **22_备忘录模式.vbs** : PASS (0.106s)
   - `编辑后: Hello World (光标: 11)`
   - ``
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.vbs** : PASS (0.107s)
+- **23_解释器模式.vbs** : PASS (0.105s)
   - `a + b = 8`
 
-## AxonASP Details
+## AxonASP-Modern Details
 
-- **01_单例模式.asp** : PASS (0.11s)
+- **01_单例模式.asp** : PASS (0.107s)
   - `已修改`
-- **02_工厂方法模式.asp** : PASS (0.109s)
+- **02_工厂方法模式.asp** : PASS (0.111s)
   - `汪汪`
-- **03_抽象工厂模式.asp** : PASS (0.109s)
+- **03_抽象工厂模式.asp** : PASS (0.107s)
   - `绘制 Mac 风格按钮绘制 Mac 风格复选框`
-- **04_建造者模式.asp** : PASS (0.114s)
+- **04_建造者模式.asp** : PASS (0.123s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.asp** : FAIL (0.132s)
-  - ERR: `Runtime error: assignment to entry in nil map`
-  - ERR: `VM context: ip=486, nextOp=OpLine, lastLine=43, bytecodeLen=600, globalsLen=333, constantsLen=24`
-  - ERR: `goroutine 1 [running]:`
-  - ERR: `runtime/debug.Stack()`
-  - ERR: `	C:/Program Files/Go/src/runtime/debug/stack.go:26 +0x5e`
-  - ERR: `g3pix.com.br/axonasp/axonvm.(*VM).Run.func3()`
-  - ERR: `	C:/Users/jeffr/Documents/GitHub/axonasp/axonvm/vm.go:1977 +0x8fc`
-  - ERR: `panic({0x7ff70baacd60?, 0x7ff70d8084a0?})`
-  - ERR: `	C:/Program Files/Go/src/runtime/panic.go:860 +0x13a`
-  - ERR: `g3pix.com.br/axonasp/axonvm.(*VM).assignRuntimeClassField(0x3d83fe5e9a88, {0x8, {0x3d83fe1339f7, 0x8}, 0xea61, 0x0, {0x3d83fe0df3a0, 0x8}, 0x0, 0x0, ...}, ...)`
-  - ERR: `	C:/Users/jeffr/Documents/GitHub/axonasp/axonvm/vm.go:9311 +0x26e`
-  - ERR: `g3pix.com.br/axonasp/axonvm.(*VM).Run(0x3d83fe5e9a88)`
-  - ERR: `	C:/Users/jeffr/Documents/GitHub/axonasp/axonvm/vm.go:3971 +0xcb17`
-  - ERR: `main.executeCLIFile({0x3d83fdb021e0, 0x53}, {0x3d83fe254960, 0x20}, 0x0)`
-  - ERR: `	C:/Users/jeffr/Documents/GitHub/axonasp/cli/main.go:915 +0x53a`
-  - ERR: `main.runDirectFile({0x3d83fdb021e0?, 0x7ff70bd209d0?})`
-  - ERR: `	C:/Users/jeffr/Documents/GitHub/axonasp/cli/main.go:993 +0x19c`
-  - ERR: `main.main()`
-  - ERR: `	C:/Users/jeffr/Documents/GitHub/axonasp/cli/main.go:340 +0x4e9`
-- **06_代理模式.asp** : PASS (0.11s)
+- **05_原型模式.asp** : PASS (0.108s)
+  - `张三 VBScript李四 JavaScript`
+- **06_代理模式.asp** : PASS (0.123s)
   - `代理已创建，真实大图尚未加载【加载大图】photo.jpg显示图片：photo.jpg显示图片：photo.jpg`
-- **07_外观模式.asp** : PASS (0.112s)
+- **07_外观模式.asp** : PASS (0.108s)
   - `CPU 冻结内存加载 数据块(0) 到 0CPU 跳转到 0CPU 执行`
-- **08_适配器模式.asp** : PASS (0.112s)
+- **08_适配器模式.asp** : PASS (0.106s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.asp** : PASS (0.111s)
+- **09_桥接模式.asp** : PASS (0.107s)
   - `矢量引擎绘制半径5的圆光栅引擎绘制半径5的圆`
-- **10_组合模式.asp** : PASS (0.112s)
+- **10_组合模式.asp** : PASS (0.107s)
   - `组合：总部  组合：分公司    叶子：员工A    叶子：员工B  叶子：员工C`
-- **11_装饰器模式.asp** : PASS (0.106s)
+- **11_装饰器模式.asp** : PASS (0.108s)
   - `普通咖啡 = 10元普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.asp** : PASS (0.091s)
-  - `在 (0,0) 绘制 在 (1,2) 绘制 在 (2,4) 绘制 3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.asp** : PASS (0.089s)
+- **12_享元模式.asp** : PASS (0.084s)
+  - `在 (0,0) 绘制 绿色橡树在 (1,2) 绘制 绿色橡树在 (2,4) 绘制 绿色橡树3 棵树，实际只有 1 个 TreeType 对象`
+- **13_策略模式.asp** : PASS (0.091s)
   - `1,2,5,8,91,2,5,8,9`
-- **14_观察者模式.asp** : PASS (0.093s)
+- **14_观察者模式.asp** : PASS (0.088s)
   - `晨报 收到新闻：重大新闻！晚报 收到新闻：重大新闻！`
-- **15_模板方法模式.asp** : PASS (0.095s)
+- **15_模板方法模式.asp** : PASS (0.084s)
   - `加载文件：data.pdf【解析 PDF】分析数据发送报告加载文件：data.csv【解析 CSV】分析数据发送报告`
-- **16_迭代器模式.asp** : PASS (0.092s)
+- **16_迭代器模式.asp** : PASS (0.103s)
   - `苹果香蕉橙子`
-- **17_责任链模式.asp** : PASS (0.091s)
+- **17_责任链模式.asp** : PASS (0.122s)
   - `【控制台】系统启动【文件】系统启动【控制台】严重错误【文件】严重错误【邮件】严重错误`
-- **18_命令模式.asp** : PASS (0.092s)
+- **18_命令模式.asp** : PASS (0.101s)
   - `灯已打开灯已关闭`
-- **19_状态模式.asp** : PASS (0.088s)
+- **19_状态模式.asp** : PASS (0.104s)
   - `红灯：停止绿灯：通行黄灯：注意`
-- **20_中介者模式.asp** : PASS (0.105s)
+- **20_中介者模式.asp** : PASS (0.095s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.asp** : PASS (0.091s)
+- **21_访问者模式.asp** : PASS (0.084s)
   - `绘制点：(10,20)绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.asp** : PASS (0.093s)
+- **22_备忘录模式.asp** : PASS (0.084s)
   - `编辑后: Hello World (光标: 11)`
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.asp** : PASS (0.089s)
+- **23_解释器模式.asp** : PASS (0.082s)
+  - `a + b = 8`
+
+## AxonASP-Classic Details
+
+- **01_单例模式.asp** : PASS (0.089s)
+  - `已修改`
+- **02_工厂方法模式.asp** : PASS (0.085s)
+  - `汪汪`
+- **03_抽象工厂模式.asp** : PASS (0.082s)
+  - `绘制 Mac 风格按钮绘制 Mac 风格复选框`
+- **04_建造者模式.asp** : PASS (0.1s)
+  - `配置：i9 / 32GB / 2TB SSD`
+- **05_原型模式.asp** : PASS (0.086s)
+  - `张三 VBScript李四 JavaScript`
+- **06_代理模式.asp** : PASS (0.081s)
+  - `代理已创建，真实大图尚未加载【加载大图】photo.jpg显示图片：photo.jpg显示图片：photo.jpg`
+- **07_外观模式.asp** : PASS (0.086s)
+  - `CPU 冻结内存加载 数据块(0) 到 0CPU 跳转到 0CPU 执行`
+- **08_适配器模式.asp** : PASS (0.084s)
+  - `【旧打印机】Hello World`
+- **09_桥接模式.asp** : PASS (0.079s)
+  - `矢量引擎绘制半径5的圆光栅引擎绘制半径5的圆`
+- **10_组合模式.asp** : FAIL (0.079s)
+  - ERR: `Compile Error: VBScript compilation error '800A03EA'`
+  - ERR: `Syntax error: Unexpected token *vbscript.PunctuationToken in expression`
+  - ERR: `Category: VBScript compilation`
+  - ERR: `Column: 51`
+  - ERR: `Description: Syntax error: Unexpected token *vbscript.PunctuationToken in expression`
+  - ERR: `File: C:\Users\jeffr\Documents\GitHub\Gof23byAxonVBscript\axonAspClassicCode\10_组合模式.asp`
+  - ERR: `Line: 35`
+  - ERR: `Number: -2146827286`
+  - ERR: `Source: VBScript compilation error`
+  - ERR: ``
+  - ERR: `            m_Children(i).Operation indent & "  "`
+- **11_装饰器模式.asp** : PASS (0.084s)
+  - `普通咖啡 = 10元普通咖啡 + 牛奶 + 糖 = 13元`
+- **12_享元模式.asp** : PASS (0.084s)
+  - `在 (0,0) 绘制 绿色橡树在 (1,2) 绘制 绿色橡树在 (2,4) 绘制 绿色橡树3 棵树，实际只有 1 个 TreeType 对象`
+- **13_策略模式.asp** : PASS (0.085s)
+  - `1,2,5,8,91,2,5,8,9`
+- **14_观察者模式.asp** : PASS (0.089s)
+  - `晨报 收到新闻：晚报 收到新闻：`
+- **15_模板方法模式.asp** : PASS (0.089s)
+  - `加载文件：data.pdf【解析 PDF】分析数据发送报告加载文件：data.csv【解析 CSV】分析数据发送报告`
+- **16_迭代器模式.asp** : PASS (0.091s)
+  - `苹果香蕉橙子`
+- **17_责任链模式.asp** : PASS (0.108s)
+  - `【控制台】系统启动【文件】系统启动【邮件】系统启动【控制台】严重错误【文件】严重错误【邮件】严重错误`
+- **18_命令模式.asp** : PASS (0.142s)
+  - `灯已打开灯已关闭`
+- **19_状态模式.asp** : PASS (0.127s)
+  - `红灯：停止绿灯：通行黄灯：注意`
+- **20_中介者模式.asp** : FAIL (0.086s)
+  - ERR: `Runtime error: VBScript runtime error '800A01A8'`
+  - ERR: `Object required`
+  - ERR: `Category: VBScript runtime`
+  - ERR: `Column: 9`
+  - ERR: `Description: Object required`
+  - ERR: `File: C:\Users\jeffr\Documents\GitHub\Gof23byAxonVBscript\axonAspClassicCode\20_中介者模式.asp`
+  - ERR: `Line: 22`
+  - ERR: `Number: -2146827864`
+  - ERR: `Source: VBScript runtime error`
+- **21_访问者模式.asp** : PASS (0.088s)
+  - `绘制点：(10,20)绘制圆：中心(5,5) 半径10`
+- **22_备忘录模式.asp** : PASS (0.108s)
+  - `编辑后: Hello World (光标: 11)`
+  - `恢复后: Hello (光标: 5)`
+- **23_解释器模式.asp** : PASS (0.084s)
   - `a + b = 8`
 
 ## ASPPY Details
 
-- **01_单例模式.asp** : PASS (0.263s)
+- **01_单例模式.asp** : PASS (0.264s)
   - `已修改`
-- **02_工厂方法模式.asp** : PASS (0.244s)
+- **02_工厂方法模式.asp** : PASS (0.263s)
   - `汪汪`
-- **03_抽象工厂模式.asp** : PASS (0.274s)
+- **03_抽象工厂模式.asp** : PASS (0.255s)
   - `绘制 Mac 风格按钮绘制 Mac 风格复选框`
-- **04_建造者模式.asp** : PASS (0.257s)
+- **04_建造者模式.asp** : PASS (0.253s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.asp** : PASS (0.264s)
+- **05_原型模式.asp** : PASS (0.277s)
   - `张三 VBScript李四 JavaScript`
-- **06_代理模式.asp** : PASS (0.249s)
+- **06_代理模式.asp** : PASS (0.274s)
   - `代理已创建，真实大图尚未加载【加载大图】photo.jpg显示图片：photo.jpg显示图片：photo.jpg`
-- **07_外观模式.asp** : PASS (0.258s)
+- **07_外观模式.asp** : PASS (0.254s)
   - `CPU 冻结内存加载 数据块(0) 到 0CPU 跳转到 0CPU 执行`
-- **08_适配器模式.asp** : PASS (0.246s)
+- **08_适配器模式.asp** : PASS (0.258s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.asp** : PASS (0.243s)
+- **09_桥接模式.asp** : PASS (0.246s)
   - `矢量引擎绘制半径5的圆光栅引擎绘制半径5的圆`
-- **10_组合模式.asp** : PASS (0.235s)
+- **10_组合模式.asp** : PASS (0.237s)
   - `组合：总部  组合：分公司    叶子：员工A    叶子：员工B  叶子：员工C`
-- **11_装饰器模式.asp** : PASS (0.236s)
+- **11_装饰器模式.asp** : PASS (0.231s)
   - `普通咖啡 = 10元普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.asp** : PASS (0.235s)
+- **12_享元模式.asp** : PASS (0.248s)
   - `在 (0,0) 绘制 绿色橡树在 (1,2) 绘制 绿色橡树在 (2,4) 绘制 绿色橡树3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.asp** : PASS (0.237s)
+- **13_策略模式.asp** : PASS (0.26s)
   - `1,2,5,8,91,2,5,8,9`
-- **14_观察者模式.asp** : PASS (0.236s)
+- **14_观察者模式.asp** : PASS (0.237s)
   - `晨报 收到新闻：重大新闻！晚报 收到新闻：重大新闻！`
-- **15_模板方法模式.asp** : PASS (0.23s)
+- **15_模板方法模式.asp** : PASS (0.239s)
   - `加载文件：data.pdf【解析 PDF】分析数据发送报告加载文件：data.csv【解析 CSV】分析数据发送报告`
-- **16_迭代器模式.asp** : PASS (0.236s)
+- **16_迭代器模式.asp** : PASS (0.241s)
   - `苹果香蕉橙子`
-- **17_责任链模式.asp** : PASS (0.246s)
+- **17_责任链模式.asp** : PASS (0.237s)
   - `【控制台】系统启动【文件】系统启动【邮件】系统启动【控制台】严重错误【文件】严重错误【邮件】严重错误`
-- **18_命令模式.asp** : PASS (0.236s)
+- **18_命令模式.asp** : PASS (0.237s)
   - `灯已打开灯已关闭`
-- **19_状态模式.asp** : PASS (0.238s)
+- **19_状态模式.asp** : PASS (0.233s)
   - `红灯：停止绿灯：通行黄灯：注意`
-- **20_中介者模式.asp** : PASS (0.235s)
+- **20_中介者模式.asp** : PASS (0.232s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.asp** : PASS (0.259s)
+- **21_访问者模式.asp** : PASS (0.244s)
   - `绘制点：(10,20)绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.asp** : PASS (0.251s)
+- **22_备忘录模式.asp** : PASS (0.24s)
   - `编辑后: Hello World (光标: 11)`
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.asp** : PASS (0.234s)
+- **23_解释器模式.asp** : PASS (0.231s)
   - `a + b = 8`
 
 ## VB.NET Details
 
-- **01_单例模式.vb** : PASS (2.788s)
+- **01_单例模式.vb** : PASS (0.222s)
   - `已修改`
-- **02_工厂方法模式.vb** : PASS (2.784s)
+- **02_工厂方法模式.vb** : PASS (0.213s)
   - `汪汪`
-- **03_抽象工厂模式.vb** : PASS (2.776s)
+- **03_抽象工厂模式.vb** : PASS (0.223s)
   - `绘制 Mac 风格按钮`
   - `绘制 Mac 风格复选框`
-- **04_建造者模式.vb** : PASS (2.828s)
+- **04_建造者模式.vb** : PASS (0.198s)
   - `配置：i9 / 32GB / 2TB SSD`
-- **05_原型模式.vb** : PASS (2.933s)
+- **05_原型模式.vb** : PASS (0.199s)
   - `张三 VBScript`
   - `李四 JavaScript`
-- **06_代理模式.vb** : PASS (2.799s)
+- **06_代理模式.vb** : PASS (0.298s)
   - `代理已创建，真实大图尚未加载`
   - `【加载大图】photo.jpg`
   - `显示图片：photo.jpg`
   - `显示图片：photo.jpg`
-- **07_外观模式.vb** : PASS (2.788s)
+- **07_外观模式.vb** : PASS (0.213s)
   - `CPU 冻结`
   - `内存加载 数据块(0) 到 0`
   - `CPU 跳转到 0`
   - `CPU 执行`
-- **08_适配器模式.vb** : PASS (2.863s)
+- **08_适配器模式.vb** : PASS (0.24s)
   - `【旧打印机】Hello World`
-- **09_桥接模式.vb** : PASS (3.205s)
+- **09_桥接模式.vb** : PASS (0.216s)
   - `矢量引擎绘制半径5的圆`
   - `光栅引擎绘制半径5的圆`
-- **10_组合模式.vb** : PASS (2.805s)
+- **10_组合模式.vb** : PASS (0.221s)
   - `组合：总部`
   - `  组合：分公司`
   - `    叶子：员工A`
   - `    叶子：员工B`
   - `  叶子：员工C`
-- **11_装饰器模式.vb** : PASS (2.748s)
+- **11_装饰器模式.vb** : PASS (0.208s)
   - `普通咖啡 = 10元`
   - `普通咖啡 + 牛奶 + 糖 = 13元`
-- **12_享元模式.vb** : PASS (2.776s)
+- **12_享元模式.vb** : PASS (0.194s)
   - `在 (0,0) 绘制 绿色橡树`
   - `在 (1,2) 绘制 绿色橡树`
   - `在 (2,4) 绘制 绿色橡树`
   - `3 棵树，实际只有 1 个 TreeType 对象`
-- **13_策略模式.vb** : PASS (2.787s)
+- **13_策略模式.vb** : PASS (0.216s)
   - `1,2,5,8,9`
   - `1,2,5,8,9`
-- **14_观察者模式.vb** : PASS (2.809s)
+- **14_观察者模式.vb** : PASS (0.255s)
   - `晨报 收到新闻：`
   - `晚报 收到新闻：`
-- **15_模板方法模式.vb** : PASS (2.828s)
+- **15_模板方法模式.vb** : PASS (0.38s)
   - `加载文件：data.pdf`
   - `【解析 PDF】`
   - `分析数据`
@@ -275,34 +326,35 @@ Generated: 2026-08-16 11:40:36
   - `【解析 CSV】`
   - `分析数据`
   - `发送报告`
-- **16_迭代器模式.vb** : PASS (2.876s)
+- **16_迭代器模式.vb** : PASS (0.198s)
   - `苹果`
   - `香蕉`
   - `橙子`
-- **17_责任链模式.vb** : PASS (2.809s)
+- **17_责任链模式.vb** : PASS (0.216s)
   - `【控制台】系统启动`
   - `【文件】系统启动`
   - `【控制台】严重错误`
   - `【文件】严重错误`
   - `【邮件】严重错误`
-- **18_命令模式.vb** : PASS (2.867s)
+- **18_命令模式.vb** : PASS (0.202s)
   - `灯已打开`
   - `灯已关闭`
-- **19_状态模式.vb** : PASS (2.824s)
+- **19_状态模式.vb** : PASS (0.2s)
   - `红灯：停止`
   - `绿灯：通行`
   - `黄灯：注意`
-- **20_中介者模式.vb** : PASS (2.853s)
+- **20_中介者模式.vb** : PASS (0.406s)
   - `Bob 收到 Alice 的消息：大家好！`
-- **21_访问者模式.vb** : PASS (2.834s)
+- **21_访问者模式.vb** : PASS (0.211s)
   - `绘制点：(10,20)`
   - `绘制圆：中心(5,5) 半径10`
-- **22_备忘录模式.vb** : PASS (2.872s)
+- **22_备忘录模式.vb** : PASS (0.22s)
   - `编辑后: Hello World (光标: 11)`
   - `恢复后: Hello (光标: 5)`
-- **23_解释器模式.vb** : PASS (2.795s)
+- **23_解释器模式.vb** : PASS (0.214s)
   - `a + b = 8`
 
 ## 修复建议
 
-- **05_原型模式.asp**: 运行时/编译错误，请检查代码。
+- **10_组合模式.asp**: 运行时/编译错误，请检查代码。
+- **20_中介者模式.asp**: 运行时/编译错误，请检查代码。

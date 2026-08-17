@@ -1,9 +1,10 @@
 """
 设计模式 VBScript + VB.NET 测试运行器
-  - classicASPcode/*.vbs  -> cscript.exe //nologo //E:vbscript
-  - axonASPcode/*.asp    -> axonasp-cli.exe --run
-  - aspPycode/*.asp      -> python asppycli.py
-  - vbNetcode/*.vb       -> dotnet run (VBCodeProvider/.NET CLI)
+  - classicASPcode/*.vbs      -> cscript.exe //nologo //E:vbscript
+  - axonAspModernCode/*.asp   -> axonasp-cli.exe --run   (AxonASP-Modern)
+  - axonAspClassicCode/*.asp  -> axonasp-cli.exe --run   (AxonASP-Classic, 传统语法)
+  - aspPycode/*.asp           -> python asppycli.py
+  - vbNetcode/*.vb            -> dotnet (build 后直接运行产物)
 用法:  python run_tests.py
 输出:  test_report.md
 """
@@ -11,9 +12,10 @@ import os, subprocess, time, datetime, tempfile, shutil
 
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 CLASSIC_DIR  = os.path.join(BASE_DIR, "classicASPcode")
-AXON_DIR     = os.path.join(BASE_DIR, "axonASPcode")
+AXON_MODERN_DIR  = os.path.join(BASE_DIR, "axonAspModernCode")
 ASPPY_DIR    = os.path.join(BASE_DIR, "aspPycode")
 VBNET_DIR    = os.path.join(BASE_DIR, "vbNetcode")
+AXON_CLASSIC_DIR = os.path.join(BASE_DIR, "axonAspClassicCode")
 REPORT_FILE  = os.path.join(BASE_DIR, "test_report.md")
 
 CSCRIPT      = r"C:\Windows\System32\cscript.exe"
@@ -124,7 +126,7 @@ def run_asppy(filepath):
 
 def run_vbnet(filepath):
     """用 dotnet CLI 编译+运行 .vb 文件（.NET Core / .NET 5+）。
-    创建临时控制台项目，放入 .vb 文件，然后 dotnet run。
+    创建临时控制台项目，**先编译（不计入 duration）**，再单独运行（只计运行时）。
     """
     workdir = tempfile.mkdtemp(prefix="vbnet_")
     try:
@@ -150,17 +152,56 @@ def run_vbnet(filepath):
                 '</Project>\n'
             )
 
+        # 1) 先 build（不计入 duration）。如果编译失败就直接返回错误。
+        build = subprocess.run(
+            [DOTNET, "build", vbproj, "--nologo", "--verbosity", "quiet"],
+            capture_output=True, text=True, timeout=TIMEOUT,
+            encoding="utf-8", errors="replace",
+            cwd=workdir,
+        )
+        if build.returncode != 0:
+            # 合并 build 的 stderr/stdout 作为错误
+            combined_err = (build.stderr.strip() + "\n" + build.stdout.strip()).strip()
+            return {
+                "success": False,
+                "output": "",
+                "error": "[BUILD] " + (combined_err if combined_err else f"exit code = {build.returncode}"),
+                "duration": 0.0,
+            }
+
+        # 2) 定位 build 产物：优先 App.exe（apphost），退化为 App.dll
+        #    预期位置: <workdir>/bin/Debug/net10.0/App.exe 或 App.dll
+        app_exe = None
+        app_dll = None
+        for root, _dirs, files in os.walk(os.path.join(workdir, "bin")):
+            for fn in files:
+                if fn.lower() == "app.exe":
+                    app_exe = os.path.join(root, fn)
+                elif fn.lower() == "app.dll":
+                    app_dll = os.path.join(root, fn)
+        runner_cmd = None
+        if app_exe and os.path.isfile(app_exe):
+            runner_cmd = [app_exe]
+        elif app_dll and os.path.isfile(app_dll):
+            runner_cmd = [DOTNET, "exec", app_dll]
+        else:
+            return {
+                "success": False,
+                "output": "",
+                "error": "[BUILD] build succeeded but cannot find App.exe / App.dll under bin/",
+                "duration": 0.0,
+            }
+
+        # 3) 运行阶段：**只计这段时间**（不含 MSBuild/SDK 启动开销）
         t0 = time.monotonic()
-        # dotnet run --project <proj>
         r = subprocess.run(
-            [DOTNET, "run", "--project", vbproj],
+            runner_cmd,
             capture_output=True, text=True, timeout=TIMEOUT,
             encoding="utf-8", errors="replace",
             cwd=workdir,
         )
 
         success = (r.returncode == 0)
-        # 合并 stdout/stderr：dotnet 的编译错误在 stderr，运行输出在 stdout
         combined_err = r.stderr.strip()
         if not success and not combined_err:
             combined_err = f"exit code = {r.returncode}"
@@ -203,23 +244,41 @@ def run_all():
     else:
         print("  [WARN] classicASPcode/ not found")
 
-    # AxonASP
+    # AxonASP-Modern（跑 Axon 增强语法的代码）
     print("\n" + "=" * 60)
-    print("  AxonASP Tests (axonasp-cli.exe)")
+    print("  AxonASP-Modern Tests (axonasp-cli.exe)")
     print("=" * 60)
-    if os.path.isdir(AXON_DIR):
-        for fn in sorted(os.listdir(AXON_DIR)):
+    if os.path.isdir(AXON_MODERN_DIR):
+        for fn in sorted(os.listdir(AXON_MODERN_DIR)):
             if not fn.lower().endswith(".asp"):
                 continue
-            fp = os.path.join(AXON_DIR, fn)
+            fp = os.path.join(AXON_MODERN_DIR, fn)
             print(f"\n  >>> {fn}")
             r = run_axon(fp)
             r["filename"] = fn
-            r["type"]     = "AxonASP"
+            r["type"]     = "AxonASPModern"
             results.append(r)
             _print_result(r)
     else:
         print("  [WARN] axonASPcode/ not found")
+
+    # AxonASP-Classic（跑传统 VBScript 语法的代码）
+    print("\n" + "=" * 60)
+    print("  AxonASP-Classic Tests (axonasp-cli.exe, classic syntax)")
+    print("=" * 60)
+    if os.path.isdir(AXON_CLASSIC_DIR):
+        for fn in sorted(os.listdir(AXON_CLASSIC_DIR)):
+            if not fn.lower().endswith(".asp"):
+                continue
+            fp = os.path.join(AXON_CLASSIC_DIR, fn)
+            print(f"\n  >>> {fn}")
+            r = run_axon(fp)
+            r["filename"] = fn
+            r["type"]     = "AxonASPClassic"
+            results.append(r)
+            _print_result(r)
+    else:
+        print("  [WARN] axonAspClassicCode/ not found")
 
     # ASPPY
     print("\n" + "=" * 60)
@@ -274,16 +333,19 @@ def _print_result(r):
 # ── report ───────────────────────────────────────────────────────
 def generate_report(results):
     classic = [r for r in results if r["type"] == "ClassicASP"]
-    axon    = [r for r in results if r["type"] == "AxonASP"]
+    axon    = [r for r in results if r["type"] == "AxonASPModern"]
+    axonc   = [r for r in results if r["type"] == "AxonASPClassic"]
     asppy   = [r for r in results if r["type"] == "ASPPY"]
     vbnet   = [r for r in results if r["type"] == "VBNET"]
 
     c_pass = sum(1 for r in classic if r["success"])
     a_pass = sum(1 for r in axon    if r["success"])
+    ac_pass = sum(1 for r in axonc  if r["success"])
     s_pass = sum(1 for r in asppy   if r["success"])
     v_pass = sum(1 for r in vbnet   if r["success"])
     c_avg  = sum(r["duration"] for r in classic) / len(classic) if classic else 0
     a_avg  = sum(r["duration"] for r in axon)    / len(axon)    if axon    else 0
+    ac_avg = sum(r["duration"] for r in axonc)   / len(axonc)   if axonc   else 0
     s_avg  = sum(r["duration"] for r in asppy)   / len(asppy)   if asppy   else 0
     v_avg  = sum(r["duration"] for r in vbnet)   / len(vbnet)   if vbnet   else 0
 
@@ -296,17 +358,19 @@ def generate_report(results):
         f"",
         f"## Summary",
         f"",
-        f"| Engine     | Total | Pass | Fail | Avg Time |",
-        f"|------------|-------|------|------|----------|",
-        f"| ClassicASP | {len(classic):5d} | {c_pass:4d} | {len(classic)-c_pass:4d} | {c_avg:.3f}s  |",
-        f"| AxonASP    | {len(axon):5d} | {a_pass:4d} | {len(axon)-a_pass:4d} | {a_avg:.3f}s  |",
-        f"| ASPPY      | {len(asppy):5d} | {s_pass:4d} | {len(asppy)-s_pass:4d} | {s_avg:.3f}s  |",
-        f"| VB.NET     | {len(vbnet):5d} | {v_pass:4d} | {len(vbnet)-v_pass:4d} | {v_avg:.3f}s  |",
+        f"| Engine         | Total | Pass | Fail | Avg Time |",
+        f"|----------------|-------|------|------|----------|",
+        f"| ClassicASP     | {len(classic):5d} | {c_pass:4d} | {len(classic)-c_pass:4d} | {c_avg:.3f}s  |",
+        f"| AxonASP-Modern | {len(axon):5d} | {a_pass:4d} | {len(axon)-a_pass:4d} | {a_avg:.3f}s  |",
+        f"| AxonASP-Classic| {len(axonc):5d} | {ac_pass:4d} | {len(axonc)-ac_pass:4d} | {ac_avg:.3f}s  |",
+        f"| ASPPY          | {len(asppy):5d} | {s_pass:4d} | {len(asppy)-s_pass:4d} | {s_avg:.3f}s  |",
+        f"| VB.NET         | {len(vbnet):5d} | {v_pass:4d} | {len(vbnet)-v_pass:4d} | {v_avg:.3f}s  |",
         f"",
     ]
 
     for section_title, section_list in [
-        ("ClassicASP", classic), ("AxonASP", axon), ("ASPPY", asppy), ("VB.NET", vbnet),
+        ("ClassicASP", classic), ("AxonASP-Modern", axon),
+        ("AxonASP-Classic", axonc), ("ASPPY", asppy), ("VB.NET", vbnet),
     ]:
         lines += [f"## {section_title} Details", ""]
         for r in section_list:

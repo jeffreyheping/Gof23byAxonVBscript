@@ -131,5 +131,75 @@ Next
 ```
 
 **Axon VBScript trade-offs**:
-- AxonASP's `For Each` custom collection iteration (issue #52, now implemented) makes the Iterator pattern **disappear entirely** — no need to hand-write `IIterator`/`ICollection` interfaces or a `MyIterator` class. The caller just writes `For Each item In coll`. `[DispId(-4)]` marks the `NewEnum` property, forwarding the built-in `Collection`'s enumerator — this is the standard approach in VBA/VB6/twinBASIC. Compared to the classic version's hand-written iterator class (`HasNext`/`NextItem`/`m_Index`), code volume drops significantly and traversal logic is built into the language.
+- This pattern is **fully solved in AxonASP, no compromises — the iterator class has disappeared**. AxonASP's `For Each` custom collection iteration (issue #52, now implemented) makes the Iterator pattern **disappear entirely** — no need to hand-write `IIterator`/`ICollection` interfaces or a `MyIterator` class, no `m_Index` variable maintenance, no `HasNext`/`NextItem` boilerplate methods. Callers just write `For Each item In coll`, identical to native array syntax. `[DispId(-4)]` marks the `NewEnum` property, forwarding the built-in `Collection`'s `[_NewEnum]` enumerator — this is the standard approach in VBA/VB6/twinBASIC. The appendix classifies this pattern as one of the 18 patterns where "AxonASP fully solves the core pain point", with no residual defects.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET has `IEnumerable(Of T)`/`IEnumerator(Of T)` generic interfaces + `Yield` keyword — this is the idiomatic .NET iterator pattern. `Yield` lets the compiler auto-generate a state-machine enumerator class, no hand-written `MoveNext`/`Current` needed.
+
+```vbnet
+' ① Implement IEnumerable(Of T): supports For Each traversal
+Public Class MyCollection(Of T)
+    Implements IEnumerable(Of T)
+
+    Private ReadOnly m_Items As New List(Of T)()
+
+    ' Add element
+    Public Sub Add(item As T)
+        m_Items.Add(item)
+    End Sub
+
+    ' Return total element count
+    Public ReadOnly Property Count As Integer
+        Get
+            Return m_Items.Count
+        End Get
+    End Property
+
+    ' Indexer
+    Default Public ReadOnly Property Item(index As Integer) As T
+        Get
+            Return m_Items(index)
+        End Get
+    End Property
+
+    ' ② Generic enumerator: Yield auto-generates IEnumerator(Of T) state machine
+    Public Iterator Function GetEnumerator() As IEnumerator(Of T) _
+        Implements IEnumerable(Of T).GetEnumerator
+        For Each element As T In m_Items
+            Yield element   ' Compiler auto-generates MoveNext/Current state machine
+        Next
+    End Function
+
+    ' ③ Non-generic enumerator: IEnumerable(Of T) inherits from IEnumerable, must implement
+    Private Function GetEnumeratorObj() As IEnumerator _
+        Implements IEnumerable.GetEnumerator
+        Return GetEnumerator()
+    End Function
+End Class
+
+' Demo: For Each traversal, consistent with Axon version call pattern
+Dim coll As New MyCollection(Of String)()
+coll.Add("Apple")
+coll.Add("Banana")
+coll.Add("Orange")
+
+For Each item In coll
+    Console.WriteLine(item)
+Next
+```
+
+**VB.NET version notes**:
+- **`Yield` compiler-generated state machine**: `Yield item` in an `Iterator` method makes the compiler auto-generate a nested class implementing `IEnumerator(Of T)`, including `MoveNext()`/`Current`/`Dispose()`. Compare with classic version: hand-written `MyIterator` needs 20+ lines of code (`m_Index`/`Init`/`HasNext`/`NextItem`), and is bug-prone.
+- **`IEnumerable(Of T)` BCL standard interface**: After implementation, auto-supports `For Each` traversal, and can be passed as argument to any BCL method accepting `IEnumerable(Of T)`. Axon version uses `[DispId(-4)]` to forward COM enumerator, only supports `For Each`, can't plug into .NET collection ecosystem.
+- **Generic type safety**: `MyCollection(Of String)` compile-time constrains to only store `String`, `Add(123)` causes compile error; `For Each item As String In coll` needs no type conversion. Axon version depends on built-in `Collection` COM object, elements are still Variant/Object.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Traversal method | Hand-written `Do While iter.HasNext` + `iter.NextItem` | Native `For Each item In coll` | Native `For Each` |
+| Iterator class | Hand-written `MyIterator` class (20+ lines) | **Disappeared**, forwards built-in Collection enumerator | **Disappeared**, `Yield` compiler auto-generated |
+| Interface standardization | No convention, each collection implements freely | `[DispId(-4)]` + `NewEnum` forwards COM enumerator | `IEnumerable(Of T)`/`IEnumerator(Of T)` BCL standard interface |
+| Type safety | All Variant, runtime errors | Depends on COM Collection, elements still Variant/Object | Generic `(Of T)` compile-time constrained |
 ---

@@ -160,5 +160,97 @@ remote.PressButton
 ```
 
 **Axon VBScript trade-offs**:
-- `ICommand` guarantees all command classes have an `Execute` method. Command objects can be uniformly stored in arrays or queues. AxonASP's interface method dispatch is fixed — `RemoteControl` holds `Private m_Command As ICommand`, and `PressButton` calls `m_Command.Execute` which auto-dispatches to the concrete command's `ICommand_Execute`. Consistent with standard OOP — no fully-qualified names needed.
+- Fully solved, no compromises. `ICommand` interface guarantees all command classes have an `Execute` method. Command objects can be uniformly stored in arrays or queues. AxonASP's interface method dispatch is fixed — `RemoteControl` holds `Private m_Command As ICommand`, `PressButton` calls `m_Command.Execute` which auto-dispatches to the concrete command's `ICommand_Execute`. Consistent with standard OOP — no fully-qualified names needed.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET has `Interface`, `Implements` explicit implementation, parameterized constructors. Command pattern structure is consistent with Axon version, only replacing `Init` two-step assembly with constructors, without introducing Undo/stack features not present in Axon version.
+
+```vbnet
+' Command interface
+Public Interface ICommand
+    Sub Execute()
+End Interface
+
+' Receiver: Light
+Public Class Light
+    Public Sub TurnOn()
+        Console.WriteLine("Light is on")
+    End Sub
+
+    Public Sub TurnOff()
+        Console.WriteLine("Light is off")
+    End Sub
+End Class
+
+' LightOn command
+Public Class LightOnCommand
+    Implements ICommand
+
+    Private ReadOnly m_Light As Light
+
+    Public Sub New(light As Light)
+        m_Light = light
+    End Sub
+
+    Public Sub Execute() Implements ICommand.Execute
+        m_Light.TurnOn()
+    End Sub
+End Class
+
+' LightOff command
+Public Class LightOffCommand
+    Implements ICommand
+
+    Private ReadOnly m_Light As Light
+
+    Public Sub New(light As Light)
+        m_Light = light
+    End Sub
+
+    Public Sub Execute() Implements ICommand.Execute
+        m_Light.TurnOff()
+    End Sub
+End Class
+
+' Invoker: Remote control
+Public Class RemoteControl
+    Private m_Command As ICommand
+
+    Public Sub SetCommand(cmd As ICommand)
+        m_Command = cmd
+    End Sub
+
+    Public Sub PressButton()
+        m_Command.Execute()
+    End Sub
+End Class
+
+' Demo
+Dim light As New Light()
+Dim onCmd As New LightOnCommand(light)
+Dim offCmd As New LightOffCommand(light)
+Dim remote As New RemoteControl()
+
+remote.SetCommand(onCmd)
+remote.PressButton()   ' Light is on
+
+remote.SetCommand(offCmd)
+remote.PressButton()   ' Light is off
+```
+
+**VB.NET version notes**:
+- **`Interface ICommand` + `Implements` compile-time enforces `Execute`**: Same as Axon version using interface to constrain command contract. `Implements ICommand.Execute` makes missing methods cause compile errors — no more runtime failures from misspelled method names.
+- **Parameterized constructor one-step assembly**: `New LightOnCommand(light)` injects receiver in one line; first two versions need `New` then manual `Init(light)` two-step, easy to forget the second step.
+- **`ReadOnly` field locks receiver reference**: `Private ReadOnly m_Light` immutable after construction, prevents command object from having its receiver swapped midway.
+- **No `Set`/`Let` distinction**: Object assignment uniformly uses `=`, `m_Command = cmd` no longer needs to remember `Set` for objects.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Command contract | Method name convention (easy to miss) | `ICommand` interface constrains `Execute` | `Interface` + `Implements` compile-time enforced |
+| Assembly method | `New` + manual `Init` two-step | `New` + manual `Init` two-step | Parameterized constructor `New(light)` one-step |
+| Receiver reference protection | `Private` field (can be rewritten) | `Private m_Light As Light` | `Private ReadOnly` immutable after construction |
+| Object assignment | `Set a = New X` | `Set a = New X` | Direct `a = New X()` |
 ---

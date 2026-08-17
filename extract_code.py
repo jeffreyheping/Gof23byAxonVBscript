@@ -1,8 +1,10 @@
 """
 从 Markdown 提取 VBScript 设计模式代码
   - 传统 VBScript 版 -> classicASPcode/  (.vbs)
-  - Axon VBScript 版  -> axonASPcode/    (.asp, 自动包裹 <% %>)
+  - Axon VBScript 版  -> axonAspModernCode/    (.asp, 自动包裹 <% %>)
   - VB.NET 版         -> vbNetcode/      (.vb)
+  - 传统版复用        -> aspPycode/      (.asp)  供 ASPPY 运行
+                       -> axonAspClassicCode/ (.asp)  供 AxonASP 跑传统语法
   - 按章节拆分 MD 文件 -> byChapterMDcn/  (25个文件)
 用法:  python extract_code.py [md_file]
 """
@@ -10,9 +12,10 @@ import os, re, sys, glob
 
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 CLASSIC_DIR = os.path.join(BASE_DIR, "classicASPcode")
-AXON_DIR    = os.path.join(BASE_DIR, "axonASPcode")
+AXON_MODERN_DIR = os.path.join(BASE_DIR, "axonAspModernCode")
 ASPPY_DIR   = os.path.join(BASE_DIR, "aspPycode")
 VBNET_DIR   = os.path.join(BASE_DIR, "vbNetcode")
+AXON_CLASSIC_DIR = os.path.join(BASE_DIR, "axonAspClassicCode")
 CHAPTER_DIR = os.path.join(BASE_DIR, "byChapterMDcn")
 
 
@@ -361,10 +364,14 @@ CN_NUM = {"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,
           "二十二":22,"二十三":23}
 
 def find_md():
-    """找设计模式 md（排除 test_report.md）"""
+    """找设计模式 md（排除 test_report.md / README.md），取最新的一个"""
     mds = glob.glob(os.path.join(BASE_DIR, "*.md"))
-    cands = [m for m in mds if "report" not in os.path.basename(m).lower()]
-    return cands[0] if cands else (mds[0] if mds else None)
+    cands = [m for m in mds
+             if "report" not in os.path.basename(m).lower()
+             and os.path.basename(m).lower() != "readme.md"]
+    if not cands:
+        return None
+    return max(cands, key=os.path.getmtime)   # 按修改时间取最新
 
 def extract(md_path):
     with open(md_path, "r", encoding="utf-8") as f:
@@ -430,12 +437,13 @@ def extract(md_path):
 
 def save(items):
     os.makedirs(CLASSIC_DIR, exist_ok=True)
-    os.makedirs(AXON_DIR,    exist_ok=True)
+    os.makedirs(AXON_MODERN_DIR, exist_ok=True)
     os.makedirs(ASPPY_DIR,   exist_ok=True)
     os.makedirs(VBNET_DIR,   exist_ok=True)
+    os.makedirs(AXON_CLASSIC_DIR, exist_ok=True)
 
-    # 先清空四个目录里的旧文件
-    for d in (CLASSIC_DIR, AXON_DIR, ASPPY_DIR, VBNET_DIR):
+    # 先清空目录里的旧文件
+    for d in (CLASSIC_DIR, AXON_MODERN_DIR, ASPPY_DIR, VBNET_DIR, AXON_CLASSIC_DIR):
         for f in os.listdir(d):
             fp = os.path.join(d, f)
             if os.path.isfile(fp):
@@ -446,7 +454,7 @@ def save(items):
         if item["type"] == "ClassicASP":
             target = CLASSIC_DIR
         elif item["type"] == "AxonASP":
-            target = AXON_DIR
+            target = AXON_MODERN_DIR
         else:
             target = VBNET_DIR
         path   = os.path.join(target, item["filename"])
@@ -488,17 +496,20 @@ def save(items):
         saved.append({**item, "path": path})
         print(f"  {item['type']:10s} | ch{item['chapter']:02d} | {item['filename']}")
 
-        # ASPPY: 用传统版代码（不注入 ResponseStub），包裹 <% %>，UTF-8 编码；注入 Option Explicit（VBScript 语法不带 On）
+        # ASPPY / AxonASP-Classic: 用传统版代码（不注入 ResponseStub），
+        # 包裹 <% %>，UTF-8 编码；注入 Option Explicit（VBScript 语法不带 On）
         if item["type"] == "ClassicASP":
-            asppy_content = item["content"]
-            if "<%" not in asppy_content:
-                asppy_content = "<%\nOption Explicit\n" + asppy_content + "\n%>"
+            wrapped = item["content"]
+            if "<%" not in wrapped:
+                wrapped = "<%\nOption Explicit\n" + wrapped + "\n%>"
             else:
-                asppy_content = asppy_content.replace("<%", "<%\nOption Explicit\n", 1)
-            asppy_path = os.path.join(ASPPY_DIR, item["filename"].replace(".vbs", ".asp"))
-            with open(asppy_path, "wb") as f:
-                f.write(asppy_content.encode("utf-8"))
-            print(f"  ASPPY      | ch{item['chapter']:02d} | {os.path.basename(asppy_path)}")
+                wrapped = wrapped.replace("<%", "<%\nOption Explicit\n", 1)
+            asp_name = item["filename"].replace(".vbs", ".asp")
+            for out_dir, tag in ((ASPPY_DIR, "ASPPY"), (AXON_CLASSIC_DIR, "AxonClassic")):
+                out_path = os.path.join(out_dir, asp_name)
+                with open(out_path, "wb") as f:
+                    f.write(wrapped.encode("utf-8"))
+                print(f"  {tag:10s} | ch{item['chapter']:02d} | {asp_name}")
     return saved
 
 def split_chapters(md_path):

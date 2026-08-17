@@ -145,5 +145,95 @@ pc.ShowConfig
 ```
 
 **Axon VBScript trade-offs**:
-- The interface mechanism enforces the builder's method contract. Director can safely accept a builder via `IBuilder`. However, chained call syntax is still unavailable — `builder.BuildCPU("i9").BuildRAM("32GB")` remains impossible.
+- The interface mechanism enforces the builder's method contract. Director can safely accept a builder via `IBuilder`. Remaining gap: **missing chained call syntax sugar**. Classic Builder encourages `builder.BuildCPU("i9").BuildRAM("32GB").BuildDisk("2TB SSD")` fluent style — each Build* method returns `Me`, caller writes all steps in one line. Even if AxonASP makes each method `Set FunctionName = Me`, callers still must write `builder.BuildCPU "i9"`, `builder.BuildRAM "32GB"` line by line, because VBScript doesn't support chaining object method calls (can't use the return value of one method as the caller for the next on the same line). Go also has chained calls (`builder.CPU("i9").RAM("32GB")`); this is a loss of expressiveness, not functionality.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET Builder with idiomatic fluent style: each Build* method `Return Me` enables chained calls (Fluent Builder), making up for Axon's inability to chain.
+
+```vbnet
+' ① Product: Public fields, same structure as Axon version
+Public Class Computer
+    Public Property CPU As String
+    Public Property RAM As String
+    Public Property Disk As String
+
+    Public Sub ShowConfig()
+        Console.WriteLine($"Config: {CPU} / {RAM} / {Disk}")
+    End Sub
+End Class
+
+' ② Builder interface: each Build* method returns its own type, supporting chaining
+Public Interface IComputerBuilder
+    Function BuildCPU(cpu As String) As IComputerBuilder
+    Function BuildRAM(ram As String) As IComputerBuilder
+    Function BuildDisk(disk As String) As IComputerBuilder
+    Function GetResult() As Computer
+End Interface
+
+' ③ Concrete builder: each method Return Me, enabling chaining
+Public Class ComputerBuilder
+    Implements IComputerBuilder
+
+    Private m_CPU As String
+    Private m_RAM As String
+    Private m_Disk As String
+
+    Public Function BuildCPU(cpu As String) As IComputerBuilder Implements IComputerBuilder.BuildCPU
+        m_CPU = cpu
+        Return Me
+    End Function
+
+    Public Function BuildRAM(ram As String) As IComputerBuilder Implements IComputerBuilder.BuildRAM
+        m_RAM = ram
+        Return Me
+    End Function
+
+    Public Function BuildDisk(disk As String) As IComputerBuilder Implements IComputerBuilder.BuildDisk
+        m_Disk = disk
+        Return Me
+    End Function
+
+    Public Function GetResult() As Computer Implements IComputerBuilder.GetResult
+        Return New Computer() With {.CPU = m_CPU, .RAM = m_RAM, .Disk = m_Disk}
+    End Function
+End Class
+
+' ④ Director: encapsulates preconfigured plans, uses chaining internally for cleaner code
+Public Class Director
+    Private ReadOnly m_Builder As IComputerBuilder
+
+    Public Sub New(builder As IComputerBuilder)
+        m_Builder = builder
+    End Sub
+
+    Public Function ConstructGamingPC() As Computer
+        Return m_Builder.BuildCPU("i9").BuildRAM("32GB").BuildDisk("2TB SSD").GetResult()
+    End Function
+
+    Public Function ConstructOfficePC() As Computer
+        Return m_Builder.BuildCPU("i5").BuildRAM("16GB").BuildDisk("512GB SSD").GetResult()
+    End Function
+End Class
+
+' Demo: via Director with preset plans
+Dim director As New Director(New ComputerBuilder())
+Dim gamingPC As Computer = director.ConstructGamingPC()
+gamingPC.ShowConfig()   ' Config: i9 / 32GB / 2TB SSD
+```
+
+**VB.NET version notes**:
+- **Real chained calls (Fluent Interface)**: Each `Build*` method `Return Me`, caller chains with `.` all the way: `builder.BuildCPU("i9").BuildRAM("32GB").BuildDisk("2TB SSD")`. Even if Axon version sets `Set FunctionName = Me`, VBScript syntax doesn't allow chaining multiple calls on one line — must split across lines.
+- **Interface returns its own type**: Each Build* method in `IComputerBuilder` returns `IComputerBuilder` instead of `void` — this is the type foundation for chaining. Axon's `IBuilder` interface methods have no return value, can't chain.
+- **Director also uses chaining internally**: `ConstructGamingPC` writes all steps in one line, more compact and readable than Axon's line-by-line approach.
+- **No `Set` needed**: VB.NET object assignment uses `=` directly, `Return New Computer()` doesn't need `Set`.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Builder contract | Method name convention | `IBuilder` interface constrains method signatures | `IComputerBuilder` interface + each method returns its own type |
+| Chained calls | Cannot (must go line by line) | Cannot (syntax doesn't support chaining expressions) | Idiomatic Fluent Interface: `a().b().c().GetResult()` |
+| Director style | Line-by-line assignment 3-6 statements | Line-by-line assignment 3-6 statements | Chained one-liner, high readability |
+| Object assignment | `Set a = New X` | `Set a = New X` | Direct `a = New X()` |
 ---

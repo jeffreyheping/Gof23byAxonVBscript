@@ -122,5 +122,82 @@ s2.Draw   ' Raster engine draws circle with radius 5
 
 **Axon VBScript trade-offs**:
 - The interface mechanism separates abstraction from implementation: `Circle` calls the renderer via `IRenderer` interface reference, freely pairing with different engines at runtime. Callers invoke `Draw` through `IShape` interface reference, which auto-dispatches to `Circle.IShape_Draw` — no need to know the concrete shape type. This demonstrates interface polymorphic dispatch.
-- Missing syntax: **Code reuse mechanism** (inheritance or struct embedding). The classic Bridge requires the Abstraction to be an abstract base class, with subclasses inheriting and reusing code. Go also lacks inheritance, but Go uses struct embedding to let `Circle` embed a base `Shape` struct and reuse common logic. AxonASP currently requires writing a separate class for each shape, manually copying common fields and logic.
+- Missing syntax: **code reuse mechanism (inheritance or struct embedding)**. Classic Bridge requires the Abstraction to be an abstract base class — all shapes share the `m_Renderer` field, injection logic, and common methods like `Resize()`/`Move()` written once in the base class. Go also lacks inheritance, but Go uses struct embedding (`type Circle struct { Shape }`) to let `Circle` embed a base `Shape` struct and "get for free" all common fields and methods. AxonASP currently requires a separate independent class for each shape (Circle, Square, Triangle...), manually copying `m_Renderer` field, `Init`'s renderer injection, pre-`Draw` parameter validation, etc. — every new shape means another copy of the boilerplate.
+
+### VB.NET Version (syntactically complete baseline)
+
+VB.NET uses `MustInherit Shape` abstract base class to hold `Protected m_Renderer As IRenderer`, concrete shapes share renderer reference and injection logic via `Inherits Shape`; implementation side uses `Interface IRenderer` + multiple concrete engines. Same scenario as Axon version: same `Circle` paired with different engines produces different results.
+
+```vbnet
+' ===== Implementation side: renderer engine interface + concrete implementations =====
+
+Public Interface IRenderer
+    Sub RenderCircle(radius As Integer)
+End Interface
+
+Public Class VectorRenderer
+    Implements IRenderer
+    Public Sub RenderCircle(radius As Integer) Implements IRenderer.RenderCircle
+        Console.WriteLine("Vector engine draws circle radius " & radius)
+    End Sub
+End Class
+
+Public Class RasterRenderer
+    Implements IRenderer
+    Public Sub RenderCircle(radius As Integer) Implements IRenderer.RenderCircle
+        Console.WriteLine("Raster engine draws circle radius " & radius)
+    End Sub
+End Class
+
+' ===== Abstraction side: MustInherit base class, subclasses share m_Renderer =====
+
+Public MustInherit Class Shape
+    Protected m_Renderer As IRenderer
+
+    Protected Sub New(renderer As IRenderer)
+        m_Renderer = renderer
+    End Sub
+
+    Public MustOverride Sub Draw()
+End Class
+
+' ===== Concrete shape: Inherits Shape, automatically gets m_Renderer =====
+
+Public Class Circle
+    Inherits Shape
+
+    Private ReadOnly m_Radius As Integer
+
+    Public Sub New(radius As Integer, renderer As IRenderer)
+        MyBase.New(renderer)
+        m_Radius = radius
+    End Sub
+
+    Public Overrides Sub Draw()
+        m_Renderer.RenderCircle(m_Radius)
+    End Sub
+End Class
+
+' Demo: same shape with different engines
+Dim c1 As Shape = New Circle(5, New VectorRenderer())
+c1.Draw()   ' Vector engine draws circle radius 5
+
+Dim c2 As Shape = New Circle(5, New RasterRenderer())
+c2.Draw()   ' Raster engine draws circle radius 5
+```
+
+**VB.NET version notes**:
+- **`Protected` field shared through inheritance**: `m_Renderer` written once in `Shape` base class, `Circle` uses it directly via `Inherits Shape`, no need to repeat in every shape class. Axon version must write `Private m_Renderer` in each shape class.
+- **`MustInherit` + `MustOverride` compile-time contract**: `Shape` prevents direct instantiation, `Draw` forces subclass implementation. Axon's `IShape` interface can constrain method existence, but cannot prevent instantiation.
+- **Parameterized constructor + `MyBase.New` replaces Init**: `New Circle(5, renderer)` completes injection in one step, no "New then Init" half-initialized window.
+- **Two inheritance lines extend independently**: Adding new shapes just needs `Inherits Shape`, adding new engines just needs `Implements IRenderer`, no interference.
+
+**Three-version comparison**:
+
+| Dimension | Classic VBScript | Axon VBScript | VB.NET |
+|------|--------------|---------------|--------|
+| Shape abstraction layer | Isolated plain Circle class | `IShape` interface + independent Circle class | `MustInherit Shape` base class + `Inherits` concrete shapes |
+| Implementation layer constraint | Method name convention | `Implements IRenderer` interface constraint | `Interface IRenderer` compile-time enforced |
+| m_Renderer reuse | Manual field copy per shape | Manual field copy per shape | Base class `Protected` field, inherited by subclasses |
+| Renderer injection | `Init` two-step (easy to forget) | `Init` two-step (easy to forget) | Parameterized constructor `New(radius, renderer)` one-step |
 ---
