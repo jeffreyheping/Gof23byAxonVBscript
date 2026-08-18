@@ -79,7 +79,7 @@ The appendix provides an implementation status overview for all 23 patterns, mis
 ## Conventions
 
 - Classic VBScript and Axon VBScript output via `Response.Write`; VB.NET output via `Console.WriteLine`.
-- All `Response.Write` output is unbuffered single-line output; multi-line displays are for readability only.
+- All `Response.Write` output is without trailing newlines; multi-line displays are for readability only.
 - Comments are in Chinese, matching the original code language.
 - **Missing syntax** items in trade-off notes are always bolded and correspond to the priority table in the appendix.
 - Go language comparisons follow Go 1.18+ syntax (including generics); where AxonASP's current state is equivalent to pre-Go 1.18, this is explicitly noted.

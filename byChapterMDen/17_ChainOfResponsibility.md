@@ -252,5 +252,3 @@ debugLog.Log("Critical error", LogLevel.ErrorLevel)
 | Common logic reuse | None (each Logger writes their own) | None (each Logger writes their own) | `MustInherit HandlerBase` base class writes once, subclasses inherit |
 | Type safety | String comparison, easy to misspell | `Enum` strongly typed | `Enum` strongly typed |
 ---
-
----
