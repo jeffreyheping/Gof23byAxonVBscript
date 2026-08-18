@@ -18,7 +18,7 @@ All 23 GoF design patterns implemented in VBScript (classic syntax + AxonASP enh
 ## 工具脚本 / Tool Scripts
 
 - `extract_code.py` — 从总 MD 文档拆出各引擎代码并注入 `Option Explicit` 等适配代码 / Extracts per-engine code from the master MD and injects `Option Explicit` etc.
-- `run_tests.py` — 跑全套测试并生成 `test_report.md` / Runs the full test suite and generates `test_report.md`
+- `run_tests.py` — 跑全套测试（含输出比对，以 cscript 为基准）并生成 `test_report.md` / Runs the full test suite (with output comparison against the cscript baseline) and generates `test_report.md`
 - `merge_chapters.py` — 合并章节 MD / Merges chapter MDs
 
 用法 / Usage:
@@ -30,17 +30,21 @@ python run_tests.py       # 全套测试 / run all tests
 
 ## 最新测试结果 / Latest Test Results
 
-Windows 11，每文件平均耗时（进程启动 + 编译 + 执行）/ Windows 11, avg time per file (process start + compile + execute):
+Windows 11，每文件平均耗时（进程启动 + 编译 + 执行）/ Windows 11, avg time per file (process start + compile + execute)。
+输出比对基准为 cscript：Mismatch = 无报错但输出与基准不一致（静默错误）/ Output compared against the cscript baseline: Mismatch = no error but silent wrong output.
 
-| 引擎 / Engine | 通过 / Pass | 平均耗时 / Avg Time |
-|---|---|---|
-| AxonASP-Classic | 21/23* | 0.092s |
-| AxonASP-Modern | 23/23 | 0.102s |
-| ClassicASP (cscript) | 23/23 | 0.107s |
-| ASPPY | 23/23 | 0.247s |
-| VB.NET (dotnet) | 23/23 | 0.233s |
+| 引擎 / Engine | 通过 / Pass | 不一致 / Mismatch | 失败 / Fail | 平均耗时 / Avg Time |
+|---|---|---|---|---|
+| AxonASP-Classic | 16 | 3 | 4* | 0.101s |
+| AxonASP-Modern | 21 | 1 | 1* | 0.119s |
+| ClassicASP (cscript) | 23 | 0 | 0 | 0.145s |
+| ASPPY | 23 | 0 | 0 | 0.249s |
+| VB.NET (dotnet) | 23 | 0 | 0 | 0.238s |
 
-\* 2 个失败为 AxonASP 引擎已知 bug（数组元素作调用方的无括号方法调用），已单独提交最小复现。/ 2 failures are known AxonASP engine bugs (paren-less method calls on array elements); minimal repros reported separately.
+\* AxonASP 的全部非 PASS 项均为引擎已知 bug，分属两个家族，均已提交最小复现 / All non-PASS AxonASP results are known engine bugs in two families, with minimal repros reported:
+
+1. 数组元素作调用方的无括号方法调用（编译错误 / Object required / 静默丢实参）/ Paren-less method calls on array-element callees (compile error / Object required / silent arg loss)
+2. 对象引用/字段赋值丢失（含 nil map 崩溃）/ Object reference / field assignment loss (incl. a nil-map crash)
 
 完整结果见 [test_report.md](test_report.md) / Full results in [test_report.md](test_report.md)
 
