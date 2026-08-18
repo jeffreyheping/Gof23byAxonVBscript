@@ -23,17 +23,18 @@ Class Logger
     End Function
 
     ' Handle log request: output if level matches, then pass to next
-    Public Function Log(msg, level)
-        If ShouldHandle(level) Then
+    ' Note: parameter named msgLevel to avoid shadowing public field Level (VBScript is case-insensitive)
+    Public Function Log(msg, msgLevel)
+        If ShouldHandle(msgLevel) Then
             Response.Write "[" & Name & "] " & msg
         End If
         If Not m_Next Is Nothing Then
-            m_Next.Log msg, level
+            m_Next.Log msg, msgLevel
         End If
     End Function
 
     ' Check if current level should handle this
-    Private Function ShouldHandle(level)
+    Private Function ShouldHandle(msgLevel)
         Dim levels(2)
         levels(0) = "DEBUG"
         levels(1) = "INFO"
@@ -44,7 +45,7 @@ Class Logger
         msgIdx = -1
         For i = 0 To 2
             If levels(i) = Level Then currentIdx = i
-            If levels(i) = level Then msgIdx = i
+            If levels(i) = msgLevel Then msgIdx = i
         Next
         ShouldHandle = (msgIdx >= currentIdx)
     End Function

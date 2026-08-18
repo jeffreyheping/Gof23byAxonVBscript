@@ -8,7 +8,7 @@
 用法:  python run_tests.py
 输出:  test_report.md
 """
-import os, subprocess, time, datetime, tempfile, shutil
+import os, re, subprocess, time, datetime, tempfile, shutil
 
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 CLASSIC_DIR  = os.path.join(BASE_DIR, "classicASPcode")
@@ -222,11 +222,35 @@ def run_vbnet(filepath):
             pass
 
 
+# ── output comparison (baseline = cscript) ───────────────────────
+def _normalize(text):
+    """规范化输出便于跨引擎比对：去除所有空白（换行/缩进/空格）。
+    原因：cscript 按行输出（缩进在行首），AxonASP/ASPPY 连续输出（缩进在中间），
+    空白只是展示格式，比对实质内容。"""
+    return re.sub(r"\s+", "", text)
+
+
+def _check_match(r, baseline):
+    """r 与基准比对，设置 r["status"]: PASS / MISMATCH / FAIL"""
+    if not r["success"]:
+        r["status"] = "FAIL"
+        return
+    stem = os.path.splitext(r["filename"])[0]
+    exp  = baseline.get(stem)
+    if exp is not None and _normalize(r["output"]) != exp:
+        r["status"]   = "MISMATCH"
+        r["expected"] = exp
+        r["actual"]   = _normalize(r["output"])
+    else:
+        r["status"] = "PASS"
+
+
 # ── test runner ──────────────────────────────────────────────────
 def run_all():
     results = []
+    baseline = {}   # 文件名主干 -> 规范化的 cscript 输出
 
-    # ClassicASP
+    # ClassicASP（基准）
     print("=" * 60)
     print("  ClassicASP Tests (cscript.exe)")
     print("=" * 60)
@@ -239,6 +263,9 @@ def run_all():
             r = run_classic(fp)
             r["filename"] = fn
             r["type"]     = "ClassicASP"
+            r["status"]   = "PASS" if r["success"] else "FAIL"
+            if r["success"]:
+                baseline[os.path.splitext(fn)[0]] = _normalize(r["output"])
             results.append(r)
             _print_result(r)
     else:
@@ -257,6 +284,7 @@ def run_all():
             r = run_axon(fp)
             r["filename"] = fn
             r["type"]     = "AxonASPModern"
+            _check_match(r, baseline)
             results.append(r)
             _print_result(r)
     else:
@@ -275,6 +303,7 @@ def run_all():
             r = run_axon(fp)
             r["filename"] = fn
             r["type"]     = "AxonASPClassic"
+            _check_match(r, baseline)
             results.append(r)
             _print_result(r)
     else:
@@ -293,6 +322,7 @@ def run_all():
             r = run_asppy(fp)
             r["filename"] = fn
             r["type"]     = "ASPPY"
+            _check_match(r, baseline)
             results.append(r)
             _print_result(r)
     else:
@@ -311,6 +341,7 @@ def run_all():
             r = run_vbnet(fp)
             r["filename"] = fn
             r["type"]     = "VBNET"
+            _check_match(r, baseline)
             results.append(r)
             _print_result(r)
     else:
@@ -320,11 +351,14 @@ def run_all():
 
 
 def _print_result(r):
-    tag = "PASS" if r["success"] else "FAIL"
+    tag = r.get("status", "PASS" if r["success"] else "FAIL")
     print(f"  [{tag}] {r['duration']}s")
     if r["output"]:
         for line in r["output"].splitlines():
             print(f"       | {line}")
+    if r.get("status") == "MISMATCH":
+        print(f"       ! expected: {r['expected']}")
+        print(f"       ! actual  : {r['actual']}")
     if not r["success"] and r["error"]:
         for line in r["error"].splitlines():
             print(f"       ! {line}")
@@ -338,11 +372,14 @@ def generate_report(results):
     asppy   = [r for r in results if r["type"] == "ASPPY"]
     vbnet   = [r for r in results if r["type"] == "VBNET"]
 
-    c_pass = sum(1 for r in classic if r["success"])
-    a_pass = sum(1 for r in axon    if r["success"])
-    ac_pass = sum(1 for r in axonc  if r["success"])
-    s_pass = sum(1 for r in asppy   if r["success"])
-    v_pass = sum(1 for r in vbnet   if r["success"])
+    def _cnt(lst, st):  # count by status
+        return sum(1 for r in lst if r.get("status") == st)
+
+    c_pass, c_mis, c_fail = _cnt(classic,"PASS"), _cnt(classic,"MISMATCH"), _cnt(classic,"FAIL")
+    a_pass, a_mis, a_fail = _cnt(axon,"PASS"),   _cnt(axon,"MISMATCH"),   _cnt(axon,"FAIL")
+    ac_pass, ac_mis, ac_fail = _cnt(axonc,"PASS"), _cnt(axonc,"MISMATCH"), _cnt(axonc,"FAIL")
+    s_pass, s_mis, s_fail = _cnt(asppy,"PASS"),  _cnt(asppy,"MISMATCH"),  _cnt(asppy,"FAIL")
+    v_pass, v_mis, v_fail = _cnt(vbnet,"PASS"),  _cnt(vbnet,"MISMATCH"),  _cnt(vbnet,"FAIL")
     c_avg  = sum(r["duration"] for r in classic) / len(classic) if classic else 0
     a_avg  = sum(r["duration"] for r in axon)    / len(axon)    if axon    else 0
     ac_avg = sum(r["duration"] for r in axonc)   / len(axonc)   if axonc   else 0
@@ -356,15 +393,17 @@ def generate_report(results):
         f"",
         f"Generated: {now}",
         f"",
+        f"输出比对基准：ClassicASP (cscript)。MISMATCH = 无报错但输出与基准不一致（静默错误）。",
+        f"",
         f"## Summary",
         f"",
-        f"| Engine         | Total | Pass | Fail | Avg Time |",
-        f"|----------------|-------|------|------|----------|",
-        f"| ClassicASP     | {len(classic):5d} | {c_pass:4d} | {len(classic)-c_pass:4d} | {c_avg:.3f}s  |",
-        f"| AxonASP-Modern | {len(axon):5d} | {a_pass:4d} | {len(axon)-a_pass:4d} | {a_avg:.3f}s  |",
-        f"| AxonASP-Classic| {len(axonc):5d} | {ac_pass:4d} | {len(axonc)-ac_pass:4d} | {ac_avg:.3f}s  |",
-        f"| ASPPY          | {len(asppy):5d} | {s_pass:4d} | {len(asppy)-s_pass:4d} | {s_avg:.3f}s  |",
-        f"| VB.NET         | {len(vbnet):5d} | {v_pass:4d} | {len(vbnet)-v_pass:4d} | {v_avg:.3f}s  |",
+        f"| Engine         | Total | Pass | Mismatch | Fail | Avg Time |",
+        f"|----------------|-------|------|----------|------|----------|",
+        f"| ClassicASP     | {len(classic):5d} | {c_pass:4d} | {c_mis:8d} | {c_fail:4d} | {c_avg:.3f}s  |",
+        f"| AxonASP-Modern | {len(axon):5d} | {a_pass:4d} | {a_mis:8d} | {a_fail:4d} | {a_avg:.3f}s  |",
+        f"| AxonASP-Classic| {len(axonc):5d} | {ac_pass:4d} | {ac_mis:8d} | {ac_fail:4d} | {ac_avg:.3f}s  |",
+        f"| ASPPY          | {len(asppy):5d} | {s_pass:4d} | {s_mis:8d} | {s_fail:4d} | {s_avg:.3f}s  |",
+        f"| VB.NET         | {len(vbnet):5d} | {v_pass:4d} | {v_mis:8d} | {v_fail:4d} | {v_avg:.3f}s  |",
         f"",
     ]
 
@@ -374,11 +413,14 @@ def generate_report(results):
     ]:
         lines += [f"## {section_title} Details", ""]
         for r in section_list:
-            s = "PASS" if r["success"] else "FAIL"
+            s = r.get("status", "PASS" if r["success"] else "FAIL")
             lines.append(f"- **{r['filename']}** : {s} ({r['duration']}s)")
             if r["output"]:
                 for l in r["output"].splitlines():
                     lines.append(f"  - `{l}`")
+            if r.get("status") == "MISMATCH":
+                lines.append(f"  - EXPECTED: `{r['expected']}`")
+                lines.append(f"  - ACTUAL  : `{r['actual']}`")
             if not r["success"] and r["error"]:
                 for l in r["error"].splitlines():
                     lines.append(f"  - ERR: `{l}`")
@@ -387,10 +429,12 @@ def generate_report(results):
     # Fix suggestions
     fixes = []
     for r in results:
-        if r["success"]:
+        if r.get("status", "PASS" if r["success"] else "FAIL") == "PASS":
             continue
         fn = r["filename"]
-        if r["type"] == "VBNET":
+        if r.get("status") == "MISMATCH":
+            fixes.append(f"- **{fn}** ({r['type']}): 输出与 cscript 基准不一致（静默错误，无报错但结果不对）。")
+        elif r["type"] == "VBNET":
             fixes.append(f"- **{fn}**: VB.NET 编译或运行错误，请检查代码（类/模块结构、Sub Main、引用）。")
         else:
             fixes.append(f"- **{fn}**: 运行时/编译错误，请检查代码。")

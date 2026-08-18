@@ -17,18 +17,19 @@ Class Logger
     End Function
 
     ' 处理日志请求：若级别匹配则输出，然后传递给下一个
-    Public Function Log(msg, level)
-        If ShouldHandle(level) Then
+    ' 注：参数名用 msgLevel，避免与公共字段 Level 同名遮蔽（VBScript 大小写不敏感）
+    Public Function Log(msg, msgLevel)
+        If ShouldHandle(msgLevel) Then
             Response.Write("【" & Name & "】" & msg)
 
         End If
         If Not m_Next Is Nothing Then
-            m_Next.Log msg, level
+            m_Next.Log msg, msgLevel
         End If
     End Function
 
     ' 判断当前级别是否应该处理
-    Private Function ShouldHandle(level)
+    Private Function ShouldHandle(msgLevel)
         Dim levels(2)
         levels(0) = "DEBUG"
         levels(1) = "INFO"
@@ -39,7 +40,7 @@ Class Logger
         msgIdx = -1
         For i = 0 To 2
             If levels(i) = Level Then currentIdx = i
-            If levels(i) = level Then msgIdx = i
+            If levels(i) = msgLevel Then msgIdx = i
         Next
         ShouldHandle = (msgIdx >= currentIdx)
     End Function

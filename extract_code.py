@@ -364,14 +364,11 @@ CN_NUM = {"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,
           "二十二":22,"二十三":23}
 
 def find_md():
-    """找设计模式 md（排除 test_report.md / README.md），取最新的一个"""
-    mds = glob.glob(os.path.join(BASE_DIR, "*.md"))
-    cands = [m for m in mds
-             if "report" not in os.path.basename(m).lower()
-             and os.path.basename(m).lower() != "readme.md"]
-    if not cands:
+    """找设计模式总 md：只认 23个设计模式*.md，按文件名时间戳取最新"""
+    mds = glob.glob(os.path.join(BASE_DIR, "23个设计模式*.md"))
+    if not mds:
         return None
-    return max(cands, key=os.path.getmtime)   # 按修改时间取最新
+    return max(mds, key=os.path.basename)   # 文件名含时间戳，字典序=时间序
 
 def extract(md_path):
     with open(md_path, "r", encoding="utf-8") as f:

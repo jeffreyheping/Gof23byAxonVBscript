@@ -125,7 +125,7 @@ Public Class NewsEventArgs
     Public ReadOnly Property News As String
 
     Public Sub New(news As String)
-        News = news
+        Me.News = news
     End Sub
 End Class
 
