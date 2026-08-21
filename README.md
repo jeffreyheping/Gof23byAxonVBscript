@@ -45,7 +45,7 @@ Windows 11，每文件平均耗时（进程启动 + 编译 + 执行）/ Windows 
 
 **5 引擎 × 23 模式 = 115 用例全部通过** / All 115 test cases (5 engines × 23 patterns) pass.
 
-测试过程中发现并上报的 AxonASP 引擎 bug（无括号方法调用 on 数组元素调用方、对象引用/字段赋值丢失）已全部在上游修复 / AxonASP engine bugs found during testing (paren-less method calls on array-element callees, object reference/field assignment loss) have all been fixed upstream.
+
 
 完整结果见 [test_report.md](test_report.md) / Full results in [test_report.md](test_report.md)
 
