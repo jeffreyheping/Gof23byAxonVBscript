@@ -19,6 +19,7 @@ All 23 GoF design patterns implemented in VBScript (classic syntax + AxonASP enh
 
 - `extract_code.py` — 从总 MD 文档拆出各引擎代码并注入 `Option Explicit` 等适配代码 / Extracts per-engine code from the master MD and injects `Option Explicit` etc.
 - `run_tests.py` — 跑全套测试（含输出比对，以 cscript 为基准）并生成 `test_report.md` / Runs the full test suite (with output comparison against the cscript baseline) and generates `test_report.md`
+- `perf_tests.py` — 性能测试：各引擎重复运行 10/20/30 次，生成 `perf_report.md` / Performance tests: repeat runs (10/20/30) per engine, generates `perf_report.md`
 - `merge_chapters.py` — 合并章节 MD / Merges chapter MDs
 
 用法 / Usage:
@@ -26,6 +27,7 @@ All 23 GoF design patterns implemented in VBScript (classic syntax + AxonASP enh
 ```bash
 python extract_code.py    # 拆代码 / extract code (auto-picks the latest MD)
 python run_tests.py       # 全套测试 / run all tests
+python perf_tests.py      # 性能测试（在 run_tests.py 之后）/ perf tests (after run_tests.py)
 ```
 
 ## 最新测试结果 / Latest Test Results
@@ -35,18 +37,17 @@ Windows 11，每文件平均耗时（进程启动 + 编译 + 执行）/ Windows 
 
 | 引擎 / Engine | 通过 / Pass | 不一致 / Mismatch | 失败 / Fail | 平均耗时 / Avg Time |
 |---|---|---|---|---|
-| AxonASP-Classic | 16 | 3 | 4* | 0.101s |
-| AxonASP-Modern | 21 | 1 | 1* | 0.119s |
-| ClassicASP (cscript) | 23 | 0 | 0 | 0.145s |
-| ASPPY | 23 | 0 | 0 | 0.249s |
-| VB.NET (dotnet) | 23 | 0 | 0 | 0.238s |
+| AxonASP-Classic | 23 | 0 | 0 | 0.097s |
+| AxonASP-Modern | 23 | 0 | 0 | 0.126s |
+| ClassicASP (cscript) | 23 | 0 | 0 | 0.146s |
+| ASPPY | 23 | 0 | 0 | 0.281s |
+| VB.NET (dotnet) | 23 | 0 | 0 | 0.259s |
 
-\* AxonASP 的全部非 PASS 项均为引擎已知 bug，分属两个家族，均已提交最小复现 / All non-PASS AxonASP results are known engine bugs in two families, with minimal repros reported:
+**5 引擎 × 23 模式 = 115 用例全部通过** / All 115 test cases (5 engines × 23 patterns) pass.
 
-1. 数组元素作调用方的无括号方法调用（编译错误 / Object required / 静默丢实参）/ Paren-less method calls on array-element callees (compile error / Object required / silent arg loss)
-2. 对象引用/字段赋值丢失（含 nil map 崩溃）/ Object reference / field assignment loss (incl. a nil-map crash)
+测试过程中发现并上报的 AxonASP 引擎 bug（无括号方法调用 on 数组元素调用方、对象引用/字段赋值丢失）已全部在上游修复 / AxonASP engine bugs found during testing (paren-less method calls on array-element callees, object reference/field assignment loss) have all been fixed upstream.
 
-完整结果见 [test_report.md](test_report.md) / Full results in [test_report.md](test_report.md)
+完整结果见 [test_report.md](test_report.md)，性能测试见 [perf_report.md](perf_report.md) / Full results in [test_report.md](test_report.md), performance tests in [perf_report.md](perf_report.md)
 
 ## 相关项目 / Related Projects
 
