@@ -19,54 +19,6 @@ AXON_CLASSIC_DIR = os.path.join(BASE_DIR, "axonAspClassicCode")
 CHAPTER_DIR = os.path.join(BASE_DIR, "byChapterMDcn")
 
 
-def _fix_vbs_trailing_comment_parens(code):
-    """修复 VBScript 中 `Response.Write(X   ' 注释)` 这种把 `)` 写进注释的问题。
-
-    模式：一行里有个未闭合的 `(`，行尾 `' ... )` 注释里包含了本应在括号外的 `)`。
-    修复策略：对每行
-      1. 检查该行是否以 `' 注释)` 这种模式结尾，并且注释体内含有 ')'
-      2. 如果该行代码部分的 '(' 数多于 ')'，将注释体里多余的 ')' 数，
-         逐个从注释最左 ')' 位置移除，依次补到代码末尾。
-    """
-    lines = code.split("\n")
-    new_lines = []
-    for line in lines:
-        # 找代码/注释分界：第一个不在字符串里的单引号（简化：只看第一个 '）
-        # 这个简化在真实演示代码里足够用，因为演示代码一般不在 Response.Write 参数里写含 ' 的字面量
-        comment_start = line.find("'")
-        if comment_start < 0:
-            new_lines.append(line)
-            continue
-        code_part    = line[:comment_start]
-        comment_part = line[comment_start + 1:]
-        opens  = code_part.count("(")
-        closes = code_part.count(")")
-        deficit = opens - closes
-        if deficit <= 0:
-            new_lines.append(line)
-            continue
-        # 从注释里找 deficit 个 ')'，逐个挪到 code_part 尾
-        # 取最靠左的 deficit 个 ')'
-        moving_closes = min(deficit, comment_part.count(")"))
-        if moving_closes <= 0:
-            new_lines.append(line)
-            continue
-        # 从 comment_part 中删除前 moving_closes 个 ')'
-        fixed_comment = list(comment_part)
-        removed = 0
-        i = 0
-        while removed < moving_closes and i < len(fixed_comment):
-            if fixed_comment[i] == ")":
-                fixed_comment.pop(i)
-                removed += 1
-            else:
-                i += 1
-        # 补到 code_part 尾，保留原缩进
-        new_code = code_part.rstrip() + (")" * moving_closes) + (" " * max(0, len(code_part) - len(code_part.rstrip())))
-        new_lines.append(new_code + "'" + "".join(fixed_comment))
-    return "\n".join(new_lines)
-
-
 # ── VB.NET 后处理辅助 ──────────────────────────────────────────
 _VBNET_TYPE_OPEN_RE = re.compile(
     r"^\s*"
@@ -94,142 +46,6 @@ _VBNET_INTERFACE_CLOSE_RE = re.compile(
     re.I,
 )
 _VBNET_INH_IMPL_RE = re.compile(r"^\s*(Inherits|Implements)\b", re.I)
-
-
-def _vbnet_fix_readonly_auto_and_default(code: str) -> str:
-    """修补 MD 中常见 VB.NET 语法简写在 vbc.exe 中报错的场景：
-
-    1) C# 风格的 ReadOnly 自动属性：
-         Public ReadOnly Property Name As String
-         Public Sub New(...)\n            Me.Name = value\n        End Sub
-       → 转为带 Get 私有字段的完整属性。
-       因为 vbc.exe（.NET Framework 4.x）默认 /langversion 不支持 ReadOnly 自动属性
-       （需要在构造函数里赋值），会报 BC30126。
-
-    2) Default(Public ReadOnly Property Item(...) As T) 这种括号包裹的语法
-       → Default Public ReadOnly Property Item(...) As T
-    """
-    # 先处理 2）：Default(...) 变成 Default ...（去掉最外层包裹括号）
-    # 匹配：行首可选空格 Default(...) → Default ...
-    # 还要处理：因为上面行的缩进 + Default(...) 被替换后，行末可能有个多余的 )
-    # 策略：先整段把 `Default(Public ... As T)` 全局替换再逐行二次处理
-    code = re.sub(
-        r"Default\((?P<body>(?:Public|Private|Protected|Friend|Protected\s+Friend)\s+"
-        r"(?:ReadOnly\s+|WriteOnly\s+)?Property\s+Item(?:\([^)]*\))?\s*As\s+[^)\n]+?)\)",
-        lambda m: "Default " + m.group("body"),
-        code,
-        flags=re.I,
-    )
-    # 清理因上面正则不完整残留的行尾 )（形如 "... As T)"）
-    code = re.sub(
-        r"^(\s*Default\s+Public\s+ReadOnly\s+Property\s+Item\([^)]*\)\s+As\s+[A-Za-z0-9_.,<> ]+)\)\s*$",
-        r"\1",
-        code,
-        flags=re.M,
-    )
-
-    lines = code.split("\n")
-    out = []
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        stripped = line.strip()
-        # 匹配：Public ReadOnly Property <Name> As <Type> （无 Get 块、且无行尾 = 初始化）
-        m_prop = re.match(
-            r"^(?P<access>Public|Private|Protected|Friend|Protected\s+Friend)\s+"
-            r"ReadOnly\s+Property\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s+As\s+(?P<type>[A-Za-z_][A-Za-z0-9_.,<> ]+?)\s*$",
-            stripped,
-            re.I,
-        )
-        # 下一行若为 End Property 或其它属性，就不要转（已经是完整块）
-        if m_prop and (i + 1 >= len(lines) or not lines[i + 1].strip().startswith("Get")):
-            access = m_prop.group("access")
-            pname  = m_prop.group("name")
-            ptype  = m_prop.group("type").strip()
-            field  = f"m_{pname}"
-            indent = line[:len(line) - len(line.lstrip())]
-            # 生成：私有字段 + 完整属性
-            out.append(f"{indent}Private {field} As {ptype}")
-            out.append(f"{indent}{access} ReadOnly Property {pname} As {ptype}")
-            out.append(f"{indent}    Get")
-            out.append(f"{indent}        Return {field}")
-            out.append(f"{indent}    End Get")
-            out.append(f"{indent}End Property")
-            # 继续扫描，把后续构造函数中的 Me.<Name> = xxx → <field> = xxx
-            # （简单处理：之后所有构造函数范围里对 Me.Name 的赋值都替换）
-            i += 1
-            continue
-        # 替换构造函数 / 属性里的 Me.Name = xxx（前提：上面已经有这个 Name 的 ReadOnly 属性定义）
-        # 这里全局替换所有 Me.<Name> = xxx → m_<Name> = xxx（Name 开头大写即可）
-        # 为安全起见不全局，只针对上面匹配过的 pname：此处先放行，下面统一 pass 处理
-        out.append(line)
-        i += 1
-
-    result = "\n".join(out)
-
-    # 全局第二轮：若代码中出现 ReadOnly Property 定义的自动属性形式（见上面），
-    # 同时出现 `Me.<PName> = xxx` 对 Me.PropertyName 赋值，统一替换成 m_<PName> = xxx。
-    # 提取上面所有已改写的 ReadOnly 属性名（从 result 里找 m_* 字段 + ReadOnly Property）
-    for m in re.finditer(r"Private\s+m_([A-Za-z_][A-Za-z0-9_]*)\s+As\s+.+?\n\s*(?:Public|Private|Protected|Friend)\s+ReadOnly\s+Property\s+\1\b",
-                         result, flags=re.I):
-        pname = m.group(1)
-        result = re.sub(rf"Me\.{pname}\s*=",
-                        lambda mm: f"m_{pname} =",
-                        result,
-                        flags=re.I)
-    return result
-
-
-def _vbnet_patch_syntax(code: str) -> str:
-    """修补 MD 中 VB.NET 代码片段常见的语法瑕疵（在包 Module 之前）。"""
-    lines = code.split("\n")
-    out = []
-    for line in lines:
-        stripped = line.lstrip()
-        # 1. 修复 m_Content(&= text) 这种括号吞掉空格问题 → m_Content &= text
-        #    匹配：identifier(&= operand)
-        fixed = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)\(\s*(&=)\s*(.+?)\s*\)\s*$",
-                       lambda m: f"{m.group(1)} {m.group(2)} {m.group(3)}",
-                       line)
-        # 2. 通用：标识符后面跟 (& 或 (+= 等）但少一个空格的模式
-        #    例如 foo(& bar) → foo & bar
-        fixed = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)\(\s*([&+\-*/])\s*(?!=)",
-                       lambda m: f"{m.group(1)} {m.group(2)} ",
-                       fixed)
-        # 2b. 复合赋值：i(+= 1) → i += 1；i(+ = 1) → i += 1；i(+ = 1) 空格变体
-        fixed = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)\(\s*([+\-*/&])\s*=\s*(.+?)\s*\)",
-                       lambda m: f"{m.group(1)} {m.group(2)}= {m.group(3)}",
-                       fixed)
-        # 2c. 更宽松（允许 "+ =" 这种中间有空格，并且不强制以 ) 结尾）
-        fixed = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)\(\s*([+\-*/&])\s*=\s*(.+?)\)\s*$",
-                       lambda m: f"{m.group(1)} {m.group(2)}= {m.group(3)}",
-                       fixed)
-        # 2d. 遗留："i + = 1)" 括号没包住整个的情况 —— "i + = 1)" → i += 1
-        fixed = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)\s+([+\-*/&])\s*\+?\s*=\s*([^\n)]+?)\)\s*$",
-                       lambda m: f"{m.group(1)} {m.group(2)}= {m.group(3).strip()}",
-                       fixed)
-        # 3. 字符串插值 $"..." → String.Format("...", ...)
-        #    简化处理：对每一行尝试，匹配 $"…{X}…{Y}…"
-        while True:
-            m = re.search(r'\$"([^"]*)"', fixed)
-            if not m:
-                break
-            body = m.group(1)
-            args = []
-            idx = [0]
-            def _sub_hole(hm):
-                args.append(hm.group(1))
-                r = "{" + str(idx[0]) + "}"
-                idx[0] += 1
-                return r
-            fmt_body = re.sub(r"\{([^{}]+)\}", _sub_hole, body)
-            if args:
-                replaced = 'String.Format("' + fmt_body + '", ' + ", ".join(args) + ")"
-            else:
-                replaced = '"' + fmt_body + '"'
-            fixed = fixed[:m.start()] + replaced + fixed[m.end():]
-        out.append(fixed)
-    return "\n".join(out)
 
 
 def _vbnet_wrap_module_and_main(code: str, module_name: str) -> str:
@@ -420,9 +236,6 @@ def extract(md_path):
                 ext    = ".vb"
             else:
                 continue
-            # VBScript 代码统一做尾随注释闭合括号修复
-            if engine in ("ClassicASP", "AxonASP"):
-                code = _fix_vbs_trailing_comment_parens(code)
             results.append({
                 "type":    engine,
                 "filename": f"{ch_slug}{ext}",
